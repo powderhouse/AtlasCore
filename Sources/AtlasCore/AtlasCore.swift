@@ -1,5 +1,10 @@
 public class AtlasCore {
-    public class func hello() {
-        print("AtlasCore Version 0.1.3!")
+    
+    public init() {
+        
+    }
+    
+    public func hello() {
+        print("AtlasCore Version 0.1.4!")
     }
 }
