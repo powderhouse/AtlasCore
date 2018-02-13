@@ -7,18 +7,6 @@
 
 import Foundation
 
-public struct Credentials {
-    public let username: String
-    public let password: String?
-    public var token: String?
-    
-    public init(_ username: String, password: String?=nil, token: String?=nil) {
-        self.username = username
-        self.password = password
-        self.token = token
-    }
-}
-
 public class Git {
     
     var directory: URL!
