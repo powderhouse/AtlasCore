@@ -9,7 +9,8 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "AtlasCore",
-            targets: ["AtlasCore", "Git"]),
+            targets: ["AtlasCore"]
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
