@@ -17,4 +17,7 @@ public class AtlasCore {
         return URL(fileURLWithPath: paths[0]).appendingPathComponent("Atlas")
     }
 
+    public func version() -> String {
+        return "AtlasCore Version 1.0.5"
+    }
 }
