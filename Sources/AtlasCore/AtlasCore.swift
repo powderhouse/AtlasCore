@@ -21,11 +21,11 @@ public class AtlasCore {
         return Git.getCredentials(baseDirectory)
     }
     
-    public func initGit(_ credentials: Credentials) {
+    public func initGit(_ credentials: Credentials) -> Bool {
         FileSystem.createDirectory(baseDirectory)
         self.git = Git(baseDirectory, credentials: credentials)
         
-        guard self.git != nil else { return }
+        guard self.git != nil else { return false }
         
         let readme = baseDirectory.appendingPathComponent("readme.md", isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
@@ -37,6 +37,7 @@ public class AtlasCore {
             _ = git!.initGitHub()
         }
         
+        return true
     }
     
     public func createBaseDirectory() {

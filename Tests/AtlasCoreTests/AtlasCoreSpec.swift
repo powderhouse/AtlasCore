@@ -55,7 +55,7 @@ class AtlasCoreSpec: QuickSpec {
             
             context("initGit") {
                 beforeEach {
-                    atlasCore.initGit(credentials)
+                    _ = atlasCore.initGit(credentials)
                 }
                 
                 it("saves the credentials to the filesystem") {
