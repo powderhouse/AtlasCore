@@ -22,10 +22,11 @@ public class AtlasCore {
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
         }
-        FileSystem.createDirectory(baseDirectory!)
+        FileSystem.createDirectory(self.baseDirectory)
         
         if let credentials = getGitCredentials() {
-            self.git = Git(baseDirectory!, credentials: credentials)
+            self.git = Git(self.baseDirectory, credentials: credentials)
+            self.git?.setGitHubRepositoryLink()
         }
     }
     

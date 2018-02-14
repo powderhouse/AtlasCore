@@ -69,7 +69,20 @@ class AtlasCoreSpec: QuickSpec {
                     let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "No readme.md found")
                 }
-}
+                
+                context("future instances of AtlasCore") {
+                    var atlasCore2: AtlasCore!
+                    
+                    beforeEach {
+                        atlasCore2 = AtlasCore(directory)
+                    }
+                    
+                    it("automatically inits git") {
+                        expect(atlasCore2.gitHubRepository()).toNot(beNil())
+                    }
+                    
+                }
+            }
         }
     }
 }
