@@ -52,6 +52,10 @@ public class AtlasCore {
         return true
     }
     
+    public func gitHubRepository() -> String? {
+        return git?.githubRepositoryLink
+    }
+    
     public func createBaseDirectory() {
         FileSystem.createDirectory(baseDirectory)
     }

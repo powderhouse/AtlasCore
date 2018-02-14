@@ -26,7 +26,7 @@ class GitSpec: QuickSpec {
             var isDirectory : ObjCBool = true
             
             beforeEach {
-                directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("GIT")
+                directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
                 
                 FileSystem.createDirectory(directory)
                 
@@ -205,6 +205,10 @@ class GitSpec: QuickSpec {
                                 let filePath = "\(directory.path)/.gitignore"
                                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
                                 expect(exists).to(beTrue(), description: "No gitignore found")
+                            }
+                            
+                            it("sets the github respository link") {
+                               expect(git.githubRepositoryLink).to(equal("https://github.com/atlastest/testGit"))
                             }
                             
                             it("results in a specific status") {

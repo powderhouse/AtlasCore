@@ -28,3 +28,6 @@ let package = Package(
             dependencies: ["AtlasCore", "Quick", "Nimble"]),
     ]
 )
+
+
+// GENERATE: swift package generate-xcodeproj --xcconfig-overrides settings.xcconfig

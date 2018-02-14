@@ -11,6 +11,7 @@ public class Git {
     
     var directory: URL!
     var repositoryName: String
+    public var githubRepositoryLink: String?
     
     static let credentialsFilename = "github.json"
     static let gitIgnore = [
@@ -249,8 +250,7 @@ public class Git {
         )
         _ = run("remote", arguments: ["add", "origin", authenticatedPath])
         
-        //        setGitHubRepositoryLink()
-        //
+        setGitHubRepositoryLink()
         initGitIgnore()
         
         _ = add()
@@ -301,6 +301,23 @@ public class Git {
     
     public func pushToGitHub() {
         _ = run("push", arguments: ["--set-upstream", "origin", "master"])
+    }
+    
+    func url() -> String {
+        let authenticatedUrl = run("ls-remote", arguments: ["--get-url"])
+        
+        guard authenticatedUrl.contains("https") else {
+            return ""
+        }
+        
+        return authenticatedUrl.replacingOccurrences(
+            of: "https://\(credentials.username):\(credentials.token!)@",
+            with: "https://"
+        )
+    }
+    
+    func setGitHubRepositoryLink() {
+        githubRepositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
     }
     
     
