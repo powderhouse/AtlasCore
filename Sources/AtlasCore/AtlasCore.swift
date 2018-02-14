@@ -22,6 +22,11 @@ public class AtlasCore {
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
         }
+        FileSystem.createDirectory(baseDirectory!)
+        
+        if let credentials = getGitCredentials() {
+            self.git = Git(baseDirectory!, credentials: credentials)
+        }
     }
     
     public func getDefaultBaseDirectory() -> URL {
@@ -34,7 +39,6 @@ public class AtlasCore {
     }
     
     public func initGit(_ credentials: Credentials) -> Bool {
-        FileSystem.createDirectory(baseDirectory)
         self.git = Git(baseDirectory, credentials: credentials)
         
         guard self.git != nil else { return false }
