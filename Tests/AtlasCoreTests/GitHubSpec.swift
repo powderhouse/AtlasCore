@@ -46,6 +46,7 @@ class GitHubSpec: QuickSpec {
 
                 afterEach {
                     FileSystem.deleteDirectory(directory)
+                    gitHub?.deleteRepository()
                 }
                 
                 it("initializes") {

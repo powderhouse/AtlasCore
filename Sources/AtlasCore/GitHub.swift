@@ -91,6 +91,10 @@ public class GitHub {
     }
     
     public func deleteRepository() {
+        guard credentials.token != nil else {
+            return
+        }
+        
         let deleteArguments = [
             "-u", "\(credentials.username):\(credentials.token!)",
             "-X", "DELETE",

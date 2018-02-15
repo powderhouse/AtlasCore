@@ -117,25 +117,39 @@ class GitSpec: QuickSpec {
                     }
                 }
 
-//                context("pushToGitHub") {
-//
-//                    beforeEach {
-//                        _ = git!.initGitHub()
-//
-//                        Helper.addFile("index.html", directory: directory)
-//                        expect(git!.add()).toNot(beNil())
-//                        expect(git!.commit()).toNot(beNil())
-//                        git!.pushToGitHub()
-//                    }
-//
-//                    afterEach {
-//                        git!.removeGitHub()
-//                    }
-//
-//                    it("should provide a working tree clean status") {
-//                        expect(git!.status()).to(contain("working tree clean"))
-//                    }
-//                }
+                context("pushToGitHub") {
+                    
+                    let repositoryName = "testGitHub"
+                    let credentials = Credentials(
+                        "atlastest",
+                        password: "1a2b3c4d",
+                        token: nil
+                    )
+                    var gitHub: GitHub!
+
+                    beforeEach {
+                        credentials.token = GitHub.getAuthenticationToken(credentials)
+                        gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+                        _ = gitHub.createRepository()
+                        
+                        Helper.addFile("index.html", directory: directory)
+                        expect(git.status()).toNot(contain("working tree clean"))
+
+                        expect(git.add()).toNot(beNil())
+                        expect(git.commit()).toNot(beNil())
+
+                        expect(git.status()).toNot(contain("Your branch is up-to-date with 'origin/master'"))
+                        git.pushToGitHub()
+                    }
+
+                    afterEach {
+                        gitHub.deleteRepository()
+                    }
+
+                    it("should provide a working tree clean status") {
+                        expect(git.status()).to(contain("Your branch is up-to-date with 'origin/master'"))
+                    }
+                }
 
 
 //                context("runInit") {
