@@ -18,6 +18,7 @@ class CredentialsSpec: QuickSpec {
             
             let username = "atlastest"
             let password = "1a2b3c4d"
+            let token = "TOKEN"
 
             var directory: URL!
             
@@ -41,8 +42,6 @@ class CredentialsSpec: QuickSpec {
             
             context("with token") {
                 
-                let token = "TOKEN"
-                
                 beforeEach {
                     credentials = Credentials(username, password: password, token: token)
                 }
@@ -64,7 +63,7 @@ class CredentialsSpec: QuickSpec {
                         expect(exists).to(beTrue(), description: "No credentials json found")
                     }
                 }
-
+                
             }
             
             context("without token") {
@@ -88,6 +87,22 @@ class CredentialsSpec: QuickSpec {
                         let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
                         expect(exists).toNot(beTrue(), description: "Credentials json found but should not be")
                     }
+                }
+            }
+            
+            context("retrieve") {
+                
+                var credentials: Credentials?
+                
+                beforeEach {
+                    Credentials(username, token: token).save(directory)
+                    credentials = Credentials.retrieve(directory).first
+                }
+                
+                it("should retrieve and instantiate the saved credentials") {
+                    expect(credentials).toNot(beNil())
+                    expect(credentials?.username).to(equal(username))
+                    expect(credentials?.token).to(equal(token))
                 }
             }
             

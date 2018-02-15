@@ -92,7 +92,7 @@ public class Credentials {
         }
     }
     
-    public class func process(_ baseDirectory: URL) -> [Credentials] {
+    public class func retrieve(_ baseDirectory: URL) -> [Credentials] {
         let path = baseDirectory.appendingPathComponent(filename)
         var json: String
         do {

@@ -47,7 +47,7 @@ public class AtlasCore {
     }
 
     public func getCredentials() -> Credentials? {
-        return Credentials.process(baseDirectory).first
+        return Credentials.retrieve(baseDirectory).first
     }
     
     public func initializeGit(_ credentials: Credentials) {
