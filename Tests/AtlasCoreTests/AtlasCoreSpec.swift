@@ -55,17 +55,17 @@ class AtlasCoreSpec: QuickSpec {
             
             context("initGit") {
                 beforeEach {
-                    _ = atlasCore.initGit(credentials)
+                    _ = atlasCore.initializeGit(credentials)
                 }
                 
                 it("saves the credentials to the filesystem") {
-                    let credentialsFile = atlasCore.baseDirectory.appendingPathComponent("github.json")
+                    let credentialsFile = atlasCore.atlasDirectory.appendingPathComponent("github.json")
                     let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "No github.json found")
                 }
 
                 it("saves the credentials to the filesystem") {
-                    let readmeFile = atlasCore.baseDirectory.appendingPathComponent("readme.md")
+                    let readmeFile = atlasCore.atlasDirectory.appendingPathComponent("readme.md")
                     let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "No readme.md found")
                 }
