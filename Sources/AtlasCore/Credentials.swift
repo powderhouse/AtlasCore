@@ -65,8 +65,7 @@ public class Credentials {
         var json: String
         do {
             json = try String(contentsOf: path, encoding: .utf8)
-        }
-        catch {
+        } catch {
             printCredentials("Not Found")
             return []
         }

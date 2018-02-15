@@ -14,7 +14,7 @@ public class Git {
 
     static let gitIgnore = [
         "DS_Store",
-        "github.json"
+        "credentials.json"
     ]
     
     public init(_ directory: URL, processFactory: AtlasProcessFactory?=ProcessFactory()) {
@@ -56,7 +56,7 @@ public class Git {
         return result
     }
     
-    func writeGitIgnore() {
+    public func writeGitIgnore() {
         do {
             let filename = directory.appendingPathComponent(".gitignore")
             
