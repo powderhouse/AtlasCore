@@ -56,40 +56,8 @@ public class Credentials {
         }
     }
     
-    public func setAuthenticationToken(_ gitHub: GitHub) {
-        let listArguments = [
-            "-u", "\(username):\(password!)",
-            "https://api.github.com/authorizations"
-        ]
-        
-        if let list = gitHub.api(listArguments) {
-            for item in list {
-                if (item["note"] as? String) == "Atlas Token" {
-                    let deleteAuthArguments = [
-                        "-u", "\(username):\(password!)",
-                        "-X", "DELETE",
-                        "https://api.github.com/authorizations/\(item["id"]!)"
-                    ]
-                    _ = gitHub.api(deleteAuthArguments)
-                }
-            }
-        }
-        
-        let authArguments = [
-            "-u", "\(username):\(password!)",
-            "-X", "POST",
-            "https://api.github.com/authorizations",
-            "-d", "{\"scopes\":[\"repo\", \"delete_repo\"], \"note\":\"Atlas Token\"}"
-        ]
-        
-        if let authentication = gitHub.api(authArguments) {
-            guard authentication[0]["token"] != nil else {
-                printCredentials("Failed GitHub Authentication: \(authentication)")
-                return
-            }
-            
-            self.token = authentication[0]["token"] as? String
-        }
+    public func setAuthenticationToken(token: String) {
+        self.token = token
     }
     
     public class func retrieve(_ baseDirectory: URL) -> [Credentials] {

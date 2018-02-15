@@ -9,10 +9,10 @@ import Foundation
 
 public class GitHub {
     
-    var credentials: Credentials!
-    var git: Git!
+    public var credentials: Credentials!
+    public var git: Git!
     
-    var repositoryName: String
+    public var repositoryName: String
     public var repositoryLink: String?
     
     public init(_ credentials: Credentials, repositoryName: String, git: Git!) {
@@ -21,7 +21,7 @@ public class GitHub {
         self.git = git
     }
     
-    func api(_ arguments: [String]) -> [[String: Any]]? {
+    class func api(_ arguments: [String]) -> [[String: Any]]? {
         let response = Glue.runProcess("curl", arguments: arguments)
         
         guard response.count > 0 else {
@@ -44,8 +44,16 @@ public class GitHub {
         }
         return nil
     }
+    
+    func api(_ arguments: [String]) -> [[String: Any]]? {
+        return GitHub.api(arguments)
+    }
 
     public func createRepository() -> [String: Any]? {
+        guard credentials.token != nil else {
+            return nil
+        }
+        
         let repoArguments = [
             "-u", "\(credentials.username):\(credentials.token!)",
             "https://api.github.com/repos/\(credentials.username)/\(repositoryName)"
@@ -63,7 +71,7 @@ public class GitHub {
             ]
             
             repoResult = api(createRepoArguments)
-            
+
             repoPath = repoResult?[0]["clone_url"] as? String
         }
         
@@ -92,9 +100,9 @@ public class GitHub {
         _ = api(deleteArguments)
     }
     
-    func url() -> String {
+    public func url() -> String {
         let authenticatedUrl = git.run("ls-remote", arguments: ["--get-url"])
-        
+
         guard authenticatedUrl.contains("https") else {
             return ""
         }
@@ -107,6 +115,48 @@ public class GitHub {
     
     func setRepositoryLink() {
         repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
+    }
+    
+    public class func getAuthenticationToken(_ credentials: Credentials) -> String? {
+        guard credentials.password != nil else {
+            return nil
+        }
+        
+        let listArguments = [
+            "-u", "\(credentials.username):\(credentials.password!)",
+            "https://api.github.com/authorizations"
+        ]
+        
+        if let list = api(listArguments) {
+            for item in list {
+                if (item["note"] as? String) == "Atlas Token" {
+                    let deleteAuthArguments = [
+                        "-u", "\(credentials.username):\(credentials.password!)",
+                        "-X", "DELETE",
+                        "https://api.github.com/authorizations/\(item["id"]!)"
+                    ]
+                    _ = api(deleteAuthArguments)
+                }
+            }
+        }
+        
+        let authArguments = [
+            "-u", "\(credentials.username):\(credentials.password!)",
+            "-X", "POST",
+            "https://api.github.com/authorizations",
+            "-d", "{\"scopes\":[\"repo\", \"delete_repo\"], \"note\":\"Atlas Token\"}"
+        ]
+        
+        if let authentication = api(authArguments) {
+            guard authentication[0]["token"] != nil else {
+                printGitHub("Failed GitHub Authentication: \(authentication)")
+                return nil
+            }
+            
+            return authentication[0]["token"] as? String
+        }
+        
+        return nil
     }
     
     func printGitHub(_ output: String) {

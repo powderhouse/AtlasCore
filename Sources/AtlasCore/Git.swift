@@ -20,6 +20,10 @@ public class Git {
     public init(_ directory: URL, processFactory: AtlasProcessFactory?=ProcessFactory()) {
         self.directory = directory
         self.atlasProcessFactory = processFactory
+        
+        if status() == nil {
+            _ = runInit()
+        }
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -37,7 +41,7 @@ public class Git {
                                arguments: fullArguments,
                                currentDirectory: directory,
                                atlasProcess: atlasProcessFactory.build()
-        )
+        )        
     }
     
     public func runInit() -> String {
