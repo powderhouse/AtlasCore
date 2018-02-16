@@ -108,6 +108,7 @@ public class GitHub {
         let authenticatedUrl = git.run("ls-remote", arguments: ["--get-url"])
 
         guard authenticatedUrl.contains("https") else {
+            print("Authenticated url does not contain https: \(authenticatedUrl)")
             return ""
         }
         
@@ -120,6 +121,7 @@ public class GitHub {
     public func setRepositoryLink() -> Bool {
         let fullUrl = url()
         if fullUrl.isEmpty {
+            print("No repository URL found.")
             return false
         }
         repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
