@@ -2,6 +2,7 @@ import Foundation
 
 public class AtlasCore {
     
+    public let appName = "Atlas"
     public let repositoryName = "Atlas"
     public var baseDirectory: URL!
     public var userDirectory: URL?
@@ -24,7 +25,7 @@ public class AtlasCore {
     
     public func getDefaultBaseDirectory() -> URL {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return URL(fileURLWithPath: paths[0])
+        return URL(fileURLWithPath: paths[0]).appendingPathComponent(appName)
     }
     
     public func setAtlasDirectory() {
