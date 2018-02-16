@@ -71,7 +71,9 @@ class GitHubSpec: QuickSpec {
                     context("with token") {
                     
                         beforeEach {
-                            credentials.token = GitHub.getAuthenticationToken(credentials)
+                            if let token = GitHub.getAuthenticationToken(credentials) {
+                                credentials.setAuthenticationToken(token: token)
+                            }
                             results = gitHub?.createRepository()
                         }
 
@@ -88,7 +90,9 @@ class GitHubSpec: QuickSpec {
                 
                 context("url") {
                     beforeEach {
-                        credentials.token = GitHub.getAuthenticationToken(credentials)
+                        if let token = GitHub.getAuthenticationToken(credentials) {
+                            credentials.setAuthenticationToken(token: token)
+                        }
                         _ = gitHub?.createRepository()
                     }
                     
@@ -97,6 +101,20 @@ class GitHubSpec: QuickSpec {
                         expect(url).to(contain(credentials.username))
                         expect(url).to(contain(repositoryName))
                         expect(url).toNot(contain(credentials.token!))
+                    }
+                }
+                
+                context("setRepositoryLink") {
+                    
+                    it("should return false if the repository does not yet exist") {
+                        expect(gitHub?.setRepositoryLink()).to(beFalse())
+                        expect(gitHub?.repositoryLink).to(beNil())
+                    }
+
+                    it("should return true if the repository does not yet exist") {
+                        _ = gitHub?.createRepository()
+                        expect(gitHub?.setRepositoryLink()).to(beTrue())
+                        expect(gitHub?.repositoryLink).to(equal("https://github.com/atlastest/testGitHub"))
                     }
                 }
             

@@ -117,8 +117,13 @@ public class GitHub {
         )
     }
     
-    func setRepositoryLink() {
+    public func setRepositoryLink() -> Bool {
+        let fullUrl = url()
+        if fullUrl.isEmpty {
+            return false
+        }
         repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
+        return true
     }
     
     public class func getAuthenticationToken(_ credentials: Credentials) -> String? {
