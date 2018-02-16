@@ -65,6 +65,7 @@ public class AtlasCore {
         }
         
         guard credentials.token != nil else {
+            print("No valid token found.")
             return false
         }
 
@@ -82,13 +83,16 @@ public class AtlasCore {
 
                 return true
             }
+            print("Failed to set repository link.")
             return false
         }
+        print("Failed to create Git repository.")
         return false
     }
     
     public func createGitRepository(_ credentials: Credentials) -> Bool {
         guard atlasDirectory != nil else {
+            print("Trying to create Git repository but Atlas directory not available.")
             return false
         }
         
@@ -96,7 +100,10 @@ public class AtlasCore {
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
-            } catch {}
+            } catch {
+                print("Unable to write Atlas readme.md")
+                return false
+            }
             
             _ = git!.runInit()
             commitChanges("Atlas Commit (Atlas Initialization)")
