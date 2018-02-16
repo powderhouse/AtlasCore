@@ -37,7 +37,7 @@ extension Process: AtlasProcess {
 }
 
 public class ProcessFactory: AtlasProcessFactory {
-    init() {
+    public init() {
     }
     
     public func build() -> AtlasProcess {

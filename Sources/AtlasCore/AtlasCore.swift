@@ -1,21 +1,14 @@
 import Foundation
 
-public struct Credentials {
-    public let username: String
-    public let password: String?
-    public var token: String?
-    
-    public init(_ username: String, password: String?=nil, token: String?=nil) {
-        self.username = username
-        self.password = password
-        self.token = token
-    }
-}
-
 public class AtlasCore {
     
+    public let repositoryName = "Atlas"
     public var baseDirectory: URL!
-    var git: Git?
+    public var userDirectory: URL?
+    public var atlasDirectory: URL?
+    var git: Git!
+    var gitHub: GitHub!
+    
     
     public init(_ baseDirectory: URL?=nil) {
         self.baseDirectory = baseDirectory
@@ -24,41 +17,90 @@ public class AtlasCore {
         }
         FileSystem.createDirectory(self.baseDirectory)
         
-        if let credentials = getGitCredentials() {
-            self.git = Git(self.baseDirectory, credentials: credentials)
-            self.git?.setGitHubRepositoryLink()
+        if let credentials = getCredentials() {
+            initGitAndGitHub(credentials)
         }
     }
     
     public func getDefaultBaseDirectory() -> URL {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return URL(fileURLWithPath: paths[0]).appendingPathComponent("Atlas")
-    }
-
-    public func getGitCredentials() -> Credentials? {
-        return Git.getCredentials(baseDirectory)
+        return URL(fileURLWithPath: paths[0])
     }
     
-    public func initGit(_ credentials: Credentials) -> Bool {
-        self.git = Git(baseDirectory, credentials: credentials)
+    public func setAtlasDirectory() {
+        guard userDirectory != nil else {
+            return
+        }
         
-        guard self.git != nil else { return false }
+        self.atlasDirectory = userDirectory!.appendingPathComponent(repositoryName)
+        FileSystem.createDirectory(self.atlasDirectory!)
+    }
+
+    public func setUserDirectory(_ credentials: Credentials?=nil) {
+        var activeCredentials = credentials
+        if activeCredentials == nil {
+            activeCredentials = getCredentials()
+        }
         
-        let readme = baseDirectory.appendingPathComponent("readme.md", isDirectory: false)
+        guard activeCredentials != nil else {
+            return
+        }
+        
+        if let username = activeCredentials?.username {
+            self.userDirectory = baseDirectory.appendingPathComponent(username)
+            FileSystem.createDirectory(self.userDirectory!)
+        }
+    }
+
+    public func getCredentials() -> Credentials? {
+        return Credentials.retrieve(baseDirectory).first
+    }
+    
+    public func initGitAndGitHub(_ credentials: Credentials) {
+        if credentials.token == nil {
+            if let token = GitHub.getAuthenticationToken(credentials) {
+                credentials.setAuthenticationToken(token: token)
+            }
+        }
+        
+        guard credentials.token != nil else {
+            return
+        }
+
+        credentials.save(baseDirectory!)
+
+        setUserDirectory(credentials)
+        setAtlasDirectory()
+        self.git = Git(self.atlasDirectory!)
+        
+        if createGitRepository(credentials) {
+            self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+            if !gitHub.setRepositoryLink() {
+                _ = gitHub.createRepository()
+                _ = gitHub.setRepositoryLink()
+            }
+        }        
+    }
+    
+    public func createGitRepository(_ credentials: Credentials) -> Bool {
+        guard atlasDirectory != nil else {
+            return false
+        }
+        
+        let readme = atlasDirectory!.appendingPathComponent("readme.md", isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
             } catch {}
             
             _ = git!.runInit()
-            _ = git!.initGitHub()
         }
         
         return true
     }
     
     public func gitHubRepository() -> String? {
-        return git?.githubRepositoryLink
+        return gitHub.repositoryLink
     }
     
     public func createBaseDirectory() {

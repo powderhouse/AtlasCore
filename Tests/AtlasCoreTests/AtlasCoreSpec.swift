@@ -55,32 +55,39 @@ class AtlasCoreSpec: QuickSpec {
             
             context("initGit") {
                 beforeEach {
-                    _ = atlasCore.initGit(credentials)
+                    _ = atlasCore.initGitAndGitHub(credentials)
                 }
                 
                 it("saves the credentials to the filesystem") {
-                    let credentialsFile = atlasCore.baseDirectory.appendingPathComponent("github.json")
-                    let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
-                    expect(exists).to(beTrue(), description: "No github.json found")
+                    if let credentialsFile = atlasCore.baseDirectory?.appendingPathComponent("credentials.json") {
+                        let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No credentials.json found")
+                    } else {
+                        expect(false).to(beTrue(), description: "User directory was not set")
+                    }
+                    
                 }
 
-                it("saves the credentials to the filesystem") {
-                    let readmeFile = atlasCore.baseDirectory.appendingPathComponent("readme.md")
-                    let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
-                    expect(exists).to(beTrue(), description: "No readme.md found")
+                it("saves a readme to the filesystem") {
+                    if let readmeFile = atlasCore.atlasDirectory?.appendingPathComponent("readme.md") {
+                        let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No readme.md found")
+                    } else {
+                        expect(false).to(beTrue(), description: "Atlas directory was not set")
+                    }
                 }
-                
+
                 context("future instances of AtlasCore") {
                     var atlasCore2: AtlasCore!
-                    
+
                     beforeEach {
                         atlasCore2 = AtlasCore(directory)
                     }
-                    
+
                     it("automatically inits git") {
                         expect(atlasCore2.gitHubRepository()).toNot(beNil())
                     }
-                    
+
                 }
             }
         }
