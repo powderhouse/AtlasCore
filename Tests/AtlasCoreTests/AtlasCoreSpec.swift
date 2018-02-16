@@ -87,6 +87,11 @@ class AtlasCoreSpec: QuickSpec {
                     it("automatically inits git") {
                         expect(atlasCore2.gitHubRepository()).toNot(beNil())
                     }
+                    
+                    it("allows you to initialize again") {
+                        let result = atlasCore.initGitAndGitHub(credentials)
+                        expect(result).to(beTrue())
+                    }
 
                 }
 

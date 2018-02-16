@@ -79,12 +79,14 @@ public class AtlasCore {
             self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
             if !gitHub.setRepositoryLink() {
                 _ = gitHub.createRepository()
-                _ = gitHub.setRepositoryLink()
+                if !gitHub.setRepositoryLink() {
+                    print("Failed to set repository link.")
+                    return false
+                }
 
                 return true
             }
-            print("Failed to set repository link.")
-            return false
+            return true
         }
         print("Failed to create Git repository.")
         return false
