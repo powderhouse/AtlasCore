@@ -18,7 +18,7 @@ public class AtlasCore {
         FileSystem.createDirectory(self.baseDirectory)
         
         if let credentials = getCredentials() {
-            initGitAndGitHub(credentials)
+            _ = initGitAndGitHub(credentials)
         }
     }
     
@@ -56,7 +56,7 @@ public class AtlasCore {
         return Credentials.retrieve(baseDirectory).first
     }
     
-    public func initGitAndGitHub(_ credentials: Credentials) {
+    public func initGitAndGitHub(_ credentials: Credentials) -> Bool {
         if credentials.token == nil {
             if let token = GitHub.getAuthenticationToken(credentials) {
                 credentials.setAuthenticationToken(token: token)
@@ -64,7 +64,7 @@ public class AtlasCore {
         }
         
         guard credentials.token != nil else {
-            return
+            return false
         }
 
         credentials.save(baseDirectory!)
@@ -78,8 +78,12 @@ public class AtlasCore {
             if !gitHub.setRepositoryLink() {
                 _ = gitHub.createRepository()
                 _ = gitHub.setRepositoryLink()
+
+                return true
             }
-        }        
+            return false
+        }
+        return false
     }
     
     public func createGitRepository(_ credentials: Credentials) -> Bool {

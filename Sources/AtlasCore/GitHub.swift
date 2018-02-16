@@ -85,7 +85,7 @@ public class GitHub {
         )
         _ = git.run("remote", arguments: ["add", "origin", authenticatedPath])
         
-        setRepositoryLink()
+        _ = setRepositoryLink()
         
         return repoResult![0]
     }
