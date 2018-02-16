@@ -1,0 +1,6 @@
+os: osx
+osx_image: xcode9.2
+language: swift 
+xcode_project: AtlasCore.xcodeproj # path to your xcodeproj folder
+xcode_scheme: AtlasCoreTests
+
