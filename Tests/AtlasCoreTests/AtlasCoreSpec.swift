@@ -53,7 +53,7 @@ class AtlasCoreSpec: QuickSpec {
                 }
             }
             
-            context("initGit") {
+            context("with git and GitHub initialized") {
                 beforeEach {
                     _ = atlasCore.initGitAndGitHub(credentials)
                 }
@@ -89,7 +89,31 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                 }
-            }
+
+            
+                context("startProject") {
+                    
+                    let projectName = "New Project"
+                    
+                    beforeEach {
+                        _ = atlasCore.startProject(projectName)
+                    }
+                    
+                    it("should create a folder in the Atlas directory") {
+                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
+                            let exists = fileManager.fileExists(atPath: projectFolder.path, isDirectory: &isDirectory)
+                            expect(exists).to(beTrue(), description: "No project folder found for \(projectName)")
+                        } else {
+                            expect(false).to(beTrue(), description: "Atlas directory was not set")
+                        }
+                    }
+                    
+                    it("commits changes") {
+                        expect(atlasCore.status()).to(contain("nothing to commit"))
+                    }
+                }
+}
+            
         }
     }
 }

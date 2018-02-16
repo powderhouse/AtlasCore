@@ -99,6 +99,7 @@ public class AtlasCore {
             } catch {}
             
             _ = git!.runInit()
+            commitChanges("Atlas Commit (Atlas Initialization)")
         }
         
         return true
@@ -114,5 +115,40 @@ public class AtlasCore {
     
     public func deleteBaseDirectory() {
         FileSystem.deleteDirectory(baseDirectory)
+    }
+    
+    public func startProject(_ name: String) -> Bool {
+        guard atlasDirectory != nil else {
+            return false
+        }
+        
+        let projectDirectory = atlasDirectory!.appendingPathComponent(name, isDirectory: true)
+        FileSystem.createDirectory(projectDirectory)
+
+        let readme = projectDirectory.appendingPathComponent("readme.md", isDirectory: false)
+        if !FileSystem.fileExists(readme, isDirectory: false) {
+            do {
+                try "This is your \(name) project".write(to: readme, atomically: true, encoding: .utf8)
+            } catch {
+                return false
+            }
+            commitChanges("Atlas Commit (New Project)")
+        }
+        
+        return true
+    }
+    
+    public func commitChanges(_ commitMessage: String?=nil) {
+        _ = git?.add()
+        _ = git?.commit(commitMessage)
+        _ = git?.pushToGitHub()
+    }
+    
+    public func status() -> String? {
+        guard git != nil else {
+            return nil
+        }
+        
+        return git.status()
     }
 }
