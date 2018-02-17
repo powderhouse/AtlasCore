@@ -19,6 +19,14 @@ public class Credentials {
         self.password = password
         self.token = token
     }
+    
+    public func sync(_ credentials: Credentials) {
+        if self.username == credentials.username {
+            if self.token == nil {
+                self.token = credentials.token
+            }
+        }
+    }
 
     public func save(_ directory: URL) {
         guard token != nil else {

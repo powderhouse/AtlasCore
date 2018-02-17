@@ -58,6 +58,10 @@ public class AtlasCore {
     }
     
     public func initGitAndGitHub(_ credentials: Credentials) -> Bool {
+        if let existingCredentials = Credentials.retrieve(baseDirectory).first {
+            credentials.sync(existingCredentials)
+        }
+
         if credentials.token == nil {
             if let token = GitHub.getAuthenticationToken(credentials) {
                 credentials.setAuthenticationToken(token: token)

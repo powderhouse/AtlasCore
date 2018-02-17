@@ -85,12 +85,28 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                     it("automatically inits git") {
-                        expect(atlasCore2.gitHubRepository()).toNot(beNil())
+                        expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
                     }
-                    
-                    it("allows you to initialize again") {
-                        let result = atlasCore.initGitAndGitHub(credentials)
-                        expect(result).to(beTrue())
+
+                    context("initialized again") {
+                        var result: Bool!
+                        let newCredentials = Credentials(
+                            "atlastest",
+                            password: "1a2b3c4d",
+                            token: nil
+                        )
+                        
+                        beforeEach {
+                            result = atlasCore.initGitAndGitHub(newCredentials)
+                        }
+
+                        it("allows you to initialize again") {
+                            expect(result).to(beTrue())
+                        }
+
+                        it("sets the github repository link properly") {
+                            expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
+                        }
                     }
 
                 }
