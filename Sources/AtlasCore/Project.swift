@@ -10,14 +10,14 @@ import Foundation
 class Project {
     
     var name: String!
-    var directory: URL!
+    var baseDirectory: URL!
     
     let states = ["unstaged", "staged", "committed"]
     
     public init(_ name: String, baseDirectory: URL) {
         self.name = name
         
-        self.directory = createFolder(name, in: baseDirectory)
+        self.baseDirectory = createFolder(name, in: baseDirectory)
         let projectReadmeMessage = """
 This is your \(name) project
 """
@@ -35,7 +35,7 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
     public func createFolder(_ name: String, in containingDirectory: URL?=nil) -> URL? {
         var dir = containingDirectory
         if dir == nil {
-            dir = self.directory
+            dir = self.baseDirectory
         }
         
         guard dir != nil else { return nil }
@@ -50,7 +50,7 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
     public func createReadme(_ message: String, in containingDirectory: URL?=nil) {
         var dir = containingDirectory
         if dir == nil {
-            dir = self.directory
+            dir = self.baseDirectory
         }
         
         guard dir != nil else { return }
@@ -63,6 +63,14 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
                 return
             }
         }
+    }
+    
+    public func directory(_ name: String?=nil) -> URL {
+        guard name != nil else {
+            return self.baseDirectory
+        }
+        
+        return baseDirectory.appendingPathComponent(name!)
     }
     
     public class func exists(_ name: String, in directory: URL) -> Bool {

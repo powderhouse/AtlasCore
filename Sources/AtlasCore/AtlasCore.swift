@@ -148,8 +148,8 @@ public class AtlasCore {
             return
         }
         
-        let projectDirectory = atlasDirectory!.appendingPathComponent(project)
-        _ = Glue.runProcess("cp", arguments: [filePath, projectDirectory.path])
+        let project = Project(project, baseDirectory: atlasDirectory!)
+        _ = Glue.runProcess("cp", arguments: [filePath, project.directory("staged").path])
     }
     
     public func commitChanges(_ commitMessage: String?=nil) {

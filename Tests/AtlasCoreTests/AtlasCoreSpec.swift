@@ -168,7 +168,8 @@ class AtlasCoreSpec: QuickSpec {
                     }
                     
                     it("adds the file to the project") {
-                        let projectFilePath = projectDirectory.appendingPathComponent(fileName).path
+                        let stagedDirectory = projectDirectory.appendingPathComponent("staged")
+                        let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
                         let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isDirectory)
                         expect(exists).to(beTrue(), description: "File not found in project directory")
                     }
