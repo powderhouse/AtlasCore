@@ -111,9 +111,7 @@ class AtlasCoreSpec: QuickSpec {
 
                 }
 
-            
                 context("startProject") {
-                    
                     let projectName = "New Project"
                     
                     beforeEach {
@@ -133,7 +131,38 @@ class AtlasCoreSpec: QuickSpec {
                         expect(atlasCore.status()).to(contain("nothing to commit"))
                     }
                 }
-}
+                
+                context("copy") {
+                    let projectName = "New Project"
+                    let fileName = "index.html"
+                    var projectDirectory: URL!
+                    var fileDirectory: URL!
+                    
+                    beforeEach {
+                        fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                        FileSystem.createDirectory(fileDirectory)
+                        Helper.addFile(fileName, directory: fileDirectory)
+                        
+                        _ = atlasCore.startProject(projectName)
+                        projectDirectory = atlasCore.atlasDirectory?.appendingPathComponent(projectName)
+                        
+                        let filePath = fileDirectory.appendingPathComponent(fileName).path
+                        _ = atlasCore.copy(filePath, into: projectName)
+                    }
+                    
+                    it("adds the file to the project") {
+                        let projectFilePath = projectDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isDirectory)
+                        expect(exists).to(beTrue(), description: "File not found in project directory")
+                    }
+                    
+                    it("leaves the file in the file's directory") {
+                        let filePath = fileDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
+                        expect(exists).to(beTrue(), description: "File not found in file's directory")
+                    }
+                }
+            }
             
         }
     }

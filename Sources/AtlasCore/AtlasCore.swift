@@ -151,6 +151,15 @@ public class AtlasCore {
         return true
     }
     
+    public func copy(_ filePath: String, into project: String) {
+        guard atlasDirectory != nil else {
+            return
+        }
+        
+        let projectDirectory = atlasDirectory!.appendingPathComponent(project)
+        _ = Glue.runProcess("cp", arguments: [filePath, projectDirectory.path])
+    }
+    
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)
