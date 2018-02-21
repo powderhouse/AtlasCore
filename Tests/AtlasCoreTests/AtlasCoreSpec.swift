@@ -164,7 +164,7 @@ class AtlasCoreSpec: QuickSpec {
                         projectDirectory = atlasCore.atlasDirectory?.appendingPathComponent(projectName)
                         
                         let filePath = fileDirectory.appendingPathComponent(fileName).path
-                        _ = atlasCore.copy(filePath, into: projectName)
+                        expect(atlasCore.copy(filePath, into: projectName)).to(beTrue())
                     }
                     
                     it("adds the file to the project") {

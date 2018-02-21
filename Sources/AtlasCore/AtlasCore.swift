@@ -143,13 +143,19 @@ public class AtlasCore {
         return true
     }
     
-    public func copy(_ filePath: String, into project: String) {
+    public func copy(_ filePath: String, into project: String) -> Bool {
         guard atlasDirectory != nil else {
-            return
+            return false
         }
         
         let project = Project(project, baseDirectory: atlasDirectory!)
-        _ = Glue.runProcess("cp", arguments: [filePath, project.directory("staged").path])
+        let stagedDirectory = project.directory("staged")
+        _ = Glue.runProcess("cp", arguments: [filePath, stagedDirectory.path])
+        
+        if let fileName = filePath.split(separator: "/").last {
+            return FileSystem.fileExists(stagedDirectory.appendingPathComponent("\(fileName)"))
+        }
+        return false
     }
     
     public func commitChanges(_ commitMessage: String?=nil) {
