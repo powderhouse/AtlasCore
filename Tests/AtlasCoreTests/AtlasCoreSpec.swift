@@ -118,7 +118,7 @@ class AtlasCoreSpec: QuickSpec {
                         _ = atlasCore.startProject(projectName)
                     }
                     
-                    it("should create a folder in the Atlas directory") {
+                    it("should create a folder in the Atlas directory with a readme") {
                         if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
                             let exists = fileManager.fileExists(atPath: projectFolder.path, isDirectory: &isDirectory)
                             expect(exists).to(beTrue(), description: "No project folder found for \(projectName)")
@@ -126,7 +126,24 @@ class AtlasCoreSpec: QuickSpec {
                             expect(false).to(beTrue(), description: "Atlas directory was not set")
                         }
                     }
-                    
+
+                    it("should create three subfolders, each with a readme, in the project folder") {
+                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
+                            for folderName in ["unstaged", "staged", "committed"] {
+                                let subfolderURL = projectFolder.appendingPathComponent(folderName)
+                                let exists = fileManager.fileExists(atPath: subfolderURL.path, isDirectory: &isDirectory)
+                                expect(exists).to(beTrue(), description: "No project subfolder found: \(folderName)")
+                                
+                                let readmePath = subfolderURL.appendingPathComponent("readme.md").path
+                                let readmeExists = fileManager.fileExists(atPath: readmePath, isDirectory: &isFile)
+                                expect(readmeExists).to(beTrue(), description: "No readme found in subfolder: \(folderName)")
+                            }
+                        } else {
+                            expect(false).to(beTrue(), description: "Atlas directory was not set")
+                        }
+                        
+                    }
+
                     it("commits changes") {
                         expect(atlasCore.status()).to(contain("nothing to commit"))
                     }

@@ -135,18 +135,10 @@ public class AtlasCore {
             return false
         }
         
-        let projectDirectory = atlasDirectory!.appendingPathComponent(name, isDirectory: true)
-        FileSystem.createDirectory(projectDirectory)
-
-        let readme = projectDirectory.appendingPathComponent("readme.md", isDirectory: false)
-        if !FileSystem.fileExists(readme, isDirectory: false) {
-            do {
-                try "This is your \(name) project".write(to: readme, atomically: true, encoding: .utf8)
-            } catch {
-                return false
-            }
-            commitChanges("Atlas Commit (New Project)")
-        }
+        if !Project.exists(name, in: atlasDirectory!) {
+            _ = Project(name, baseDirectory: atlasDirectory!)
+            commitChanges("Atlas Commit (\(name) Project Initialization")
+        }        
         
         return true
     }
