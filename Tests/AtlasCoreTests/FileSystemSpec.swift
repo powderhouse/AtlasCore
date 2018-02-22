@@ -132,11 +132,52 @@ class FileSystemSpec: QuickSpec {
                     }
                 }
                 
-                it("leaves the file in the start directory") {
+                it("leaves both files in the start directory") {
                     for fileName in [fileName1, fileName2] {
                         let startFilePath = startDirectory.appendingPathComponent(fileName).path
                         let exists = fileManager.fileExists(atPath: startFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in start directory")
+                    }
+                }
+            }
+            
+            context("move") {
+                let fileName1 = "index1.html"
+                let fileName2 = "index2.html"
+                var startDirectory: URL!
+                var endDirectory: URL!
+                
+                beforeEach {
+                    startDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("START")
+                    endDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("END")
+                    FileSystem.createDirectory(startDirectory)
+                    FileSystem.createDirectory(endDirectory)
+                    Helper.addFile(fileName1, directory: startDirectory)
+                    Helper.addFile(fileName2, directory: startDirectory)
+                    
+                    let filePath1 = startDirectory.appendingPathComponent(fileName1).path
+                    let filePath2 = startDirectory.appendingPathComponent(fileName2).path
+                    expect(FileSystem.move([filePath1, filePath2], into: endDirectory)).to(beTrue())
+                }
+                
+                afterEach {
+                    FileSystem.deleteDirectory(startDirectory)
+                    FileSystem.deleteDirectory(endDirectory)
+                }
+                
+                it("adds both files to the end directory") {
+                    for fileName in [fileName1, fileName2] {
+                        let endFilePath = endDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: endFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in end directory")
+                    }
+                }
+                
+                it("removes both files from the start directory") {
+                    for fileName in [fileName1, fileName2] {
+                        let startFilePath = startDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: startFilePath, isDirectory: &isFile)
+                        expect(exists).to(beFalse(), description: "File still found in start directory")
                     }
                 }
             }
