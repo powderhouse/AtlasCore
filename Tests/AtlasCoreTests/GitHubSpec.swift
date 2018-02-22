@@ -100,7 +100,11 @@ class GitHubSpec: QuickSpec {
                         let url = gitHub?.url()
                         expect(url).to(contain(credentials.username))
                         expect(url).to(contain(repositoryName))
-                        expect(url).toNot(contain(credentials.token!))
+                        if let token = credentials.token {
+                            expect(url).toNot(contain(token))
+                        } else {
+                            expect(false).to(beTrue(), description: "token is nil")
+                        }
                     }
                 }
                 

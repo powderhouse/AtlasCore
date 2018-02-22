@@ -115,7 +115,7 @@ class AtlasCoreSpec: QuickSpec {
                     let projectName = "New Project"
                     
                     beforeEach {
-                        _ = atlasCore.startProject(projectName)
+                        _ = atlasCore.initProject(projectName)
                     }
                     
                     it("should create a folder in the Atlas directory with a readme") {
@@ -143,10 +143,6 @@ class AtlasCoreSpec: QuickSpec {
                         }
                         
                     }
-
-                    it("commits changes") {
-                        expect(atlasCore.status()).to(contain("nothing to commit"))
-                    }
                 }
                 
                 context("copy") {
@@ -160,18 +156,21 @@ class AtlasCoreSpec: QuickSpec {
                         FileSystem.createDirectory(fileDirectory)
                         Helper.addFile(fileName, directory: fileDirectory)
                         
-                        _ = atlasCore.startProject(projectName)
+                        _ = atlasCore.initProject(projectName)
                         projectDirectory = atlasCore.atlasDirectory?.appendingPathComponent(projectName)
                         
                         let filePath = fileDirectory.appendingPathComponent(fileName).path
-                        expect(atlasCore.copy(filePath, into: projectName)).to(beTrue())
+                        expect(atlasCore.copy([filePath], into: projectName)).to(beTrue())
                     }
                     
                     it("adds the file to the project") {
-                        let stagedDirectory = projectDirectory.appendingPathComponent("staged")
-                        let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
-                        let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isDirectory)
-                        expect(exists).to(beTrue(), description: "File not found in project directory")
+                        if let stagedDirectory = projectDirectory?.appendingPathComponent("staged") {
+                            let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                            let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isDirectory)
+                            expect(exists).to(beTrue(), description: "File not found in project directory")
+                        } else {
+                            expect(false).to(beTrue(), description: "Project directory is nil")
+                        }
                     }
                     
                     it("leaves the file in the file's directory") {

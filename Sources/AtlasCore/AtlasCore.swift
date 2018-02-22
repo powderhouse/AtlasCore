@@ -79,7 +79,7 @@ public class AtlasCore {
         setAtlasDirectory()
         self.git = Git(self.atlasDirectory!)
         
-        if createGitRepository(credentials) {
+        if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
             if !gitHub.setRepositoryLink() {
                 _ = gitHub.createRepository()
@@ -96,7 +96,7 @@ public class AtlasCore {
         return false
     }
     
-    public func createGitRepository(_ credentials: Credentials) -> Bool {
+    public func initGitRepository(_ credentials: Credentials) -> Bool {
         guard atlasDirectory != nil else {
             print("Trying to create Git repository but Atlas directory not available.")
             return false
@@ -112,14 +112,13 @@ public class AtlasCore {
             }
             
             _ = git!.runInit()
-            commitChanges("Atlas Commit (Atlas Initialization)")
         }
         
         return true
     }
     
     public func gitHubRepository() -> String? {
-        return gitHub.repositoryLink
+        return gitHub?.repositoryLink
     }
     
     public func createBaseDirectory() {
@@ -130,38 +129,39 @@ public class AtlasCore {
         FileSystem.deleteDirectory(baseDirectory)
     }
     
-    public func startProject(_ name: String) -> Bool {
+    public func initProject(_ name: String) -> Bool {
         guard atlasDirectory != nil else {
             return false
         }
         
         if !Project.exists(name, in: atlasDirectory!) {
             _ = Project(name, baseDirectory: atlasDirectory!)
-            commitChanges("Atlas Commit (\(name) Project Initialization")
-        }        
+        }
         
         return true
     }
     
-    public func copy(_ filePath: String, into project: String) -> Bool {
+    public func copy(_ filePaths: [String], into project: String) -> Bool {
         guard atlasDirectory != nil else {
             return false
         }
         
         let project = Project(project, baseDirectory: atlasDirectory!)
-        let stagedDirectory = project.directory("staged")
-        _ = Glue.runProcess("cp", arguments: [filePath, stagedDirectory.path])
-        
-        if let fileName = filePath.split(separator: "/").last {
-            return FileSystem.fileExists(stagedDirectory.appendingPathComponent("\(fileName)"))
-        }
-        return false
+        return FileSystem.copy(filePaths, into: project.directory("staged"))
     }
     
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)
         _ = git?.pushToGitHub()
+    }
+    
+    public func atlasCommit(_ message: String?=nil) {
+        var submessage = ""
+        if message != nil {
+            submessage = " (\(message!))"
+        }
+        commitChanges("Atlas Commit\(submessage)")
     }
     
     public func status() -> String? {
