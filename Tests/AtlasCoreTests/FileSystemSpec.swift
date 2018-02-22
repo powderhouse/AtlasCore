@@ -16,14 +16,14 @@ class FileSystemSpec: QuickSpec {
         describe("FileSystem") {
             
             let fileManager = FileManager.default
-            
+            var isDir : ObjCBool = true
+            var isFile : ObjCBool = false
+
             context("createDirectory") {
                 let name = "NEWDIRECTORY"
                 let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name)
                 let path = url.path
-                
-                var isDir : ObjCBool = true
-                
+
                 it("creates a new directory at the specified path") {
                     do {
                         try fileManager.removeItem(at: url)
@@ -99,6 +99,48 @@ class FileSystemSpec: QuickSpec {
                     expect(FileSystem.filesInDirectory(url).sorted()).to(equal(files))
                 }
             }
+            
+            context("copy") {
+                let fileName1 = "index1.html"
+                let fileName2 = "index2.html"
+                var startDirectory: URL!
+                var endDirectory: URL!
+                
+                beforeEach {
+                    startDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("START")
+                    endDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("END")
+                    FileSystem.createDirectory(startDirectory)
+                    FileSystem.createDirectory(endDirectory)
+                    Helper.addFile(fileName1, directory: startDirectory)
+                    Helper.addFile(fileName2, directory: startDirectory)
+                    
+                    let filePath1 = startDirectory.appendingPathComponent(fileName1).path
+                    let filePath2 = startDirectory.appendingPathComponent(fileName2).path
+                    expect(FileSystem.copy([filePath1, filePath2], into: endDirectory)).to(beTrue())
+                }
+                
+                afterEach {
+                    FileSystem.deleteDirectory(startDirectory)
+                    FileSystem.deleteDirectory(endDirectory)
+                }
+                
+                it("adds both files to the end directory") {
+                    for fileName in [fileName1, fileName2] {
+                        let endFilePath = endDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: endFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in end directory")
+                    }
+                }
+                
+                it("leaves the file in the start directory") {
+                    for fileName in [fileName1, fileName2] {
+                        let startFilePath = startDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: startFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in start directory")
+                    }
+                }
+            }
+
         }
     }
 }
