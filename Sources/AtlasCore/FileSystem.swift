@@ -60,6 +60,9 @@ public class FileSystem {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
                     return false
                 }
+                if !FileSystem.fileExists(URL(fileURLWithPath: file)) {
+                    return false
+                }
             } else {
                 return false
             }
@@ -77,6 +80,9 @@ public class FileSystem {
             _ = Glue.runProcess("mv", arguments: [file, directory.path])
             if let fileName = file.split(separator: "/").last {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
+                    return false
+                }
+                if FileSystem.fileExists(URL(fileURLWithPath: file)) {
                     return false
                 }
             } else {

@@ -149,7 +149,16 @@ public class AtlasCore {
         let project = Project(project, baseDirectory: atlasDirectory!)
         return FileSystem.copy(filePaths, into: project.directory("staged"))
     }
-    
+
+    public func changeState(_ filePaths: [String], within project: String, to state: String) -> Bool {
+        guard atlasDirectory != nil else {
+            return false
+        }
+
+        let project = Project(project, baseDirectory: atlasDirectory!)
+        return FileSystem.move(filePaths, into: project.directory(state))
+    }
+
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)

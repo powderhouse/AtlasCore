@@ -154,7 +154,13 @@ class FileSystemSpec: QuickSpec {
                     FileSystem.createDirectory(endDirectory)
                     Helper.addFile(fileName1, directory: startDirectory)
                     Helper.addFile(fileName2, directory: startDirectory)
-                    
+
+                    for fileName in [fileName1, fileName2] {
+                        let startFilePath = startDirectory.appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: startFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in start directory")
+                    }
+
                     let filePath1 = startDirectory.appendingPathComponent(fileName1).path
                     let filePath2 = startDirectory.appendingPathComponent(fileName2).path
                     expect(FileSystem.move([filePath1, filePath2], into: endDirectory)).to(beTrue())

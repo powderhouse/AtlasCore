@@ -166,8 +166,8 @@ class AtlasCoreSpec: QuickSpec {
                     it("adds the file to the project") {
                         if let stagedDirectory = projectDirectory?.appendingPathComponent("staged") {
                             let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
-                            let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isDirectory)
-                            expect(exists).to(beTrue(), description: "File not found in project directory")
+                            let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isFile)
+                            expect(exists).to(beTrue(), description: "File not found in project's staged directory")
                         } else {
                             expect(false).to(beTrue(), description: "Project directory is nil")
                         }
@@ -179,8 +179,55 @@ class AtlasCoreSpec: QuickSpec {
                         expect(exists).to(beTrue(), description: "File not found in file's directory")
                     }
                 }
+                
+                
+                context("changeState") {
+                    let projectName = "New Project"
+                    let fileName = "newfile.html"
+                    var projectDirectory: URL!
+                    
+                    beforeEach {
+                        let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+                        let fileDirectory = tempDirectory.appendingPathComponent("FILE_DIR")
+                        FileSystem.createDirectory(fileDirectory)
+                        Helper.addFile(fileName, directory: fileDirectory)
+                        
+                        _ = atlasCore.initProject(projectName)
+                        projectDirectory = atlasCore.atlasDirectory?.appendingPathComponent(projectName)
+                        
+                        let filePath = fileDirectory.appendingPathComponent(fileName).path
+                        expect(atlasCore.copy([filePath], into: projectName)).to(beTrue())
+
+                        if let stagedDirectory = projectDirectory?.appendingPathComponent("staged") {
+                            let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                            let result = atlasCore.changeState([stagedFilePath], within: projectName, to: "unstaged")
+                            expect(result).to(beTrue())
+                        } else {
+                            expect(false).to(beTrue(), description: "Project directory is nil")
+                        }
+                    }
+                    
+                    it("adds the file to the unstaged subfolder within the project") {
+                        if let unstagedDirectory = projectDirectory?.appendingPathComponent("unstaged") {
+                            let unstagedFilePath = unstagedDirectory.appendingPathComponent(fileName).path
+                            let exists = fileManager.fileExists(atPath: unstagedFilePath, isDirectory: &isFile)
+                            expect(exists).to(beTrue(), description: "File not found in unstaged directory")
+                        } else {
+                            expect(false).to(beTrue(), description: "Project directory is nil")
+                        }
+                    }
+                    
+                    it("removes the file from the staged directory") {
+                        if let stagedDirectory = projectDirectory?.appendingPathComponent("staged") {
+                            let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                            let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                            expect(exists).to(beFalse(), description: "File still found in staged directory")
+                        } else {
+                            expect(false).to(beTrue(), description: "Project directory is nil")
+                        }
+                    }
+                }
             }
-            
         }
     }
 }
