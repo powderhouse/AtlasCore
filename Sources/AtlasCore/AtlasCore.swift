@@ -141,6 +141,14 @@ public class AtlasCore {
         return true
     }
     
+    public func project(_ name: String) -> Project? {
+        guard atlasDirectory != nil else {
+            return nil
+        }
+
+        return Project(name, baseDirectory: atlasDirectory!)
+    }
+    
     public func copy(_ filePaths: [String], into project: String) -> Bool {
         guard atlasDirectory != nil else {
             return false

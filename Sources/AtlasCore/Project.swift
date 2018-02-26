@@ -77,6 +77,10 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
         return projectDirectory.appendingPathComponent(name!)
     }
     
+    public func files(_ state: String) -> [String] {
+        return FileSystem.filesInDirectory(directory(state))
+    }
+    
     public class func exists(_ name: String, in directory: URL) -> Bool {
         let projectDirectory = directory.appendingPathComponent(name)
         return FileSystem.fileExists(projectDirectory, isDirectory: true)
