@@ -7,17 +7,21 @@
 
 import Foundation
 
-class Project {
+public class Project {
     
     var name: String!
-    var baseDirectory: URL!
+    var projectDirectory: URL!
     
-    let states = ["unstaged", "staged", "committed"]
+    public let states = ["unstaged", "staged", "committed"]
     
     public init(_ name: String, baseDirectory: URL) {
         self.name = name
-        
-        self.baseDirectory = createFolder(name, in: baseDirectory)
+        self.projectDirectory = createFolder(name, in: baseDirectory)
+
+        initFoldersAndReadmes()
+    }
+    
+    public func initFoldersAndReadmes() {
         let projectReadmeMessage = """
 This is your \(name) project
 """
@@ -35,7 +39,7 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
     public func createFolder(_ name: String, in containingDirectory: URL?=nil) -> URL? {
         var dir = containingDirectory
         if dir == nil {
-            dir = self.baseDirectory
+            dir = self.projectDirectory
         }
         
         guard dir != nil else { return nil }
@@ -50,7 +54,7 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
     public func createReadme(_ message: String, in containingDirectory: URL?=nil) {
         var dir = containingDirectory
         if dir == nil {
-            dir = self.baseDirectory
+            dir = self.projectDirectory
         }
         
         guard dir != nil else { return }
@@ -67,10 +71,10 @@ This folder contains all of your \(subfolderName) files for the project \(self.n
     
     public func directory(_ name: String?=nil) -> URL {
         guard name != nil else {
-            return self.baseDirectory
+            return self.projectDirectory
         }
         
-        return baseDirectory.appendingPathComponent(name!)
+        return projectDirectory.appendingPathComponent(name!)
     }
     
     public class func exists(_ name: String, in directory: URL) -> Bool {
