@@ -198,13 +198,8 @@ class AtlasCoreSpec: QuickSpec {
                         let filePath = fileDirectory.appendingPathComponent(fileName).path
                         expect(atlasCore.copy([filePath], into: projectName)).to(beTrue())
 
-                        if let stagedDirectory = projectDirectory?.appendingPathComponent("staged") {
-                            let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
-                            let result = atlasCore.changeState([stagedFilePath], within: projectName, to: "unstaged")
-                            expect(result).to(beTrue())
-                        } else {
-                            expect(false).to(beTrue(), description: "Project directory is nil")
-                        }
+                        let result = atlasCore.changeState([fileName], within: projectName, to: "unstaged")
+                        expect(result).to(beTrue())
                     }
                     
                     it("adds the file to the unstaged subfolder within the project") {

@@ -150,12 +150,18 @@ public class AtlasCore {
         return FileSystem.copy(filePaths, into: project.directory("staged"))
     }
 
-    public func changeState(_ filePaths: [String], within project: String, to state: String) -> Bool {
+    public func changeState(_ fileNames: [String], within project: String, to state: String) -> Bool {
         guard atlasDirectory != nil else {
             return false
         }
 
         let project = Project(project, baseDirectory: atlasDirectory!)
+        var filePaths: [String] = []
+        for fileName in fileNames {
+            let fromState = state == "staged" ? "unstaged" : "staged"
+            let file = project.directory(fromState).appendingPathComponent(fileName)
+            filePaths.append(file.path)
+        }
         return FileSystem.move(filePaths, into: project.directory(state))
     }
 
