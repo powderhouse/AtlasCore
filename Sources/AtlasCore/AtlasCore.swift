@@ -117,6 +117,14 @@ public class AtlasCore {
         return true
     }
     
+    public func deleteGitHubRepository() {
+        guard gitHub != nil else {
+            return
+        }
+        
+        gitHub.deleteRepository()
+    }
+    
     public func gitHubRepository() -> String? {
         return gitHub?.repositoryLink
     }

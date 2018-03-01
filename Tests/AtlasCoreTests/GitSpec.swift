@@ -150,7 +150,7 @@ class GitSpec: QuickSpec {
                     }
 
                     it("should provide a working tree clean status") {
-                        expect(git.status()).to(contain("Your branch is up-to-date with 'origin/master'"))
+                        expect(git.status()).to(contain("working tree clean"))
                     }
                 }
                 

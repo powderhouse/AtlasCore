@@ -30,7 +30,7 @@ This is your \(name) project
         for subfolderName in self.states {
             let subfolderURL = createFolder(subfolderName)
             let readmeMessage = """
-This folder contains all of your \(subfolderName) files for the project \(self.name)
+This folder contains all of your \(subfolderName) files for the project \(name)
 """
             createReadme(readmeMessage, in: subfolderURL)
         }

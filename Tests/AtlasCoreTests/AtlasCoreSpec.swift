@@ -42,6 +42,7 @@ class AtlasCoreSpec: QuickSpec {
             }
             
             afterEach {
+                atlasCore.deleteGitHubRepository()
                 FileSystem.deleteDirectory(directory)
             }
 
