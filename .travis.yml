@@ -1,6 +1,5 @@
 os: osx
-osx_image: xcode9.2
-language: swift 
-xcode_project: AtlasCore.xcodeproj # path to your xcodeproj folder
-xcode_scheme: AtlasCoreTests
-
+osx_image: Xcode 9.3beta
+language: swift
+script:
+    - xcodebuild clean test -project AtlasCore.xcodeproj -scheme AtlasCore-Package -destination "platform=OS X,arch=x86_64" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO -quiet
