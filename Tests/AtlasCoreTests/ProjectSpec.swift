@@ -41,7 +41,7 @@ class ProjectSpec: QuickSpec {
 
                         let readme = folder.appendingPathComponent("readme.md")
                         let readmeExists = fileManager.fileExists(atPath: readme.path, isDirectory: &isFile)
-                        expect(readmeExists).to(beTrue(), description: "No readme found in \(subfolderName)")
+                        expect(readmeExists).to(beFalse(), description: "No readme found in \(subfolderName)")
 }
                 }
 
