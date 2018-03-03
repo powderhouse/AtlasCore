@@ -6,4 +6,4 @@ jobs:
     steps:
       - checkout
       - run: echo "hello world"
-      - run: xcodebuild clean test -project AtlasCore.xcodeproj -scheme AtlasCore-Package -sdk macosx10.12 -destination "platform=OS X,arch=x86_64" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO -quiet
+      - run: xcodebuild -showsdks
