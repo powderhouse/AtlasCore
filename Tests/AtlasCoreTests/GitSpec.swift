@@ -54,7 +54,7 @@ class GitSpec: QuickSpec {
                 it("provides a specific status") {
                     let status = git.status()
                     expect(status).to(contain("On branch master"))
-                    expect(status).to(contain("No commits yet"))
+                    expect(status).to(contain("nothing to commi"))
                 }
                 
                 context("when reinitialized") {
