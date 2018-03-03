@@ -25,13 +25,6 @@
 		OBJ_138 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* Package.swift */; };
 		OBJ_144 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_120 /* Package.swift */; };
 		OBJ_150 /* AtlasCoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* AtlasCoreSpec.swift */; };
-		OBJ_151 /* CredentialsSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* CredentialsSpec.swift */; };
-		OBJ_152 /* FileSystemSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* FileSystemSpec.swift */; };
-		OBJ_153 /* GitHubSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* GitHubSpec.swift */; };
-		OBJ_154 /* GitSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* GitSpec.swift */; };
-		OBJ_155 /* GlueSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* GlueSpec.swift */; };
-		OBJ_156 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* Helper.swift */; };
-		OBJ_157 /* ProjectSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* ProjectSpec.swift */; };
 		OBJ_159 /* Nimble.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Nimble::Nimble::Product" /* Nimble.framework */; };
 		OBJ_160 /* Quick.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Quick::Quick::Product" /* Quick.framework */; };
 		OBJ_161 /* QuickSpecBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Quick::QuickSpecBase::Product" /* QuickSpecBase.framework */; };
@@ -199,13 +192,6 @@
 		OBJ_17 /* Glue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glue.swift; sourceTree = "<group>"; };
 		OBJ_18 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		OBJ_21 /* AtlasCoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreSpec.swift; sourceTree = "<group>"; };
-		OBJ_22 /* CredentialsSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsSpec.swift; sourceTree = "<group>"; };
-		OBJ_23 /* FileSystemSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemSpec.swift; sourceTree = "<group>"; };
-		OBJ_24 /* GitHubSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubSpec.swift; sourceTree = "<group>"; };
-		OBJ_25 /* GitSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitSpec.swift; sourceTree = "<group>"; };
-		OBJ_26 /* GlueSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlueSpec.swift; sourceTree = "<group>"; };
-		OBJ_27 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
-		OBJ_28 /* ProjectSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSpec.swift; sourceTree = "<group>"; };
 		OBJ_32 /* QuickSpecBase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuickSpecBase.m; sourceTree = "<group>"; };
 		OBJ_34 /* QuickSpecBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuickSpecBase.h; sourceTree = "<group>"; };
 		OBJ_35 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/jcosulich/workspace/AtlasCore/AtlasCore.xcodeproj/GeneratedModuleMap/QuickSpecBase/module.modulemap; sourceTree = "<group>"; };
@@ -366,13 +352,6 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_21 /* AtlasCoreSpec.swift */,
-				OBJ_22 /* CredentialsSpec.swift */,
-				OBJ_23 /* FileSystemSpec.swift */,
-				OBJ_24 /* GitHubSpec.swift */,
-				OBJ_25 /* GitSpec.swift */,
-				OBJ_26 /* GlueSpec.swift */,
-				OBJ_27 /* Helper.swift */,
-				OBJ_28 /* ProjectSpec.swift */,
 			);
 			name = AtlasCoreTests;
 			path = Tests/AtlasCoreTests;
@@ -780,13 +759,6 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_150 /* AtlasCoreSpec.swift in Sources */,
-				OBJ_151 /* CredentialsSpec.swift in Sources */,
-				OBJ_152 /* FileSystemSpec.swift in Sources */,
-				OBJ_153 /* GitHubSpec.swift in Sources */,
-				OBJ_154 /* GitSpec.swift in Sources */,
-				OBJ_155 /* GlueSpec.swift in Sources */,
-				OBJ_156 /* Helper.swift in Sources */,
-				OBJ_157 /* ProjectSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
