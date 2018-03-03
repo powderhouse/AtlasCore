@@ -27,6 +27,19 @@ class AtlasCoreSpec: QuickSpec {
                 let pipe = Pipe()
                 p.standardOutput = pipe
                 
+                print("")
+                print("")
+                print("")
+                print("")
+                print("")
+                print("PROCESS: \(p)")
+                print("PROCESS EXEC URL: \(p.executableURL)")
+                print("")
+                print("")
+                print("")
+                print("")
+                print("")
+                print("")
                 p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
                 p.arguments = ["pwd"]
                 do {
