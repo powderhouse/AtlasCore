@@ -5,6 +5,4 @@ jobs:
       xcode: "9.0"
     steps:
       - checkout
-      - run: swift package generate-xcodeproj --xcconfig-overrides settings.xcconfig
-      - run: swift build -Xswiftc "-target" -Xswiftc "x86_64-apple-macosx10.13"
-      - run: xcodebuild test -sdk macosx10.13 -project AtlasCore.xcodeproj/ -scheme AtlasCore-Package -destination 'platform=OS X,arch=x86_64'
+      - run: swift test -Xswiftc "-target" -Xswiftc "x86_64-apple-macosx10.13"
