@@ -27,6 +27,8 @@ class AtlasCoreSpec: QuickSpec {
                 let pipe = Pipe()
                 p.standardOutput = pipe
 
+                p.arguments = ["pwd"]
+
                 print("")
                 print("")
                 print("")
@@ -54,7 +56,6 @@ class AtlasCoreSpec: QuickSpec {
                 print("")
 
                 p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-                p.arguments = ["pwd"]
                 
                 do {
                     try p.run()
