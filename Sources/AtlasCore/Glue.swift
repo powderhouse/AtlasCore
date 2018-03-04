@@ -15,9 +15,12 @@ public class Glue {
         process.launchPath = "/usr/bin/env"
 //        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = [command] + (arguments ?? [])
+        
         if currentDirectory != nil {
-            process.currentDirectoryURL = currentDirectory
+//            process.currentDirectoryURL = currentDirectory
+            process.currentDirectoryPath = currentDirectory!.path
         }
+        
         
         return process.runAndWait()
     }

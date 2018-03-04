@@ -9,6 +9,7 @@ import Foundation
 
 public protocol AtlasProcess {
     var currentDirectoryURL: URL? { get set }
+    var currentDirectoryPath: String { get set }
     var executableURL: URL? { get set }
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
