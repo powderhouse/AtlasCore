@@ -26,22 +26,36 @@ class AtlasCoreSpec: QuickSpec {
                 
                 let pipe = Pipe()
                 p.standardOutput = pipe
-                
+
                 print("")
                 print("")
                 print("")
                 print("")
                 print("")
                 print("PROCESS: \(p)")
-                print("PROCESS EXEC URL: \(p.executableURL)")
+                let m = Mirror(reflecting: p)
+                print("M: \(m)")
+                for (name, value) in m.children {
+                    print("\(name): \(type(of: value)) = '\(value)'")
+                }
+
+                if let m2 = m.superclassMirror {
+                    print("M2: \(m2)")
+                    for (name, value) in m2.children {
+                        print("\(name): \(type(of: value)) = '\(value)'")
+                    }
+                }
+                print("STANDARD OUT: \(p.standardOutput)")
                 print("")
                 print("")
                 print("")
                 print("")
                 print("")
                 print("")
+
                 p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
                 p.arguments = ["pwd"]
+                
                 do {
                     try p.run()
                 } catch {
