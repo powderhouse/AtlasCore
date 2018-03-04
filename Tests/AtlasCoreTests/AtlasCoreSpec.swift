@@ -81,8 +81,11 @@ class AtlasCoreSpec: QuickSpec {
                 }
                 
                 print("KEYS: \(self.getKeysAndTypes(forObject: p))")
+                print("LAUNCH PATH: \(p.launchPath)")
                 print("")
                 print("")
+                p.launchPath = "/usr/bin/env"
+                print("LAUNCH PATH: \(p.launchPath)")
                 print("")
                 print("")
                 print("")
