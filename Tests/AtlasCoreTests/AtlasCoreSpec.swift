@@ -91,7 +91,7 @@ class AtlasCoreSpec: QuickSpec {
                 print("")
                 print("")
 
-                p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+//                p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
                 
                 do {
                     try p.run()
