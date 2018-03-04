@@ -12,7 +12,8 @@ public class Glue {
     public class func runProcess(_ command: String, arguments: [String]?=[], currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
         var process = atlasProcess
         
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.launchPath = "/usr/bin/env"
+//        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = [command] + (arguments ?? [])
         if currentDirectory != nil {
             process.currentDirectoryURL = currentDirectory

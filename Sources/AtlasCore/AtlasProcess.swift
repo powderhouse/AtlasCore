@@ -10,6 +10,7 @@ import Foundation
 public protocol AtlasProcess {
     var currentDirectoryURL: URL? { get set }
     var executableURL: URL? { get set }
+    var launchPath: String? { get set }
     var arguments: [String]? { get set }
     func runAndWait() -> String
 }
@@ -22,13 +23,14 @@ extension Process: AtlasProcess {
     public func runAndWait() -> String {
         let pipe = Pipe()
         standardOutput = pipe
-        
-        do {
-            try run()
-        } catch {
-            return "AtlasProcess Error: \(error)"
-        }
-        waitUntilExit()
+
+        launch()
+//        do {
+//            try run()
+//        } catch {
+//            return "AtlasProcess Error: \(error)"
+//        }
+//        waitUntilExit()
         
         let file:FileHandle = pipe.fileHandleForReading
         let data =  file.readDataToEndOfFile()
