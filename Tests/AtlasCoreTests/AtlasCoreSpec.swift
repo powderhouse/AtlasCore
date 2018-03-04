@@ -93,13 +93,15 @@ class AtlasCoreSpec: QuickSpec {
 
 //                p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
                 
-                do {
-                    try p.run()
-                } catch {
-                    print("AtlasProcess Error: \(error)")
-                }
+//                do {
+//                    try p.run()
+//                } catch {
+//                    print("AtlasProcess Error: \(error)")
+//                }
+//
+//                p.waitUntilExit()
                 
-                p.waitUntilExit()
+                p.launch()
                 
                 let file:FileHandle = pipe.fileHandleForReading
                 let data = file.readDataToEndOfFile()
