@@ -48,6 +48,19 @@ class AtlasCoreSpec: QuickSpec {
                     }
                 }
                 print("STANDARD OUT: \(p.standardOutput)")
+                print("ARGS: \(p.arguments)")
+
+                var count: UInt32 = 0
+                let properties = class_copyPropertyList(object_getClass(p), &count)
+                print("PROPERTIES: \(properties)")
+                
+                if properties != nil {
+                    for index in 0...count {
+                        let property1 = property_getName(properties![Int(index)])
+                        let result1 = String(cString: property1)
+                        print(result1)
+                    }
+                }
                 print("")
                 print("")
                 print("")
