@@ -106,6 +106,25 @@ class CredentialsSpec: QuickSpec {
                 }
             }
             
+            context("delete") {
+                var filePath: String!
+
+                beforeEach {
+                    Credentials(username, token: token).save(directory)
+
+                    filePath = "\(directory.path)/credentials.json"
+                    let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "No credentials json found")
+                }
+                
+                it("should delete the credentials file") {
+                    Credentials.delete(directory)
+                    
+                    let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
+                    expect(exists).to(beFalse(), description: "credentials json still exists")
+                }
+            }
+            
         }
     }
 }

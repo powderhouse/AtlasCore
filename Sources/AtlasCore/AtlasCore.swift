@@ -57,6 +57,10 @@ public class AtlasCore {
         return Credentials.retrieve(baseDirectory).first
     }
     
+    public func deleteCredentials() {
+        Credentials.delete(baseDirectory)
+    }
+    
     public func initGitAndGitHub(_ credentials: Credentials) -> Bool {
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)

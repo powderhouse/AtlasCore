@@ -99,6 +99,11 @@ public class Credentials {
         return []
     }
     
+    public class func delete(_ directory: URL) {
+        let url = directory.appendingPathComponent(filename)
+        FileSystem.deleteDirectory(url)
+    }
+    
     class func printCredentials(_ message: String) {
         print("CREDENTIALS: \(message)")
     }
