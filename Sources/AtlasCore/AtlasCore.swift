@@ -184,7 +184,7 @@ public class AtlasCore {
         }
         return FileSystem.move(filePaths, into: project.directory(state))
     }
-
+    
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)

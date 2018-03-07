@@ -60,6 +60,55 @@ class ProjectSpec: QuickSpec {
                 }
             }
             
+            context("commitStaged") {
+                
+                let fileName = "index.html"
+                let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
+                var commitFolder: URL!
+                
+                beforeEach {
+                    let stagedDirectory = project.directory("staged")
+                    Helper.addFile(fileName, directory: stagedDirectory)
+                    
+                    project.commitStaged(commitMessage)
+                    
+                    let slug = project.commitSlug(commitMessage)
+                    commitFolder = project.directory("committed").appendingPathComponent(slug)
+                }
+                
+                it("creates a folder using the slug of the commit message") {
+                    let exists = fileManager.fileExists(atPath: commitFolder.path, isDirectory: &isDirectory)
+                    expect(exists).to(beTrue(), description: "Commit folder not found")
+                }
+                
+                it("moves all files into the new commit folder") {
+                    let committedFilePath = commitFolder.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in commited directory")
+                }
+                
+                it("creates a text file with the full commit message in it and adds it to the commit folder") {
+                    let commitMessageFileUrl = commitFolder.appendingPathComponent("commit_message.txt")
+                    let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "Commit message file not found in commited directory")
+                    
+                    do {
+                        let contents = try String(contentsOf: commitMessageFileUrl, encoding: .utf8)
+                        expect(contents).to(equal(commitMessage))
+                    } catch {
+                        expect(false).to(beTrue(), description: "unable to load contents")
+                    }
+                }
+                
+                it("removes the file from the staged directory") {
+                    let stagedDirectory = project.directory("staged")
+                    let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                    print("STAGED FILE PATH: \(stagedFilePath)")
+                    let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beFalse(), description: "File still found in staged directory")
+                }
+            }
+            
         }
     }
 }

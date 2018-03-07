@@ -81,6 +81,28 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         return FileSystem.filesInDirectory(directory(state))
     }
     
+    public func commitStaged(_ message: String) -> Bool {
+        let commitedUrl = directory("committed")
+        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(message))
+        FileSystem.createDirectory(commitUrl)
+        
+        let commitMessageURL = commitUrl.appendingPathComponent("commit_message.txt")
+        do {
+            try message.write(to: commitMessageURL, atomically: true, encoding: .utf8)
+        } catch {
+            return false
+        }
+        
+        let stagedFolder = directory("staged")
+        var filePaths: [String] = []
+        for file in files("staged") {
+            if (file == "readme.md") { continue }
+            
+            filePaths.append(stagedFolder.appendingPathComponent(file).path)
+        }
+        return FileSystem.move(filePaths, into: commitUrl)
+    }
+    
     public func commitSlug(_ message: String) -> String {
         var slug = message.lowercased()
         
