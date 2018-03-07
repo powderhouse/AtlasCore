@@ -81,6 +81,22 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         return FileSystem.filesInDirectory(directory(state))
     }
     
+    public func commitSlug(_ message: String) -> String {
+        var slug = message.lowercased()
+        
+        for pattern in ["(\\s+)", "[^\\w\\-]+", "[-]+"] {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                let range = NSMakeRange(0, slug.count)
+                slug = regex.stringByReplacingMatches(in: slug, options: [], range: range, withTemplate: "-")
+            }
+        }
+        
+        if slug.last == "-" { slug.removeLast() }
+        if slug.first == "-" { slug.removeFirst() }
+        
+        return String(slug.prefix(254))
+    }
+    
     public class func exists(_ name: String, in directory: URL) -> Bool {
         let projectDirectory = directory.appendingPathComponent(name)
         return FileSystem.fileExists(projectDirectory, isDirectory: true)
