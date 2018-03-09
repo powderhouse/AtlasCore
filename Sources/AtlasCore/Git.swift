@@ -89,33 +89,30 @@ public class Git {
         _ = run("push", arguments: ["--set-upstream", "origin", "master"])
     }
     
-    public func log() -> [[String: Any]] {
-        let arguments = [
+    public func log(_ projectName: String?=nil) -> [[String: Any]] {
+        var arguments = [
             "--pretty=format:|%s",
             "--reverse",
             "--name-only",
+            "--relative",
             "--",
-            ".",
-            ":*/committed/*"
+            ":!*/unstaged/*",
+            ":!*/staged/*",
+            ":!*readme.md"
         ]
         
+        if projectName != nil {
+            arguments.append("\(projectName!)/committed")
+        }
+    
         let log = run("log", arguments: arguments)
-        
-        print("")
-        print("LOG: \(log)")
-        print("")
+
         var data: [[String:Any]] = []
         let commits = log.split(separator: "|")
         for commit in commits {
             var info = String(commit).split(separator: "\n")
             let message = String(info.removeFirst())
-
-            print("")
-            print("INFO: \(info.count) -> \(info)")
-            print("")
-            print("FLATMAP: \(info.map { String($0) })")
-            print("")
-
+            
             data.append([
                 "message": message,
                 "files": info.map { String($0) }.filter { !$0.contains("commit_message.txt") }

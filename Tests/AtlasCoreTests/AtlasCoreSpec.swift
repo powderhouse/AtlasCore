@@ -247,6 +247,7 @@ class AtlasCoreSpec: QuickSpec {
                         
                         let filePath1 = fileDirectory.appendingPathComponent(file1).path
                         expect(atlasCore.copy([filePath1], into: project1)).to(beTrue())
+                        atlasCore.atlasCommit()
 
                         _ = atlasCore.project(project1)?.commitStaged(message1)
                         atlasCore.commitChanges(message1)
@@ -264,12 +265,29 @@ class AtlasCoreSpec: QuickSpec {
                     it("should return an array of commit information ordered by date submitted") {
                         let log = atlasCore.log()
  
+                        expect(log.count).to(equal(2))
+                        
                         if let lastCommit = log.last {
                             expect(lastCommit.message).to(equal(message2))
                             expect(lastCommit.files.count).to(equal(2))
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file2))
                                 expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project2)/committed/\(atlasCore.project(project2)!.commitSlug(message2))/\(file2)"))
+                            }
+                        }
+                    }
+                    
+                    it("should only return the commits for a project if specified") {
+                        let log = atlasCore.log("General")
+                        
+                        expect(log.count).to(equal(1))
+
+                        if let lastCommit = log.last {
+                            expect(lastCommit.message).to(equal(message1))
+                            expect(lastCommit.files.count).to(equal(1))
+                            if let firstFile = lastCommit.files.first {
+                                expect(firstFile.name).to(equal(file1))
+                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project1)/committed/\(atlasCore.project(project1)!.commitSlug(message1))/\(file1)"))
                             }
                         }
                     }
