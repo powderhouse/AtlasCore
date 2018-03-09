@@ -89,6 +89,41 @@ public class Git {
         _ = run("push", arguments: ["--set-upstream", "origin", "master"])
     }
     
+    public func log() -> [[String: Any]] {
+        let arguments = [
+            "--pretty=format:|%s",
+            "--reverse",
+            "--name-only",
+            "--",
+            ".",
+            ":*/committed/*"
+        ]
+        
+        let log = run("log", arguments: arguments)
+        
+        print("")
+        print("LOG: \(log)")
+        print("")
+        var data: [[String:Any]] = []
+        let commits = log.split(separator: "|")
+        for commit in commits {
+            var info = String(commit).split(separator: "\n")
+            let message = String(info.removeFirst())
+
+            print("")
+            print("INFO: \(info.count) -> \(info)")
+            print("")
+            print("FLATMAP: \(info.map { String($0) })")
+            print("")
+
+            data.append([
+                "message": message,
+                "files": info.map { String($0) }.filter { !$0.contains("commit_message.txt") }
+            ])
+        }
+        
+        return data
+    }
     
     func printGit(_ output: String) {
         Git.printGit(output)

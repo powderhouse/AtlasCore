@@ -224,6 +224,57 @@ class AtlasCoreSpec: QuickSpec {
                     }
                 }
                 
+                context("log") {
+                    
+                    let project1 = "General"
+                    let project2 = "AnotherProject"
+                    let file1 = "index1.html"
+                    let file2 = "index2.html"
+                    let file3 = "index3.html"
+                    var fileDirectory: URL!
+                    
+                    let message1 = "The first commit"
+                    let message2 = "The second commit"
+                    
+                    beforeEach {
+                        fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                        FileSystem.createDirectory(fileDirectory)
+                        Helper.addFile(file1, directory: fileDirectory)
+                        Helper.addFile(file2, directory: fileDirectory)
+                        Helper.addFile(file3, directory: fileDirectory)
+
+                        expect(atlasCore.initProject(project2)).to(beTrue())
+                        
+                        let filePath1 = fileDirectory.appendingPathComponent(file1).path
+                        expect(atlasCore.copy([filePath1], into: project1)).to(beTrue())
+
+                        _ = atlasCore.project(project1)?.commitStaged(message1)
+                        atlasCore.commitChanges(message1)
+
+                        let filePath2 = fileDirectory.appendingPathComponent(file2).path
+                        expect(atlasCore.copy([filePath2], into: project2)).to(beTrue())
+
+                        let filePath3 = fileDirectory.appendingPathComponent(file3).path
+                        expect(atlasCore.copy([filePath3], into: project2)).to(beTrue())
+
+                        _ = atlasCore.project(project2)?.commitStaged(message2)
+                        atlasCore.commitChanges(message2)
+                    }
+
+                    it("should return an array of commit information ordered by date submitted") {
+                        let log = atlasCore.log()
+ 
+                        if let lastCommit = log.last {
+                            expect(lastCommit.message).to(equal(message2))
+                            expect(lastCommit.files.count).to(equal(2))
+                            if let firstFile = lastCommit.files.first {
+                                expect(firstFile.name).to(equal(file2))
+                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project2)/committed/\(atlasCore.project(project2)!.commitSlug(message2))/\(file2)"))
+                            }
+                        }
+                    }
+                }
+                
             }
         }
     }

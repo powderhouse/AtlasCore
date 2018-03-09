@@ -1,5 +1,16 @@
 import Foundation
 
+public struct File {
+    public var name: String
+    public var url: String
+}
+
+public struct Commit {
+    public var message: String
+    public var files: [File] = []
+}
+
+
 public class AtlasCore {
     
     public let appName = "Atlas"
@@ -159,6 +170,34 @@ public class AtlasCore {
         }
 
         return Project(name, baseDirectory: atlasDirectory!)
+    }
+    
+    public func log() -> [Commit] {
+        let logData =  git.log()
+        
+        var commits: [Commit] = []
+        for data in logData {
+            var files: [File] = []
+            if let fileInfo = data["files"] as? [String] {
+                for filePath in fileInfo {
+                    if let repositoryLink = gitHub.repositoryLink {
+                        let rawGitHub = repositoryLink.replacingOccurrences(
+                            of: "github.com",
+                            with: "raw.githubusercontent.com"
+                        )
+                        
+                        let fileComponents = filePath.split(separator: "/")
+                        let fileName = String(fileComponents.last!)
+                        files.append(File(name: fileName, url: "\(rawGitHub)/master/\(filePath)"))
+                    }
+                }
+            }
+            
+            if let message = data["message"] as? String {
+                commits.append(Commit(message: message, files: files))
+            }
+        }
+        return commits
     }
     
     public func copy(_ filePaths: [String], into project: String) -> Bool {
