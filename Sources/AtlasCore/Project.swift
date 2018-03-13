@@ -14,6 +14,8 @@ public class Project {
     
     public let states = ["unstaged", "staged", "committed"]
     
+    let commitMessageFile = "commit_message.txt"
+    
     public init(_ name: String, baseDirectory: URL) {
         self.name = name
         self.projectDirectory = createFolder(name, in: baseDirectory)
@@ -81,15 +83,37 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         return FileSystem.filesInDirectory(directory(state))
     }
     
-    public func commitStaged(_ message: String) -> Bool {
-        let commitedUrl = directory("committed")
-        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(message))
-        FileSystem.createDirectory(commitUrl)
-        
-        let commitMessageURL = commitUrl.appendingPathComponent("commit_message.txt")
+    public func commitMessage(_ message: String) -> Bool {
+        let commitMessageURL = directory().appendingPathComponent(commitMessageFile)
         do {
             try message.write(to: commitMessageURL, atomically: true, encoding: .utf8)
         } catch {
+            return false
+        }
+        return true
+    }
+    
+    public func commitStaged() -> Bool {
+        let commitMessageUrl = directory().appendingPathComponent(commitMessageFile)
+        
+        if !FileSystem.fileExists(commitMessageUrl) {
+            print("No commit message found.")
+            return false
+        }
+        
+        var commitMessage: String
+        do {
+            commitMessage = try String(contentsOf: commitMessageUrl, encoding: .utf8)
+        } catch {
+            print("Unable to read commit message")
+            return false
+        }
+        
+        let commitedUrl = directory("committed")
+        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage))
+        FileSystem.createDirectory(commitUrl)
+        
+        if !FileSystem.move(commitMessageUrl.path, into: commitUrl) {
             return false
         }
         

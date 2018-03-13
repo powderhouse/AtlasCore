@@ -249,7 +249,8 @@ class AtlasCoreSpec: QuickSpec {
                         expect(atlasCore.copy([filePath1], into: project1)).to(beTrue())
                         atlasCore.atlasCommit()
 
-                        _ = atlasCore.project(project1)?.commitStaged(message1)
+                        expect(atlasCore.project(project1)?.commitMessage(message1)).to(beTrue())
+                        expect(atlasCore.project(project1)?.commitStaged()).to(beTrue())
                         atlasCore.commitChanges(message1)
 
                         let filePath2 = fileDirectory.appendingPathComponent(file2).path
@@ -258,7 +259,8 @@ class AtlasCoreSpec: QuickSpec {
                         let filePath3 = fileDirectory.appendingPathComponent(file3).path
                         expect(atlasCore.copy([filePath3], into: project2)).to(beTrue())
 
-                        _ = atlasCore.project(project2)?.commitStaged(message2)
+                        expect(atlasCore.project(project2)?.commitMessage(message2)).to(beTrue())
+                        expect(atlasCore.project(project2)?.commitStaged()).to(beTrue())
                         atlasCore.commitChanges(message2)
                     }
 

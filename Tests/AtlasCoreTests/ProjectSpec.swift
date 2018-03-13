@@ -60,6 +60,28 @@ class ProjectSpec: QuickSpec {
                 }
             }
             
+            context("commitMessage") {
+                let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
+                
+                beforeEach {
+                    expect(project.commitMessage(commitMessage)).to(beTrue())
+                }
+                
+                it("should write the commit message to a commit_message.txt file in the project's directory") {
+                    let commitMessageFileUrl = project.directory().appendingPathComponent("commit_message.txt")
+                    let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "Commit message file not found in project directory")
+                    
+                    do {
+                        let contents = try String(contentsOf: commitMessageFileUrl, encoding: .utf8)
+                        expect(contents).to(equal(commitMessage))
+                    } catch {
+                        expect(false).to(beTrue(), description: "unable to load contents")
+                    }
+                }
+                
+            }
+            
             context("commitStaged") {
                 
                 let fileName = "index.html"
@@ -70,7 +92,8 @@ class ProjectSpec: QuickSpec {
                     let stagedDirectory = project.directory("staged")
                     Helper.addFile(fileName, directory: stagedDirectory)
                     
-                    project.commitStaged(commitMessage)
+                    expect(project.commitMessage(commitMessage)).to(beTrue())
+                    expect(project.commitStaged()).to(beTrue())
                     
                     let slug = project.commitSlug(commitMessage)
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
@@ -87,7 +110,7 @@ class ProjectSpec: QuickSpec {
                     expect(exists).to(beTrue(), description: "File not found in commited directory")
                 }
                 
-                it("creates a text file with the full commit message in it and adds it to the commit folder") {
+                it("moves the commit_message.txt file to the commit folder") {
                     let commitMessageFileUrl = commitFolder.appendingPathComponent("commit_message.txt")
                     let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "Commit message file not found in commited directory")
