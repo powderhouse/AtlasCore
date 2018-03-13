@@ -7,6 +7,11 @@
 
 import Foundation
 
+public struct CommitMessage {
+    var url: URL!
+    var text: String!
+}
+
 public class Project {
     
     var name: String!
@@ -93,12 +98,11 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         return true
     }
     
-    public func commitStaged() -> Bool {
+    public func currentCommitMessage() -> CommitMessage? {
         let commitMessageUrl = directory().appendingPathComponent(commitMessageFile)
-        
         if !FileSystem.fileExists(commitMessageUrl) {
             print("No commit message found.")
-            return false
+            return nil
         }
         
         var commitMessage: String
@@ -106,14 +110,23 @@ This folder contains all of your \(subfolderName) files for the project \(name)
             commitMessage = try String(contentsOf: commitMessageUrl, encoding: .utf8)
         } catch {
             print("Unable to read commit message")
+            return nil
+        }
+        return CommitMessage(url: commitMessageUrl, text: commitMessage)
+    }
+    
+    public func commitStaged() -> Bool {
+        let commitMessage = currentCommitMessage()
+        
+        guard commitMessage != nil else {
             return false
         }
         
         let commitedUrl = directory("committed")
-        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage))
+        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage!.text))
         FileSystem.createDirectory(commitUrl)
         
-        if !FileSystem.move(commitMessageUrl.path, into: commitUrl) {
+        if !FileSystem.move(commitMessage!.url.path, into: commitUrl) {
             return false
         }
         
