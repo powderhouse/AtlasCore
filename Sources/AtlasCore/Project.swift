@@ -8,8 +8,8 @@
 import Foundation
 
 public struct CommitMessage {
-    var url: URL!
-    var text: String!
+    public var url: URL!
+    public var text: String!
 }
 
 public class Project {
