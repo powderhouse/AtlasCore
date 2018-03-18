@@ -200,30 +200,10 @@ public class AtlasCore {
         return commits
     }
     
-    public func copy(_ filePaths: [String], into project: String) -> Bool {
-        guard atlasDirectory != nil else {
-            return false
-        }
+    public func purge(_ filePaths: [String]) -> Bool {
+        return false
+    }
         
-        let project = Project(project, baseDirectory: atlasDirectory!)
-        return FileSystem.copy(filePaths, into: project.directory("staged"))
-    }
-
-    public func changeState(_ fileNames: [String], within project: String, to state: String) -> Bool {
-        guard atlasDirectory != nil else {
-            return false
-        }
-
-        let project = Project(project, baseDirectory: atlasDirectory!)
-        var filePaths: [String] = []
-        for fileName in fileNames {
-            let fromState = state == "staged" ? "unstaged" : "staged"
-            let file = project.directory(fromState).appendingPathComponent(fileName)
-            filePaths.append(file.path)
-        }
-        return FileSystem.move(filePaths, into: project.directory(state))
-    }
-    
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)

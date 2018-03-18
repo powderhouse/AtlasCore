@@ -132,6 +132,65 @@ class ProjectSpec: QuickSpec {
                 }
             }
             
+            context("copy") {
+                let fileName = "index.html"
+                var fileDirectory: URL!
+                
+                beforeEach {
+                    fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(fileName, directory: fileDirectory)
+                    
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    expect(project.copyInto([filePath])).to(beTrue())
+                }
+                
+                it("adds the file to the project") {
+                    let stagedDirectory = project.directory().appendingPathComponent("staged")
+                    let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in project's staged directory")
+                }
+                
+                it("leaves the file in the file's directory") {
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
+                    expect(exists).to(beTrue(), description: "File not found in file's directory")
+                }
+            }
+            
+            
+            context("changeState") {
+                let fileName = "newfile.html"
+                
+                beforeEach {
+                    let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+                    let fileDirectory = tempDirectory.appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(fileName, directory: fileDirectory)
+                    
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    expect(project.copyInto([filePath])).to(beTrue())
+                    
+                    let result = project.changeState([fileName], to: "unstaged")
+                    expect(result).to(beTrue())
+                }
+                
+                it("adds the file to the unstaged subfolder within the project") {
+                    let unstagedDirectory = project.directory().appendingPathComponent("unstaged")
+                    let unstagedFilePath = unstagedDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: unstagedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in unstaged directory")
+                }
+                
+                it("removes the file from the staged directory") {
+                    let stagedDirectory = project.directory().appendingPathComponent("staged") 
+                    let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beFalse(), description: "File still found in staged directory")
+                }
+            }
+            
         }
     }
 }

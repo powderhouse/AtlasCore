@@ -160,4 +160,18 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         let projectDirectory = directory.appendingPathComponent(name)
         return FileSystem.fileExists(projectDirectory, isDirectory: true)
     }
+    
+    public func changeState(_ fileNames: [String], to state: String) -> Bool {
+        var filePaths: [String] = []
+        for fileName in fileNames {
+            let fromState = state == "staged" ? "unstaged" : "staged"
+            let file = directory(fromState).appendingPathComponent(fileName)
+            filePaths.append(file.path)
+        }
+        return FileSystem.move(filePaths, into: directory(state))
+    }
+    
+    public func copyInto(_ filePaths: [String]) -> Bool {
+        return FileSystem.copy(filePaths, into: directory("staged"))
+    }
 }
