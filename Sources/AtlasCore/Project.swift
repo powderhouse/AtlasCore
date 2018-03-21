@@ -19,7 +19,7 @@ public class Project {
     
     public let states = ["unstaged", "staged", "committed"]
     
-    let commitMessageFile = "commit_message.txt"
+    public static let commitMessageFile = "commit_message.txt"
     
     public init(_ name: String, baseDirectory: URL) {
         self.name = name
@@ -91,7 +91,7 @@ public class Project {
     }
     
     public func commitMessage(_ message: String) -> Bool {
-        let commitMessageURL = directory().appendingPathComponent(commitMessageFile)
+        let commitMessageURL = directory().appendingPathComponent(Project.commitMessageFile)
         do {
             try message.write(to: commitMessageURL, atomically: true, encoding: .utf8)
         } catch {
@@ -101,7 +101,7 @@ public class Project {
     }
     
     public func currentCommitMessage() -> CommitMessage? {
-        let commitMessageUrl = directory().appendingPathComponent(commitMessageFile)
+        let commitMessageUrl = directory().appendingPathComponent(Project.commitMessageFile)
         if !FileSystem.fileExists(commitMessageUrl) {
             print("No commit message found.")
             return nil

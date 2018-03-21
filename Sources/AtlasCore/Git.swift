@@ -129,7 +129,7 @@ public class Git {
             ":!*/unstaged/*",
             ":!*/staged/*",
             ":!*readme.md",
-            ":!*commit_message.txt"
+            ":!*\(Project.commitMessageFile)"
         ]
         
         if projectName != nil {
