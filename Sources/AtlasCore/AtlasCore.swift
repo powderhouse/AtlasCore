@@ -201,7 +201,17 @@ public class AtlasCore {
     }
     
     public func purge(_ filePaths: [String]) -> Bool {
-        return false
+        guard git != nil else {
+            return false
+        }
+        
+        var success = true
+        for filePath in filePaths {
+            if !git!.removeFile(filePath) {
+                success = false
+            }
+        }
+        return success
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {

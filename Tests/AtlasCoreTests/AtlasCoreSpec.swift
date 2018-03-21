@@ -226,28 +226,39 @@ class AtlasCoreSpec: QuickSpec {
                 context("purge") {
                     
                     var project: Project!
+                    let projectName = "General"
                     let fileName = "index.html"
                     let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
                     var commitFolder: URL!
                     var committedFilePath: String!
                     
                     beforeEach {
-                        project = atlasCore.project("General")
+                        expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
+                        
+                        project = atlasCore.project(projectName)
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
                         
+                        atlasCore.atlasCommit()
+                        
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
-                        
+
+                        atlasCore.atlasCommit()
+
                         let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
                         
                         committedFilePath = commitFolder.appendingPathComponent(fileName).path
-                        expect(atlasCore.purge([committedFilePath])).to(beTrue())
+                        
+                        let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in commited directory")
+                        
+                        let gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
+                        expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
                     }
                     
                     it("removes the files from the commit folder") {
-                        let committedFilePath = commitFolder.appendingPathComponent(fileName).path
                         let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
                         expect(exists).to(beFalse(), description: "File still found in commited directory")
                     }
@@ -261,6 +272,7 @@ class AtlasCoreSpec: QuickSpec {
                 context("purge (removing two file with more than two files)") {
                     
                     var project: Project!
+                    let projectName = "General"
                     let fileName1 = "index1.html"
                     let fileName2 = "index2.html"
                     let fileName3 = "index3.html"
@@ -271,14 +283,20 @@ class AtlasCoreSpec: QuickSpec {
                     var committedFilePath3: String!
                     
                     beforeEach {
-                        project = atlasCore.project("General")
+                        expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
+
+                        project = atlasCore.project(projectName)
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName1, directory: stagedDirectory)
                         Helper.addFile(fileName2, directory: stagedDirectory)
                         Helper.addFile(fileName3, directory: stagedDirectory)
                         
+                        atlasCore.atlasCommit()
+                        
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
+                        
+                        atlasCore.atlasCommit()
                         
                         let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
@@ -286,7 +304,10 @@ class AtlasCoreSpec: QuickSpec {
                         committedFilePath1 = commitFolder.appendingPathComponent(fileName1).path
                         committedFilePath2 = commitFolder.appendingPathComponent(fileName2).path
                         committedFilePath3 = commitFolder.appendingPathComponent(fileName3).path
-                        expect(atlasCore.purge([committedFilePath1, committedFilePath2])).to(beTrue())
+                        
+                        let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
+                        let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
+                        expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
                     }
                     
                     it("removes the files from the commit folder") {
@@ -304,8 +325,8 @@ class AtlasCoreSpec: QuickSpec {
                         let log = atlasCore.log()
                         expect(log.count).to(equal(1))
                         
-                        expect(log.first.files.count).to(equal(1))
-                        expect(log.first.files.first.name).to(equal(fileName3))
+                        expect(log.first?.files.count).to(equal(1))
+                        expect(log.first?.files.first?.name).to(equal(fileName3))
                     }
                 }
                 

@@ -29,17 +29,19 @@ public class Project {
     }
     
     public func initFoldersAndReadmes() {
-        let projectReadmeMessage = """
-This is your \(name) project
-"""
-        createReadme(projectReadmeMessage)
-        
-        for subfolderName in self.states {
-            let subfolderURL = createFolder(subfolderName)
-            let readmeMessage = """
-This folder contains all of your \(subfolderName) files for the project \(name)
-"""
-            createReadme(readmeMessage, in: subfolderURL)
+        if let projectName = name {
+            let projectReadmeMessage = """
+            This is your \(projectName) project
+            """
+            createReadme(projectReadmeMessage)
+            
+            for subfolderName in self.states {
+                let subfolderURL = createFolder(subfolderName)
+                let readmeMessage = """
+                This folder contains all of your \(subfolderName) files for the project \(projectName)
+                """
+                createReadme(readmeMessage, in: subfolderURL)
+            }
         }
     }
     
@@ -69,7 +71,7 @@ This folder contains all of your \(subfolderName) files for the project \(name)
         let readme = dir!.appendingPathComponent("readme.md", isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
-                try "This is your \(name) project".write(to: readme, atomically: true, encoding: .utf8)
+                try message.write(to: readme, atomically: true, encoding: .utf8)
             } catch {
                 return
             }

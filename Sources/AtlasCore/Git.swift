@@ -81,6 +81,19 @@ public class Git {
         return true
     }
     
+    public func removeFile(_ filePath: String) -> Bool {
+        _ = run("rm", arguments: [filePath])
+        _ = commit()
+        _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(filePath)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
+        _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
+        _ = run("reflog", arguments: ["expire", "--expire=now", "-all"])
+        _ = run("gc", arguments: ["--prune=now"])
+        _ = run("push", arguments: ["origin", "master", "--force"])
+//        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/committed/second-commit/laurensevent.jpg' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
+//        git push origin --force --tags
+        return true
+    }
+    
     public func commit(_ message: String?=nil) -> String {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
     }

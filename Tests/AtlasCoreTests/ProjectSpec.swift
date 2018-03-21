@@ -15,6 +15,7 @@ class ProjectSpec: QuickSpec {
     override func spec() {
         describe("Project") {
             
+            let projectName = "Project"
             var project: Project!
             var directory: URL!
             
@@ -24,7 +25,7 @@ class ProjectSpec: QuickSpec {
             
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testProject")
-                project = Project("Project", baseDirectory: directory)                
+                project = Project(projectName, baseDirectory: directory)
             }
             
             afterEach {
@@ -42,7 +43,15 @@ class ProjectSpec: QuickSpec {
                         let readme = folder.appendingPathComponent("readme.md")
                         let readmeExists = fileManager.fileExists(atPath: readme.path, isDirectory: &isFile)
                         expect(readmeExists).to(beTrue(), description: "No readme found in \(subfolderName)")
-}
+                     
+                        do {
+                            let readmeContents = try String(contentsOf: readme, encoding: .utf8)
+                            expect(readmeContents).to(contain("This folder contains all of your \(subfolderName) files for the project \(projectName)"))
+                        } catch {
+                            expect(false).to(beTrue(), description: "Unable to read contents of readme/")
+                        }
+                        
+                    }
                 }
 
             }
