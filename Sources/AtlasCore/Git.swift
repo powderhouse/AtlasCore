@@ -94,6 +94,23 @@ public class Git {
         return true
     }
     
+    public func removeDirectory(_ filePath: String) -> Bool {
+        _ = run("rm", arguments: ["-rf", filePath])
+        _ = commit()
+        _ = run("filter-branch", arguments: ["--force", "--tree-filter", "git rm -rf \(filePath)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
+        _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
+        _ = run("reflog", arguments: ["expire", "--expire=now", "-all"])
+        _ = run("gc", arguments: ["--prune=now"])
+        _ = run("push", arguments: ["origin", "master", "--force"])
+
+        //        `git --no-pager log --diff-filter=A --pretty=format:%H -- foo.js` gives you the hash
+        //        `git filter-branch --tree-filter 'project_folder/commit_folder' --prune-empty HEAD` — removes the folder
+        //        `git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d` — removes the refs
+        //        `git gc` — garbage collects/frees up the space
+
+        return true
+}
+    
     public func commit(_ message: String?=nil) -> String {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
     }
@@ -111,7 +128,8 @@ public class Git {
             "--",
             ":!*/unstaged/*",
             ":!*/staged/*",
-            ":!*readme.md"
+            ":!*readme.md",
+            ":!*commit_message.txt"
         ]
         
         if projectName != nil {
@@ -128,7 +146,7 @@ public class Git {
             
             data.append([
                 "message": message,
-                "files": info.map { String($0) }.filter { !$0.contains("commit_message.txt") }
+                "files": info.map { String($0) }
             ])
         }
         

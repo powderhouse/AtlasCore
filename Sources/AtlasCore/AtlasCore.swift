@@ -201,16 +201,36 @@ public class AtlasCore {
     }
     
     public func purge(_ filePaths: [String]) -> Bool {
-        guard git != nil else {
+        guard git != nil && atlasDirectory != nil else {
             return false
         }
         
         var success = true
+        
+        var directories: [String] = []
         for filePath in filePaths {
             if !git!.removeFile(filePath) {
                 success = false
+            } else {
+                let directory = URL(fileURLWithPath: filePath).deletingLastPathComponent().relativePath
+                if !directories.contains(directory) {
+                    directories.append(directory)
+                }
             }
         }
+        
+        for directory in directories {
+            if directory.contains("committed") {
+                let fullDirectory = atlasDirectory!.appendingPathComponent(directory)
+                let files = FileSystem.filesInDirectory(fullDirectory)
+                if files.count == 1 && files.first!.contains("commit_message.txt") {
+                    if !git!.removeDirectory(directory) {
+                        success = false
+                    }
+                }
+            }
+        }
+        
         return success
     }
         
