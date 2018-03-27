@@ -72,7 +72,7 @@ public class FileSystem {
     }
 
     public class func move(_ file: String, into directory: URL) -> Bool {
-        return copy([file], into: directory)
+        return move([file], into: directory)
     }
     
     public class func move(_ files: [String], into directory: URL) -> Bool {
