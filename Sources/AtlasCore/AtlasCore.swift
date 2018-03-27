@@ -224,6 +224,10 @@ public class AtlasCore {
                 let fullDirectory = atlasDirectory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.commitMessageFile) {
+                    if !git!.removeFile("\(directory)/\(Project.commitMessageFile)") {
+                        success = false
+                    }
+                    
                     if !git!.removeDirectory(directory) {
                         success = false
                     }
