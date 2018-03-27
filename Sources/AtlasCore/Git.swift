@@ -102,25 +102,7 @@ public class Git {
 //        git push origin --force --tags
         return true
     }
-    
-    public func removeDirectory(_ filePath: String) -> Bool {
-        _ = run("rm", arguments: ["-rf", filePath])
-        _ = commit()
-        _ = run("filter-branch", arguments: ["--force", "--tree-filter", "git rm -rf \(filePath)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
-        _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
-        _ = run("push", arguments: ["origin", "--force", "--all"])
-        _ = run("push", arguments: ["origin", "--force", "--tags"])
-        _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
-        _ = run("gc", arguments: ["--prune=now"])
-
-        //        `git --no-pager log --diff-filter=A --pretty=format:%H -- foo.js` gives you the hash
-        //        `git filter-branch --tree-filter 'project_folder/commit_folder' --prune-empty HEAD` — removes the folder
-        //        `git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d` — removes the refs
-        //        `git gc` — garbage collects/frees up the space
-
-        return true
-}
-    
+        
     public func commit(_ message: String?=nil) -> String {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
     }

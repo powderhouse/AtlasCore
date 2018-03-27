@@ -227,10 +227,6 @@ public class AtlasCore {
                     if !git!.removeFile("\(directory)/\(Project.commitMessageFile)") {
                         success = false
                     }
-                    
-                    if !git!.removeDirectory(directory) {
-                        success = false
-                    }
                 }
             }
         }
