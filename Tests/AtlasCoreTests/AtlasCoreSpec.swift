@@ -254,7 +254,7 @@ class AtlasCoreSpec: QuickSpec {
                         let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in commited directory")
                         
-                        let gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
+                        let gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
                         expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
                     }
                     
@@ -305,8 +305,8 @@ class AtlasCoreSpec: QuickSpec {
                         committedFilePath2 = commitFolder.appendingPathComponent(fileName2).path
                         committedFilePath3 = commitFolder.appendingPathComponent(fileName3).path
                         
-                        let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
-                        let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: "./\(projectName)")
+                        let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: projectName)
+                        let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: projectName)
                         expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
                     }
                     
