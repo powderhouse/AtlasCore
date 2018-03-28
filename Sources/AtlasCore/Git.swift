@@ -82,17 +82,13 @@ public class Git {
     }
     
     public func removeFile(_ filePath: String) -> Bool {
-        var staged = ""
-        let components = filePath.split(separator: "/")
-        if let projectName = components.first {
-            if let fileName = components.last {
-                staged = "\(projectName)/staged/\(fileName)"
-            }
-        }
+        let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
+        
+        let files = history.replacingOccurrences(of: "\n", with: " ")
         
         _ = run("rm", arguments: [filePath])
         _ = commit()
-        _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(staged) \(filePath)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
+        _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(files)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("push", arguments: ["origin", "--force", "--all"])
         _ = run("push", arguments: ["origin", "--force", "--tags"])
