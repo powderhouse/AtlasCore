@@ -330,6 +330,21 @@ class AtlasCoreSpec: QuickSpec {
                     }
                 }
                 
+                context("projects") {
+                    
+                    beforeEach {
+                        _ = atlasCore.initProject("Project 1")
+                        _ = atlasCore.initProject("Project a")
+                        _ = atlasCore.initProject("A Project")
+                    }
+                    
+                    it("should return an array of the projects") {
+                        let projects = atlasCore.projects().map { $0.name }.sorted()
+                        expect(projects).to(equal(["A Project", "Project 1", "Project a"]))
+                    }
+                    
+                }
+                
             }
         }
     }

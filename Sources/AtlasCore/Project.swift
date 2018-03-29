@@ -14,7 +14,7 @@ public struct CommitMessage {
 
 public class Project {
     
-    var name: String!
+    public var name: String!
     var projectDirectory: URL!
     
     public let states = ["unstaged", "staged", "committed"]

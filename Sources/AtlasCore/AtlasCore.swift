@@ -164,6 +164,16 @@ public class AtlasCore {
         return true
     }
     
+    public func projects() -> [Project] {
+        guard atlasDirectory != nil else {
+            return []
+        }
+        
+        let fileNames = FileSystem.filesInDirectory(atlasDirectory!)
+        let projectNames = fileNames.filter { $0 != ".git" && $0 != "readme.md" }
+        return projectNames.map { project($0)! }
+    }
+    
     public func project(_ name: String) -> Project? {
         guard atlasDirectory != nil else {
             return nil
