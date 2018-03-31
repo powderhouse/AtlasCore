@@ -42,11 +42,19 @@ public class FileSystem {
         } catch {}
     }
     
-    public class func filesInDirectory(_ url: URL) -> [String] {
+    public class func filesInDirectory(_ url: URL, excluding: [String]=[]) -> [String] {
         let fileManager = FileManager.default
-        let contents = try? fileManager.contentsOfDirectory(atPath: url.path)
+        var contents = try? fileManager.contentsOfDirectory(atPath: url.path)
         
-        return contents ?? []
+        guard contents != nil else {
+            return []
+        }
+        
+        for exclude in excluding {
+            contents = contents!.filter { $0 != exclude }
+        }
+        
+        return contents!
     }
     
     public class func copy(_ file: String, into directory: URL) -> Bool {
@@ -71,15 +79,19 @@ public class FileSystem {
         return true
     }
 
-    public class func move(_ file: String, into directory: URL) -> Bool {
-        return copy([file], into: directory)
+    public class func move(_ file: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+        return move([file], into: directory, renamedTo: newName)
     }
     
-    public class func move(_ files: [String], into directory: URL) -> Bool {
+    public class func move(_ files: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
         for file in files {
-            _ = Glue.runProcess("mv", arguments: [file, directory.path])
             if let fileName = file.split(separator: "/").last {
-                if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
+                let destinationName = newName == nil ? String(fileName) : newName!
+                let destination = directory.appendingPathComponent(destinationName)
+
+                _ = Glue.runProcess("mv", arguments: [file, destination.path])
+
+                if !FileSystem.fileExists(destination) {
                     return false
                 }
                 if FileSystem.fileExists(URL(fileURLWithPath: file)) {

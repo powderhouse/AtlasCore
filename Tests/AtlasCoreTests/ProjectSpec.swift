@@ -15,6 +15,7 @@ class ProjectSpec: QuickSpec {
     override func spec() {
         describe("Project") {
             
+            let projectName = "Project"
             var project: Project!
             var directory: URL!
             
@@ -24,7 +25,7 @@ class ProjectSpec: QuickSpec {
             
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testProject")
-                project = Project("Project", baseDirectory: directory)                
+                project = Project(projectName, baseDirectory: directory)
             }
             
             afterEach {
@@ -39,10 +40,18 @@ class ProjectSpec: QuickSpec {
                         let exists = fileManager.fileExists(atPath: folder.path, isDirectory: &isDirectory)
                         expect(exists).to(beTrue(), description: "No subfolder found for \(subfolderName)")
 
-                        let readme = folder.appendingPathComponent("readme.md")
+                        let readme = folder.appendingPathComponent(Project.readme)
                         let readmeExists = fileManager.fileExists(atPath: readme.path, isDirectory: &isFile)
                         expect(readmeExists).to(beTrue(), description: "No readme found in \(subfolderName)")
-}
+                     
+                        do {
+                            let readmeContents = try String(contentsOf: readme, encoding: .utf8)
+                            expect(readmeContents).to(contain("This folder contains all of your \(subfolderName) files for the project \(projectName)"))
+                        } catch {
+                            expect(false).to(beTrue(), description: "Unable to read contents of readme/")
+                        }
+                        
+                    }
                 }
 
             }
@@ -68,7 +77,7 @@ class ProjectSpec: QuickSpec {
                 }
                 
                 it("should write the commit message to a commit_message.txt file in the project's directory") {
-                    let commitMessageFileUrl = project.directory().appendingPathComponent("commit_message.txt")
+                    let commitMessageFileUrl = project.directory().appendingPathComponent(Project.commitMessageFile)
                     let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "Commit message file not found in project directory")
                     
@@ -111,7 +120,7 @@ class ProjectSpec: QuickSpec {
                 }
                 
                 it("moves the commit_message.txt file to the commit folder") {
-                    let commitMessageFileUrl = commitFolder.appendingPathComponent("commit_message.txt")
+                    let commitMessageFileUrl = commitFolder.appendingPathComponent(Project.readme)
                     let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "Commit message file not found in commited directory")
                     
@@ -127,6 +136,65 @@ class ProjectSpec: QuickSpec {
                     let stagedDirectory = project.directory("staged")
                     let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
                     print("STAGED FILE PATH: \(stagedFilePath)")
+                    let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beFalse(), description: "File still found in staged directory")
+                }
+            }
+            
+            context("copy") {
+                let fileName = "index.html"
+                var fileDirectory: URL!
+                
+                beforeEach {
+                    fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(fileName, directory: fileDirectory)
+                    
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    expect(project.copyInto([filePath])).to(beTrue())
+                }
+                
+                it("adds the file to the project") {
+                    let stagedDirectory = project.directory().appendingPathComponent("staged")
+                    let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in project's staged directory")
+                }
+                
+                it("leaves the file in the file's directory") {
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
+                    expect(exists).to(beTrue(), description: "File not found in file's directory")
+                }
+            }
+            
+            
+            context("changeState") {
+                let fileName = "newfile.html"
+                
+                beforeEach {
+                    let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+                    let fileDirectory = tempDirectory.appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(fileName, directory: fileDirectory)
+                    
+                    let filePath = fileDirectory.appendingPathComponent(fileName).path
+                    expect(project.copyInto([filePath])).to(beTrue())
+                    
+                    let result = project.changeState([fileName], to: "unstaged")
+                    expect(result).to(beTrue())
+                }
+                
+                it("adds the file to the unstaged subfolder within the project") {
+                    let unstagedDirectory = project.directory().appendingPathComponent("unstaged")
+                    let unstagedFilePath = unstagedDirectory.appendingPathComponent(fileName).path
+                    let exists = fileManager.fileExists(atPath: unstagedFilePath, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in unstaged directory")
+                }
+                
+                it("removes the file from the staged directory") {
+                    let stagedDirectory = project.directory().appendingPathComponent("staged") 
+                    let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
                     let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
                     expect(exists).to(beFalse(), description: "File still found in staged directory")
                 }

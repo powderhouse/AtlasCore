@@ -8,6 +8,7 @@ public struct File {
 public struct Commit {
     public var message: String
     public var files: [File] = []
+    public var projects: [Project] = []
 }
 
 
@@ -117,12 +118,12 @@ public class AtlasCore {
             return false
         }
         
-        let readme = atlasDirectory!.appendingPathComponent("readme.md", isDirectory: false)
+        let readme = atlasDirectory!.appendingPathComponent(Project.readme, isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
             } catch {
-                print("Unable to write Atlas readme.md")
+                print("Unable to write Atlas \(Project.readme)")
                 return false
             }
             
@@ -164,6 +165,15 @@ public class AtlasCore {
         return true
     }
     
+    public func projects() -> [Project] {
+        guard atlasDirectory != nil else {
+            return []
+        }
+        
+        let projectNames = FileSystem.filesInDirectory(atlasDirectory!, excluding: [".git", Project.readme])
+        return projectNames.map { project($0)! }
+    }
+    
     public func project(_ name: String) -> Project? {
         guard atlasDirectory != nil else {
             return nil
@@ -178,6 +188,7 @@ public class AtlasCore {
         var commits: [Commit] = []
         for data in logData {
             var files: [File] = []
+            var projects: [Project] = []
             if let fileInfo = data["files"] as? [String] {
                 for filePath in fileInfo {
                     if let repositoryLink = gitHub.repositoryLink {
@@ -189,41 +200,54 @@ public class AtlasCore {
                         let fileComponents = filePath.split(separator: "/")
                         let fileName = String(fileComponents.last!)
                         files.append(File(name: fileName, url: "\(rawGitHub)/master/\(filePath)"))
+                        
+                        let projectName = String(fileComponents.first!)
+                        projects.append(Project(projectName, baseDirectory: atlasDirectory!))
                     }
                 }
             }
             
             if let message = data["message"] as? String {
-                commits.append(Commit(message: message, files: files))
+                commits.append(Commit(message: message, files: files, projects: projects))
             }
         }
         return commits
     }
     
-    public func copy(_ filePaths: [String], into project: String) -> Bool {
-        guard atlasDirectory != nil else {
+    public func purge(_ filePaths: [String]) -> Bool {
+        guard git != nil && atlasDirectory != nil else {
             return false
         }
         
-        let project = Project(project, baseDirectory: atlasDirectory!)
-        return FileSystem.copy(filePaths, into: project.directory("staged"))
-    }
-
-    public func changeState(_ fileNames: [String], within project: String, to state: String) -> Bool {
-        guard atlasDirectory != nil else {
-            return false
+        var success = true
+        
+        var directories: [String] = []
+        for filePath in filePaths {
+            if !git!.removeFile(filePath) {
+                success = false
+            } else {
+                let directory = URL(fileURLWithPath: filePath).deletingLastPathComponent().relativePath
+                if !directories.contains(directory) {
+                    directories.append(directory)
+                }
+            }
         }
-
-        let project = Project(project, baseDirectory: atlasDirectory!)
-        var filePaths: [String] = []
-        for fileName in fileNames {
-            let fromState = state == "staged" ? "unstaged" : "staged"
-            let file = project.directory(fromState).appendingPathComponent(fileName)
-            filePaths.append(file.path)
+        
+        for directory in directories {
+            if directory.contains("committed") {
+                let fullDirectory = atlasDirectory!.appendingPathComponent(directory)
+                let files = FileSystem.filesInDirectory(fullDirectory)
+                if files.count == 1 && files.first!.contains(Project.commitMessageFile) {
+                    if !git!.removeFile("\(directory)/\(Project.commitMessageFile)") {
+                        success = false
+                    }
+                }
+            }
         }
-        return FileSystem.move(filePaths, into: project.directory(state))
+        
+        return success
     }
-    
+        
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)
