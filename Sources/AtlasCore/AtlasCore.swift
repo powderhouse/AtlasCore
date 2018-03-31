@@ -117,12 +117,12 @@ public class AtlasCore {
             return false
         }
         
-        let readme = atlasDirectory!.appendingPathComponent("readme.md", isDirectory: false)
+        let readme = atlasDirectory!.appendingPathComponent(Project.readme, isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
             } catch {
-                print("Unable to write Atlas readme.md")
+                print("Unable to write Atlas \(Project.readme)")
                 return false
             }
             
@@ -169,7 +169,7 @@ public class AtlasCore {
             return []
         }
         
-        let projectNames = FileSystem.filesInDirectory(atlasDirectory!, excluding: [".git", "readme.md"])
+        let projectNames = FileSystem.filesInDirectory(atlasDirectory!, excluding: [".git", Project.readme])
         return projectNames.map { project($0)! }
     }
     

@@ -79,15 +79,19 @@ public class FileSystem {
         return true
     }
 
-    public class func move(_ file: String, into directory: URL) -> Bool {
-        return move([file], into: directory)
+    public class func move(_ file: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+        return move([file], into: directory, renamedTo: newName)
     }
     
-    public class func move(_ files: [String], into directory: URL) -> Bool {
+    public class func move(_ files: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
         for file in files {
-            _ = Glue.runProcess("mv", arguments: [file, directory.path])
             if let fileName = file.split(separator: "/").last {
-                if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
+                let destinationName = newName == nil ? String(fileName) : newName!
+                let destination = directory.appendingPathComponent(destinationName)
+
+                _ = Glue.runProcess("mv", arguments: [file, destination.path])
+
+                if !FileSystem.fileExists(destination) {
                     return false
                 }
                 if FileSystem.fileExists(URL(fileURLWithPath: file)) {

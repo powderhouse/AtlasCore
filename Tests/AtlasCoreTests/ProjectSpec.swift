@@ -40,7 +40,7 @@ class ProjectSpec: QuickSpec {
                         let exists = fileManager.fileExists(atPath: folder.path, isDirectory: &isDirectory)
                         expect(exists).to(beTrue(), description: "No subfolder found for \(subfolderName)")
 
-                        let readme = folder.appendingPathComponent("readme.md")
+                        let readme = folder.appendingPathComponent(Project.readme)
                         let readmeExists = fileManager.fileExists(atPath: readme.path, isDirectory: &isFile)
                         expect(readmeExists).to(beTrue(), description: "No readme found in \(subfolderName)")
                      
@@ -120,7 +120,7 @@ class ProjectSpec: QuickSpec {
                 }
                 
                 it("moves the commit_message.txt file to the commit folder") {
-                    let commitMessageFileUrl = commitFolder.appendingPathComponent(Project.commitMessageFile)
+                    let commitMessageFileUrl = commitFolder.appendingPathComponent(Project.readme)
                     let exists = fileManager.fileExists(atPath: commitMessageFileUrl.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "Commit message file not found in commited directory")
                     

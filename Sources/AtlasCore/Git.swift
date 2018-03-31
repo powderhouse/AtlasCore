@@ -116,7 +116,7 @@ public class Git {
             "--",
             ":!*/unstaged/*",
             ":!*/staged/*",
-            ":!*readme.md",
+            ":!*\(Project.readme)",
             ":!*\(Project.commitMessageFile)"
         ]
         

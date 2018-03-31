@@ -20,7 +20,8 @@ public class Project {
     public let states = ["unstaged", "staged", "committed"]
     
     public static let commitMessageFile = "commit_message.txt"
-    
+    public static let readme = "readme.md"
+
     public init(_ name: String, baseDirectory: URL) {
         self.name = name
         self.projectDirectory = createFolder(name, in: baseDirectory)
@@ -68,7 +69,7 @@ public class Project {
         
         guard dir != nil else { return }
 
-        let readme = dir!.appendingPathComponent("readme.md", isDirectory: false)
+        let readme = dir!.appendingPathComponent(Project.readme, isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try message.write(to: readme, atomically: true, encoding: .utf8)
@@ -87,7 +88,7 @@ public class Project {
     }
     
     public func files(_ state: String) -> [String] {
-        return FileSystem.filesInDirectory(directory(state), excluding: ["readme.md"])
+        return FileSystem.filesInDirectory(directory(state), excluding: [Project.readme])
     }
     
     public func commitMessage(_ message: String) -> Bool {
@@ -128,17 +129,12 @@ public class Project {
         let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage!.text))
         FileSystem.createDirectory(commitUrl)
         
-        if !FileSystem.move(commitMessage!.url.path, into: commitUrl) {
+        if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
             return false
         }
         
         let stagedFolder = directory("staged")
-        var filePaths: [String] = []
-        for file in files("staged") {
-            if (file == "readme.md") { continue }
-            
-            filePaths.append(stagedFolder.appendingPathComponent(file).path)
-        }
+        let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
         return FileSystem.move(filePaths, into: commitUrl)
     }
     

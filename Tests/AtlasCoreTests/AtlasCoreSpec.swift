@@ -70,9 +70,9 @@ class AtlasCoreSpec: QuickSpec {
                 }
 
                 it("saves a readme to the filesystem") {
-                    if let readmeFile = atlasCore.atlasDirectory?.appendingPathComponent("readme.md") {
+                    if let readmeFile = atlasCore.atlasDirectory?.appendingPathComponent(Project.readme) {
                         let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
-                        expect(exists).to(beTrue(), description: "No readme.md found")
+                        expect(exists).to(beTrue(), description: "No \(Project.readme) found")
                     } else {
                         expect(false).to(beTrue(), description: "Atlas directory was not set")
                     }
@@ -135,7 +135,7 @@ class AtlasCoreSpec: QuickSpec {
                                 let exists = fileManager.fileExists(atPath: subfolderURL.path, isDirectory: &isDirectory)
                                 expect(exists).to(beTrue(), description: "No project subfolder found: \(folderName)")
                                 
-                                let readmePath = subfolderURL.appendingPathComponent("readme.md").path
+                                let readmePath = subfolderURL.appendingPathComponent(Project.readme).path
                                 let readmeExists = fileManager.fileExists(atPath: readmePath, isDirectory: &isFile)
                                 expect(readmeExists).to(beTrue(), description: "No readme found in subfolder: \(folderName)")
                             }
