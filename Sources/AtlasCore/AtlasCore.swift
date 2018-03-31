@@ -169,8 +169,7 @@ public class AtlasCore {
             return []
         }
         
-        let fileNames = FileSystem.filesInDirectory(atlasDirectory!)
-        let projectNames = fileNames.filter { $0 != ".git" && $0 != "readme.md" }
+        let projectNames = FileSystem.filesInDirectory(atlasDirectory!, excluding: [".git", "readme.md"])
         return projectNames.map { project($0)! }
     }
     

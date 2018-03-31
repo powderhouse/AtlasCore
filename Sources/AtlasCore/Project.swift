@@ -87,7 +87,7 @@ public class Project {
     }
     
     public func files(_ state: String) -> [String] {
-        return FileSystem.filesInDirectory(directory(state))
+        return FileSystem.filesInDirectory(directory(state), excluding: ["readme.md"])
     }
     
     public func commitMessage(_ message: String) -> Bool {

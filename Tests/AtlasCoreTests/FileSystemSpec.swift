@@ -98,6 +98,12 @@ class FileSystemSpec: QuickSpec {
                 it("returns a list of filenames in a directory") {
                     expect(FileSystem.filesInDirectory(url).sorted()).to(equal(files))
                 }
+                
+                it("excludes a file if specified") {
+                    let files = FileSystem.filesInDirectory(url, excluding: ["index2.html"])
+                    expect(files).toNot(contain("index2.html"))
+                    expect(files).to(contain("index1.html"))
+                }
             }
             
             context("copy") {

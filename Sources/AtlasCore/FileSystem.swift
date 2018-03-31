@@ -42,11 +42,19 @@ public class FileSystem {
         } catch {}
     }
     
-    public class func filesInDirectory(_ url: URL) -> [String] {
+    public class func filesInDirectory(_ url: URL, excluding: [String]=[]) -> [String] {
         let fileManager = FileManager.default
-        let contents = try? fileManager.contentsOfDirectory(atPath: url.path)
+        var contents = try? fileManager.contentsOfDirectory(atPath: url.path)
         
-        return contents ?? []
+        guard contents != nil else {
+            return []
+        }
+        
+        for exclude in excluding {
+            contents = contents!.filter { $0 != exclude }
+        }
+        
+        return contents!
     }
     
     public class func copy(_ file: String, into directory: URL) -> Bool {
