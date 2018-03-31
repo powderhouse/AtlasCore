@@ -218,6 +218,15 @@ class AtlasCoreSpec: QuickSpec {
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file1))
                                 expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project1Name)/committed/\(project1!.commitSlug(message1))/\(file1)"))
+                            } else {
+                                expect(false).to(beTrue(), description: "file missing")
+                            }
+                            
+                            expect(lastCommit.projects.count).to(equal(1))
+                            if let project = lastCommit.projects.first {
+                                expect(project.name).to(equal("General"))
+                            } else {
+                                expect(false).to(beTrue(), description: "project missing")
                             }
                         }
                     }
