@@ -280,9 +280,15 @@ Multiline
                         let log = atlasCore.log()
                         expect(log.count).to(equal(0))
                     }
+                    
+                    it("removes the commit folder") {
+                        let exists = fileManager.fileExists(atPath: commitFolder.path, isDirectory: &isDirectory)
+                        expect(exists).to(beFalse(), description: "Commit folder still found")
+                    }
+
                 }
 
-                context("purge (removing two file with more than two files)") {
+                context("purge (removing two files with more than two files)") {
 
                     var project: Project!
                     let projectName = "General"

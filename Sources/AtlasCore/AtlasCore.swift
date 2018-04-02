@@ -237,8 +237,8 @@ public class AtlasCore {
             if directory.contains("committed") {
                 let fullDirectory = atlasDirectory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
-                if files.count == 1 && files.first!.contains(Project.commitMessageFile) {
-                    if !git!.removeFile("\(directory)/\(Project.commitMessageFile)") {
+                if files.count == 1 && files.first!.contains(Project.readme) {
+                    if !git!.removeFile("\(directory)/\(Project.readme)") {
                         success = false
                     }
                 }
