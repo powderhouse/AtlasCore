@@ -183,6 +183,10 @@ public class AtlasCore {
     }
     
     public func log(_ projectName: String?=nil) -> [Commit] {
+        guard git != nil else {
+            return []
+        }
+
         let logData =  git.log(projectName)
         
         var commits: [Commit] = []
