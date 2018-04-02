@@ -53,12 +53,12 @@ class AtlasCoreSpec: QuickSpec {
                     expect(path).to(contain("Application Support"))
                 }
             }
-            
+
             context("with git and GitHub initialized") {
                 beforeEach {
                     _ = atlasCore.initGitAndGitHub(credentials)
                 }
-                
+
                 it("saves the credentials to the filesystem") {
                     if let credentialsFile = atlasCore.baseDirectory?.appendingPathComponent("credentials.json") {
                         let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
@@ -66,7 +66,7 @@ class AtlasCoreSpec: QuickSpec {
                     } else {
                         expect(false).to(beTrue(), description: "User directory was not set")
                     }
-                    
+
                 }
 
                 it("saves a readme to the filesystem") {
@@ -96,7 +96,7 @@ class AtlasCoreSpec: QuickSpec {
                             password: "1a2b3c4d",
                             token: nil
                         )
-                        
+
                         beforeEach {
                             result = atlasCore.initGitAndGitHub(newCredentials)
                         }
@@ -114,11 +114,11 @@ class AtlasCoreSpec: QuickSpec {
 
                 context("startProject") {
                     let projectName = "New Project"
-                    
+
                     beforeEach {
                         _ = atlasCore.initProject(projectName)
                     }
-                    
+
                     it("should create a folder in the Atlas directory with a readme") {
                         if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
                             let exists = fileManager.fileExists(atPath: projectFolder.path, isDirectory: &isDirectory)
@@ -134,7 +134,7 @@ class AtlasCoreSpec: QuickSpec {
                                 let subfolderURL = projectFolder.appendingPathComponent(folderName)
                                 let exists = fileManager.fileExists(atPath: subfolderURL.path, isDirectory: &isDirectory)
                                 expect(exists).to(beTrue(), description: "No project subfolder found: \(folderName)")
-                                
+
                                 let readmePath = subfolderURL.appendingPathComponent(Project.readme).path
                                 let readmeExists = fileManager.fileExists(atPath: readmePath, isDirectory: &isFile)
                                 expect(readmeExists).to(beTrue(), description: "No readme found in subfolder: \(folderName)")
@@ -142,10 +142,10 @@ class AtlasCoreSpec: QuickSpec {
                         } else {
                             expect(false).to(beTrue(), description: "Atlas directory was not set")
                         }
-                        
+
                     }
                 }
-                
+
                 context("log") {
                     
                     let project1Name = "General"
@@ -159,7 +159,11 @@ class AtlasCoreSpec: QuickSpec {
                     var fileDirectory: URL!
                     
                     let message1 = "The first commit"
-                    let message2 = "The second commit"
+                    let message2 = """
+The second commit
+
+Multiline
+"""
                     
                     beforeEach {
                         fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
@@ -198,7 +202,7 @@ class AtlasCoreSpec: QuickSpec {
                         expect(log.count).to(equal(2))
                         
                         if let lastCommit = log.last {
-                            expect(lastCommit.message).to(equal(message2))
+                            expect(lastCommit.message).to(contain(message2))
                             expect(lastCommit.files.count).to(equal(2))
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file2))
@@ -213,7 +217,7 @@ class AtlasCoreSpec: QuickSpec {
                         expect(log.count).to(equal(1))
 
                         if let lastCommit = log.last {
-                            expect(lastCommit.message).to(equal(message1))
+                            expect(lastCommit.message).to(contain(message1))
                             expect(lastCommit.files.count).to(equal(1))
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file1))
@@ -233,23 +237,23 @@ class AtlasCoreSpec: QuickSpec {
                 }
                 
                 context("purge") {
-                    
+
                     var project: Project!
                     let projectName = "General"
                     let fileName = "index.html"
                     let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
                     var commitFolder: URL!
                     var committedFilePath: String!
-                    
+
                     beforeEach {
                         expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
-                        
+
                         project = atlasCore.project(projectName)
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
-                        
+
                         atlasCore.atlasCommit()
-                        
+
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
 
@@ -257,29 +261,29 @@ class AtlasCoreSpec: QuickSpec {
 
                         let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
-                        
+
                         committedFilePath = commitFolder.appendingPathComponent(fileName).path
-                        
+
                         let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in commited directory")
-                        
+
                         let gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
                         expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
                     }
-                    
+
                     it("removes the files from the commit folder") {
                         let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
                         expect(exists).to(beFalse(), description: "File still found in commited directory")
                     }
-                    
+
                     it("removes the commit from the projects' log") {
                         let log = atlasCore.log()
                         expect(log.count).to(equal(0))
                     }
                 }
-                
+
                 context("purge (removing two file with more than two files)") {
-                    
+
                     var project: Project!
                     let projectName = "General"
                     let fileName1 = "index1.html"
@@ -290,7 +294,7 @@ class AtlasCoreSpec: QuickSpec {
                     var committedFilePath1: String!
                     var committedFilePath2: String!
                     var committedFilePath3: String!
-                    
+
                     beforeEach {
                         expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
 
@@ -299,61 +303,59 @@ class AtlasCoreSpec: QuickSpec {
                         Helper.addFile(fileName1, directory: stagedDirectory)
                         Helper.addFile(fileName2, directory: stagedDirectory)
                         Helper.addFile(fileName3, directory: stagedDirectory)
-                        
+
                         atlasCore.atlasCommit()
-                        
+
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
-                        
+
                         atlasCore.atlasCommit()
-                        
+
                         let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
-                        
+
                         committedFilePath1 = commitFolder.appendingPathComponent(fileName1).path
                         committedFilePath2 = commitFolder.appendingPathComponent(fileName2).path
                         committedFilePath3 = commitFolder.appendingPathComponent(fileName3).path
-                        
+
                         let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: projectName)
                         let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: projectName)
                         expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
                     }
-                    
+
                     it("removes the files from the commit folder") {
                         let exists1 = fileManager.fileExists(atPath: committedFilePath1, isDirectory: &isFile)
                         expect(exists1).to(beFalse(), description: "File 1 still found in commited directory")
-                        
+
                         let exists2 = fileManager.fileExists(atPath: committedFilePath2, isDirectory: &isFile)
                         expect(exists2).to(beFalse(), description: "File 2 still found in commited directory")
-                        
+
                         let exists3 = fileManager.fileExists(atPath: committedFilePath3, isDirectory: &isFile)
                         expect(exists3).to(beTrue(), description: "File 3 not found in commited directory")
                     }
-                    
+
                     it("removes the file from the list in the commit's log") {
                         let log = atlasCore.log()
                         expect(log.count).to(equal(1))
-                        
+
                         expect(log.first?.files.count).to(equal(1))
                         expect(log.first?.files.first?.name).to(equal(fileName3))
                     }
                 }
-                
+
                 context("projects") {
-                    
+
                     beforeEach {
                         _ = atlasCore.initProject("Project 1")
                         _ = atlasCore.initProject("Project a")
                         _ = atlasCore.initProject("A Project")
                     }
-                    
+
                     it("should return an array of the projects") {
                         let projects = atlasCore.projects().map { $0.name }.sorted()
                         expect(projects).to(equal(["A Project", "Project 1", "Project a"]))
                     }
-                    
                 }
-                
             }
         }
     }

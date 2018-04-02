@@ -109,7 +109,7 @@ public class Git {
     
     public func log(_ projectName: String?=nil) -> [[String: Any]] {
         var arguments = [
-            "--pretty=format:|%s",
+            "--pretty=format:|%B~",
             "--reverse",
             "--name-only",
             "--relative",
@@ -129,13 +129,15 @@ public class Git {
         var data: [[String:Any]] = []
         let commits = log.split(separator: "|")
         for commit in commits {
-            var info = String(commit).split(separator: "\n")
-            let message = String(info.removeFirst())
-            
-            data.append([
-                "message": message,
-                "files": info.map { String($0) }
-            ])
+            let info = String(commit).split(separator: "~")
+            if let message = info.first {
+                if let files = info.last {
+                    data.append([
+                        "message": String(message),
+                        "files": String(files).split(separator: "\n").map { String($0) }
+                    ])
+                }
+            }
         }
         
         return data
