@@ -244,6 +244,7 @@ Multiline
                     let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
                     var commitFolder: URL!
                     var committedFilePath: String!
+                    var gitCommittedFilePath: String!
 
                     beforeEach {
                         expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
@@ -267,7 +268,7 @@ Multiline
                         let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in commited directory")
 
-                        let gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
+                        gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
                         expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
                     }
 
@@ -284,6 +285,11 @@ Multiline
                     it("removes the commit folder") {
                         let exists = fileManager.fileExists(atPath: commitFolder.path, isDirectory: &isDirectory)
                         expect(exists).to(beFalse(), description: "Commit folder still found")
+                    }
+                    
+                    it("fails if the file can not be found") {
+                        let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
+                        expect(atlasCore.purge([nonexistentFilePath])).to(beFalse())
                     }
 
                 }

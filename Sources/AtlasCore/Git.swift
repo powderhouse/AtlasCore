@@ -84,6 +84,10 @@ public class Git {
     public func removeFile(_ filePath: String) -> Bool {
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         
+        if history.count == 0 {
+            return false
+        }
+        
         let files = history.replacingOccurrences(of: "\n", with: " ")
         
         _ = run("rm", arguments: [filePath])
