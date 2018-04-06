@@ -367,6 +367,20 @@ Multiline
                         let projects = atlasCore.projects().map { $0.name }.sorted()
                         expect(projects).to(equal(["A Project", "Project 1", "Project a"]))
                     }
+                    
+                    it("should ignore files in the atlas directory") {
+                        Helper.addFile("index.html", directory: atlasCore.atlasDirectory!)
+
+                        let projects = atlasCore.projects().map { $0.name }.sorted()
+                        expect(projects).to(equal(["A Project", "Project 1", "Project a"]))
+}
+                    
+                    it("should ignore folders in the atlas directory that do not have a readme.md") {
+                        FileSystem.createDirectory((atlasCore.atlasDirectory!.appendingPathComponent("misc")))
+
+                        let projects = atlasCore.projects().map { $0.name }.sorted()
+                        expect(projects).to(equal(["A Project", "Project 1", "Project a"]))
+}
                 }
             }
         }

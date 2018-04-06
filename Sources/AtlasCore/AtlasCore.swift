@@ -170,7 +170,12 @@ public class AtlasCore {
             return []
         }
         
-        let projectNames = FileSystem.filesInDirectory(atlasDirectory!, excluding: [".git", Project.readme])
+        let directories = FileSystem.filesInDirectory(atlasDirectory!, directoriesOnly: true)
+        let projectNames = directories.filter {
+            let readme = atlasDirectory!.appendingPathComponent($0).appendingPathComponent(Project.readme)
+            return FileSystem.fileExists(readme, isDirectory: false)
+        }
+        
         return projectNames.map { project($0)! }
     }
     

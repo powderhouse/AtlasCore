@@ -9,12 +9,16 @@ import Foundation
 
 public class FileSystem {
     
-    public class func fileExists(_ url: URL, isDirectory: Bool=true) -> Bool {
+    public class func fileExists(_ url: URL, isDirectory: Bool=false) -> Bool {
         let fileManager = FileManager.default
         
         var isDir : ObjCBool = (isDirectory ? true : false)
         
-        return fileManager.fileExists(atPath: url.path, isDirectory: &isDir)
+        if fileManager.fileExists(atPath: url.path, isDirectory: &isDir) {
+            return isDirectory && isDir.boolValue || !isDirectory && !isDir.boolValue
+        } else {
+            return false
+        }
     }
     
     public class func createDirectory(_ url: URL) {
@@ -42,7 +46,7 @@ public class FileSystem {
         } catch {}
     }
     
-    public class func filesInDirectory(_ url: URL, excluding: [String]=[]) -> [String] {
+    public class func filesInDirectory(_ url: URL, excluding: [String]=[], directoriesOnly: Bool=false) -> [String] {
         let fileManager = FileManager.default
         var contents = try? fileManager.contentsOfDirectory(atPath: url.path)
         
@@ -52,6 +56,13 @@ public class FileSystem {
         
         for exclude in excluding {
             contents = contents!.filter { $0 != exclude }
+        }
+        
+        if directoriesOnly {
+            contents = contents!.filter {
+                let contentUrl = url.appendingPathComponent($0)
+                return fileExists(contentUrl, isDirectory: true)
+            }
         }
         
         return contents!
