@@ -170,13 +170,7 @@ public class AtlasCore {
             return []
         }
         
-        let directories = FileSystem.filesInDirectory(atlasDirectory!, directoriesOnly: true)
-        let projectNames = directories.filter {
-            let readme = atlasDirectory!.appendingPathComponent($0).appendingPathComponent(Project.readme)
-            return FileSystem.fileExists(readme, isDirectory: false)
-        }
-        
-        return projectNames.map { project($0)! }
+        return git.projects().map { project($0)! }
     }
     
     public func project(_ name: String) -> Project? {

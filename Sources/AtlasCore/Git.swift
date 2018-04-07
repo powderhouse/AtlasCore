@@ -56,6 +56,11 @@ public class Git {
         return result
     }
     
+    public func projects() -> [String] {
+        let result = run("ls-tree", arguments: ["-d", "--name-only", "HEAD", "."])
+        return result.split(separator: "\n").map { String($0) }
+    }
+    
     public func writeGitIgnore() {
         do {
             let filename = directory.appendingPathComponent(".gitignore")

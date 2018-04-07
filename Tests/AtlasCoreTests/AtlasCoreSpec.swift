@@ -361,6 +361,7 @@ Multiline
                         _ = atlasCore.initProject("Project 1")
                         _ = atlasCore.initProject("Project a")
                         _ = atlasCore.initProject("A Project")
+                        atlasCore.atlasCommit()
                     }
 
                     it("should return an array of the projects") {
