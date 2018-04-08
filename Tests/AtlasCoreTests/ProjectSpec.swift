@@ -100,11 +100,12 @@ class ProjectSpec: QuickSpec {
                 beforeEach {
                     let stagedDirectory = project.directory("staged")
                     Helper.addFile(fileName, directory: stagedDirectory)
-                    
+
+                    let slug = project.commitSlug(commitMessage)
+
                     expect(project.commitMessage(commitMessage)).to(beTrue())
                     expect(project.commitStaged()).to(beTrue())
                     
-                    let slug = project.commitSlug(commitMessage)
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
                 }
                 
@@ -138,6 +139,18 @@ class ProjectSpec: QuickSpec {
                     print("STAGED FILE PATH: \(stagedFilePath)")
                     let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
                     expect(exists).to(beFalse(), description: "File still found in staged directory")
+                }
+                
+                it("will not use duplicate slugs") {
+                    Helper.addFile("index2.html", directory: project.directory("staged"))
+
+                    let slug = project.commitSlug(commitMessage)
+
+                    expect(project.commitMessage(commitMessage)).to(beTrue())
+                    expect(project.commitStaged()).to(beTrue())
+                    
+                    expect(slug).to(contain("2"))
+                    commitFolder = project.directory("committed").appendingPathComponent(slug)
                 }
             }
             

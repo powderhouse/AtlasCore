@@ -151,7 +151,18 @@ public class Project {
         if slug.last == "-" { slug.removeLast() }
         if slug.first == "-" { slug.removeFirst() }
         
-        return String(slug.prefix(254))
+        slug = String(slug.prefix(254))
+        
+        var indexSlug = slug
+        var slugIndex = 1
+        for previousCommit in files("committed").sorted() {
+            if previousCommit == indexSlug {
+                slugIndex += 1
+                indexSlug = slug.appending("\(slugIndex)")
+            }
+        }
+        
+        return indexSlug
     }
     
     public class func exists(_ name: String, in directory: URL) -> Bool {

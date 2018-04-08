@@ -142,7 +142,6 @@ class AtlasCoreSpec: QuickSpec {
                         } else {
                             expect(false).to(beTrue(), description: "Atlas directory was not set")
                         }
-
                     }
                 }
 
@@ -164,6 +163,8 @@ The second commit
 
 Multiline
 """
+                    var slug1 = ""
+                    var slug2 = ""
                     
                     beforeEach {
                         fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
@@ -180,6 +181,9 @@ Multiline
                         let filePath1 = fileDirectory.appendingPathComponent(file1).path
                         expect(project1?.copyInto([filePath1])).to(beTrue())
                         atlasCore.atlasCommit()
+                        
+                        slug1 = project1!.commitSlug(message1)
+                        slug2 = project2!.commitSlug(message2)
 
                         expect(project1?.commitMessage(message1)).to(beTrue())
                         expect(project1?.commitStaged()).to(beTrue())
@@ -206,7 +210,7 @@ Multiline
                             expect(lastCommit.files.count).to(equal(2))
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file2))
-                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project2Name)/committed/\(project2!.commitSlug(message2))/\(file2)"))
+                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project2Name)/committed/\(slug2)/\(file2)"))
                             }
                         }
                     }
@@ -221,7 +225,7 @@ Multiline
                             expect(lastCommit.files.count).to(equal(1))
                             if let firstFile = lastCommit.files.first {
                                 expect(firstFile.name).to(equal(file1))
-                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project1Name)/committed/\(project1!.commitSlug(message1))/\(file1)"))
+                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/master/\(project1Name)/committed/\(slug1)/\(file1)"))
                             } else {
                                 expect(false).to(beTrue(), description: "file missing")
                             }
@@ -255,12 +259,13 @@ Multiline
 
                         atlasCore.atlasCommit()
 
+                        let slug = project.commitSlug(commitMessage)
+
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
 
                         atlasCore.atlasCommit()
 
-                        let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
 
                         committedFilePath = commitFolder.appendingPathComponent(fileName).path
@@ -318,12 +323,13 @@ Multiline
 
                         atlasCore.atlasCommit()
 
+                        let slug = project.commitSlug(commitMessage)
+
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
 
                         atlasCore.atlasCommit()
 
-                        let slug = project.commitSlug(commitMessage)
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
 
                         committedFilePath1 = commitFolder.appendingPathComponent(fileName1).path
