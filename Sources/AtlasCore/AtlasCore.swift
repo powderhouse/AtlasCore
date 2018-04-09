@@ -7,6 +7,7 @@ public struct File {
 
 public struct Commit {
     public var message: String
+    public var hash: String
     public var files: [File] = []
     public var projects: [Project] = []
 }
@@ -190,8 +191,13 @@ public class AtlasCore {
         
         var commits: [Commit] = []
         for data in logData {
+            guard data["hash"] != nil else { continue }
+            
             var files: [File] = []
             var projects: [Project] = []
+            
+            let hash = data["hash"] as! String
+            
             if let fileInfo = data["files"] as? [String] {
                 for filePath in fileInfo {
                     if let repositoryLink = gitHub.repositoryLink {
@@ -202,7 +208,7 @@ public class AtlasCore {
                         
                         let fileComponents = filePath.split(separator: "/")
                         let fileName = String(fileComponents.last!)
-                        files.append(File(name: fileName, url: "\(rawGitHub)/master/\(filePath)"))
+                        files.append(File(name: fileName, url: "\(rawGitHub)/\(hash)/\(filePath)"))
                         
                         let projectName = String(fileComponents.first!)
                         projects.append(Project(projectName, baseDirectory: atlasDirectory!))
@@ -211,7 +217,7 @@ public class AtlasCore {
             }
             
             if let message = data["message"] as? String {
-                commits.append(Commit(message: message, files: files, projects: projects))
+                commits.append(Commit(message: message, hash: hash, files: files, projects: projects))
             }
         }
         return commits
