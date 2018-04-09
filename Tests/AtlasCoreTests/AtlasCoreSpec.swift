@@ -112,7 +112,7 @@ class AtlasCoreSpec: QuickSpec {
 
                 }
 
-                context("startProject") {
+                context("initProject") {
                     let projectName = "New Project"
 
                     beforeEach {

@@ -94,7 +94,7 @@ class ProjectSpec: QuickSpec {
             context("commitStaged") {
                 
                 let fileName = "index.html"
-                let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
+                let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit! 2"
                 var commitFolder: URL!
                 
                 beforeEach {
@@ -136,7 +136,6 @@ class ProjectSpec: QuickSpec {
                 it("removes the file from the staged directory") {
                     let stagedDirectory = project.directory("staged")
                     let stagedFilePath = stagedDirectory.appendingPathComponent(fileName).path
-                    print("STAGED FILE PATH: \(stagedFilePath)")
                     let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
                     expect(exists).to(beFalse(), description: "File still found in staged directory")
                 }
@@ -149,8 +148,18 @@ class ProjectSpec: QuickSpec {
                     expect(project.commitMessage(commitMessage)).to(beTrue())
                     expect(project.commitStaged()).to(beTrue())
                     
-                    expect(slug).to(contain("2"))
+                    expect(slug).to(contain("-2"))
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
+
+                    Helper.addFile("index3.html", directory: project.directory("staged"))
+                    
+                    let duplicateSlug = project.commitSlug(commitMessage.appending("-2"))
+                    
+                    expect(project.commitMessage(commitMessage)).to(beTrue())
+                    expect(project.commitStaged()).to(beTrue())
+                    
+                    expect(duplicateSlug).to(contain("-2-2"))
+                    commitFolder = project.directory("committed").appendingPathComponent(duplicateSlug)
                 }
             }
             

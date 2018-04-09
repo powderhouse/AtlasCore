@@ -158,7 +158,7 @@ public class Project {
         for previousCommit in files("committed").sorted() {
             if previousCommit == indexSlug {
                 slugIndex += 1
-                indexSlug = slug.appending("\(slugIndex)")
+                indexSlug = slug.appending("-\(slugIndex)")
             }
         }
         
