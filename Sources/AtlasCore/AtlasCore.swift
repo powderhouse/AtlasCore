@@ -206,7 +206,7 @@ public class AtlasCore {
                             with: "raw.githubusercontent.com"
                         )
                         
-                        let fileComponents = filePath.split(separator: "/")
+                        let fileComponents = filePath.components(separatedBy: "/")
                         let fileName = String(fileComponents.last!)
                         files.append(File(name: fileName, url: "\(rawGitHub)/\(hash)/\(filePath)"))
                         

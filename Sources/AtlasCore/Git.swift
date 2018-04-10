@@ -118,7 +118,7 @@ public class Git {
     
     public func log(_ projectName: String?=nil) -> [[String: Any]] {
         var arguments = [
-            "--pretty=format:|%B~%H~",
+            "--pretty=format:<START COMMIT>%H<DELIMITER>%B<DELIMITER>",
             "--reverse",
             "--name-only",
             "--relative",
@@ -136,16 +136,16 @@ public class Git {
         let log = run("log", arguments: arguments)
 
         var data: [[String:Any]] = []
-        let commits = log.split(separator: "|")
+        let commits = log.components(separatedBy: "<START COMMIT>").filter { $0.count > 0 }
         for commit in commits {
-            let info = String(commit).split(separator: "~")
-            if let message = info.first {
-                let hash = String(info[1])
-                if let files = info.last {
+            let components = commit.components(separatedBy: "<DELIMITER>")
+            if let hash = components.first {
+                let message = components[1]
+                if let files = components.last {
                     data.append([
-                        "message": String(message),
+                        "message": message,
                         "hash": hash,
-                        "files": String(files).split(separator: "\n").map { String($0) }
+                        "files": files.components(separatedBy: "\n").filter { $0.count > 0 }
                     ])
                 }
             }
