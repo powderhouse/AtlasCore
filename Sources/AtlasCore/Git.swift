@@ -81,7 +81,7 @@ public class Git {
     }
     
     public func add(_ filter: String=".") -> Bool {
-        _ = run("add", arguments: ["."])
+        _ = run("add", arguments: [filter])
         
         return true
     }
