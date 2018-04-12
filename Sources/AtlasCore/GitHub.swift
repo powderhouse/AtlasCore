@@ -136,7 +136,10 @@ public class GitHub {
 git push --set-upstream origin master
 """
         do {
-            try hook.write(to: git.directory, atomically: true, encoding: .utf8)
+            let gitURL = git.directory.appendingPathComponent(".git")
+            let hooksURL = gitURL.appendingPathComponent("hooks")
+            let postCommitURL = hooksURL.appendingPathComponent("post-commit")
+            try hook.write(to: postCommitURL, atomically: true, encoding: .utf8)
         } catch {
             return false
         }
