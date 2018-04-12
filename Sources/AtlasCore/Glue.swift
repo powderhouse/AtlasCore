@@ -22,7 +22,11 @@ public class Glue {
         }
         
         if async {
-            process.runAsync()
+            do {
+                try process.run()
+            } catch {
+                return "FAIL"
+            }
             return "OK"
         }
         
