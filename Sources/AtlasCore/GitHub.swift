@@ -137,7 +137,7 @@ public class GitHub {
 
         let hook = """
 #!/bin/sh
-git push --set-upstream origin master
+git push --set-upstream origin master >/dev/null 2>&1 &
 """
         do {
             try hook.write(to: postCommitURL, atomically: true, encoding: .utf8)
