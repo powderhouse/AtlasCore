@@ -14,6 +14,7 @@ public protocol AtlasProcess {
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
     func runAndWait() -> String
+    func runAsync()
 }
 
 public protocol AtlasProcessFactory {
@@ -21,6 +22,13 @@ public protocol AtlasProcessFactory {
 }
 
 extension Process: AtlasProcess {
+    public func runAsync() {
+        do {
+            try run()
+        } catch {
+        }
+    }
+    
     public func runAndWait() -> String {
         let pipe = Pipe()
         standardOutput = pipe

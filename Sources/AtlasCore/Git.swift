@@ -31,7 +31,7 @@ public class Git {
         return ["--git-dir=\(path)/.git", command] + additionalArguments
     }
     
-    func run(_ command: String, arguments: [String]=[]) -> String {
+    func run(_ command: String, arguments: [String]=[], async: Bool=false) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -40,7 +40,8 @@ public class Git {
         return Glue.runProcess("git",
                                arguments: fullArguments,
                                currentDirectory: directory,
-                               atlasProcess: atlasProcessFactory.build()
+                               atlasProcess: atlasProcessFactory.build(),
+                               async: async
         )        
     }
     
@@ -113,7 +114,7 @@ public class Git {
     }
     
     public func pushToGitHub() {
-        _ = run("push", arguments: ["--set-upstream", "origin", "master"])
+        _ = run("push", arguments: ["--set-upstream", "origin", "master"], async: true)
     }
     
     public func log(_ projectName: String?=nil) -> [[String: Any]] {
