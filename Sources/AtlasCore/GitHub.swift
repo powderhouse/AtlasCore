@@ -131,20 +131,21 @@ public class GitHub {
     }
     
     public func setPostCommitHook() -> Bool {
+        let gitURL = git.directory.appendingPathComponent(".git")
+        let hooksURL = gitURL.appendingPathComponent("hooks")
+        let postCommitURL = hooksURL.appendingPathComponent("post-commit")
+
         let hook = """
 #!/bin/sh
 git push --set-upstream origin master
 """
         do {
-            let gitURL = git.directory.appendingPathComponent(".git")
-            let hooksURL = gitURL.appendingPathComponent("hooks")
-            let postCommitURL = hooksURL.appendingPathComponent("post-commit")
             try hook.write(to: postCommitURL, atomically: true, encoding: .utf8)
         } catch {
             return false
         }
         
-        _ = Glue.runProcess("chmod", arguments: ["a+x", ".git/hooks/post-commit"])
+        _ = Glue.runProcess("chmod", arguments: ["a+x", "post-commit"], currentDirectory: hooksURL)
         
         return true
     }
