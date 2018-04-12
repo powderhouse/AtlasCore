@@ -87,6 +87,8 @@ public class GitHub {
         
         _ = setRepositoryLink()
         
+        setPostCommitHook()
+        
         return repoResult![0]
     }
     
@@ -125,6 +127,22 @@ public class GitHub {
             return false
         }
         repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
+        return true
+    }
+    
+    public func setPostCommitHook() -> Bool {
+        let hook = """
+#!/bin/sh
+git push --set-upstream origin master
+"""
+        do {
+            try hook.write(to: git.directory, atomically: true, encoding: .utf8)
+        } catch {
+            return false
+        }
+        
+        _ = Glue.runProcess("chmod", arguments: ["a+x", ".git/hooks/post-commit"])
+        
         return true
     }
     

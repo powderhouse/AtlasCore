@@ -9,7 +9,7 @@ import Foundation
 
 public class Glue {
     
-    public class func runProcess(_ command: String, arguments: [String]?=[], currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process(), async:Bool=false) -> String {
+    public class func runProcess(_ command: String, arguments: [String]?=[], currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
         var process = atlasProcess
         
         process.launchPath = "/usr/bin/env"
@@ -19,15 +19,6 @@ public class Glue {
         if currentDirectory != nil {
 //            process.currentDirectoryURL = currentDirectory
             process.currentDirectoryPath = currentDirectory!.path
-        }
-        
-        if async {
-            do {
-                try process.run()
-            } catch {
-                return "FAIL"
-            }
-            return "OK"
         }
         
         return process.runAndWait()

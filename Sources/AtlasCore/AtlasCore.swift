@@ -260,7 +260,6 @@ public class AtlasCore {
     public func commitChanges(_ commitMessage: String?=nil) {
         _ = git?.add()
         _ = git?.commit(commitMessage)
-        _ = git?.pushToGitHub()
     }
     
     public func atlasCommit(_ message: String?=nil) {

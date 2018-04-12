@@ -142,7 +142,6 @@ class GitSpec: QuickSpec {
                         expect(git.commit()).toNot(beNil())
 
                         expect(git.status()).toNot(contain("Your branch is up-to-date with 'origin/master'"))
-                        git.pushToGitHub()
                     }
 
                     afterEach {

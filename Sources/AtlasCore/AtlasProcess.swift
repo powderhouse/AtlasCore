@@ -14,7 +14,6 @@ public protocol AtlasProcess {
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
     func runAndWait() -> String
-    func run() throws
 }
 
 public protocol AtlasProcessFactory {

@@ -40,8 +40,7 @@ public class Git {
         return Glue.runProcess("git",
                                arguments: fullArguments,
                                currentDirectory: directory,
-                               atlasProcess: atlasProcessFactory.build(),
-                               async: async
+                               atlasProcess: atlasProcessFactory.build()
         )        
     }
     
@@ -111,10 +110,6 @@ public class Git {
         
     public func commit(_ message: String?=nil) -> String {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
-    }
-    
-    public func pushToGitHub() {
-        _ = run("push", arguments: ["--set-upstream", "origin", "master"], async: true)
     }
     
     public func log(_ projectName: String?=nil) -> [[String: Any]] {
