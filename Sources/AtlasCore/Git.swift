@@ -95,15 +95,16 @@ public class Git {
         
         let files = history.replacingOccurrences(of: "\n", with: " ")
         
-        _ = run("rm", arguments: [filePath])
-        _ = commit()
+//        _ = run("rm", arguments: [filePath])
+//        _ = commit()
         _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(files)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
-        _ = run("push", arguments: ["origin", "--force", "--all"])
-        _ = run("push", arguments: ["origin", "--force", "--tags"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
         _ = run("gc", arguments: ["--prune=now"])
-//        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/committed/second-commit/laurensevent.jpg' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
+        _ = run("push", arguments: ["origin", "--force", "--all"])
+        _ = run("push", arguments: ["origin", "--force", "--tags"])
+
+//        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
         return true
     }
@@ -112,18 +113,23 @@ public class Git {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
     }
     
-    public func log(_ projectName: String?=nil) -> [[String: Any]] {
+    public func log(projectName: String?=nil, full: Bool=true) -> [[String: Any]] {
         var arguments = [
             "--pretty=format:<START COMMIT>%H<DELIMITER>%B<DELIMITER>",
             "--reverse",
             "--name-only",
             "--relative",
-            "--",
-            ":!*/unstaged/*",
-            ":!*/staged/*",
-            ":!*\(Project.readme)",
-            ":!*\(Project.commitMessageFile)"
+            "--"
         ]
+        
+        if !full {
+            arguments.append(contentsOf: [
+                ":!*/unstaged/*",
+                ":!*/staged/*",
+                ":!*\(Project.readme)",
+                ":!*\(Project.commitMessageFile)"
+            ])
+        }
         
         if projectName != nil {
             arguments.append("\(projectName!)/committed")

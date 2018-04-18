@@ -182,12 +182,12 @@ public class AtlasCore {
         return Project(name, baseDirectory: atlasDirectory!)
     }
     
-    public func log(_ projectName: String?=nil) -> [Commit] {
+    public func log(projectName: String?=nil, full: Bool=false) -> [Commit] {
         guard git != nil else {
             return []
         }
 
-        let logData =  git.log(projectName)
+        let logData =  git.log(projectName: projectName, full: full)
         
         var commits: [Commit] = []
         for data in logData {

@@ -216,7 +216,7 @@ Multiline
                     }
                     
                     it("should only return the commits for a project if specified") {
-                        let log = atlasCore.log("General")
+                        let log = atlasCore.log(projectName: "General")
                         
                         expect(log.count).to(equal(1))
 
@@ -254,49 +254,74 @@ Multiline
                         expect(atlasCore.initGitAndGitHub(credentials)).to(beTrue())
 
                         project = atlasCore.project(projectName)
+                        atlasCore.atlasCommit()
+
+                        expect(atlasCore.log(full: true).count).to(equal(1))
+
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
 
                         atlasCore.atlasCommit()
-
-                        let slug = project.commitSlug(commitMessage)
-
-                        expect(project.commitMessage(commitMessage)).to(beTrue())
-                        expect(project.commitStaged()).to(beTrue())
-
-                        atlasCore.atlasCommit()
-
-                        commitFolder = project.directory("committed").appendingPathComponent(slug)
-
-                        committedFilePath = commitFolder.appendingPathComponent(fileName).path
-
-                        let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
-                        expect(exists).to(beTrue(), description: "File not found in commited directory")
-
-                        gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
-                        expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
-                    }
-
-                    it("removes the files from the commit folder") {
-                        let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
-                        expect(exists).to(beFalse(), description: "File still found in commited directory")
-                    }
-
-                    it("removes the commit from the projects' log") {
-                        let log = atlasCore.log()
-                        expect(log.count).to(equal(0))
                     }
                     
-                    it("removes the commit folder") {
-                        let exists = fileManager.fileExists(atPath: commitFolder.path, isDirectory: &isDirectory)
-                        expect(exists).to(beFalse(), description: "Commit folder still found")
+                    it("should remove the staged file and atlasCore commit") {
+                        let stagedFilePath = project.directory("staged").appendingPathComponent(fileName).path
+                        let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "File not found in staged directory")
+
+                        expect(atlasCore.log(full: true).count).to(equal(2))
+
+                        let stagedFileRelativePath = "\(projectName)/staged/\(fileName)"
+                        expect(atlasCore.purge([stagedFileRelativePath])).to(beTrue())
+                        
+                        let stillExists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
+                        expect(stillExists).to(beFalse(), description: "File still found in staged directory")
+                        
+                        expect(atlasCore.log(full: true).count).to(equal(1))
                     }
                     
-                    it("fails if the file can not be found") {
-                        let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
-                        expect(atlasCore.purge([nonexistentFilePath])).to(beFalse())
-                    }
+                    context("after commit") {
 
+                        beforeEach {
+                            let slug = project.commitSlug(commitMessage)
+
+                            expect(project.commitMessage(commitMessage)).to(beTrue())
+                            expect(project.commitStaged()).to(beTrue())
+
+                            atlasCore.atlasCommit()
+
+                            commitFolder = project.directory("committed").appendingPathComponent(slug)
+
+                            committedFilePath = commitFolder.appendingPathComponent(fileName).path
+
+                            let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
+                            expect(exists).to(beTrue(), description: "File not found in commited directory")
+
+                            gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
+                            expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
+                        }
+
+                        it("removes the files from the commit folder") {
+                            let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
+                            expect(exists).to(beFalse(), description: "File still found in commited directory")
+                        }
+
+                        it("removes the commit from the projects' log") {
+                            let log = atlasCore.log()
+                            expect(log.count).to(equal(0))
+                        }
+                        
+                        it("removes the commit folder") {
+                            let exists = fileManager.fileExists(atPath: commitFolder.path, isDirectory: &isDirectory)
+                            expect(exists).to(beFalse(), description: "Commit folder still found")
+                        }
+                        
+                        it("fails if the file can not be found") {
+                            let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
+                            expect(atlasCore.purge([nonexistentFilePath])).to(beFalse())
+                        }
+
+                    }
                 }
 
                 context("purge (removing two files with more than two files)") {
