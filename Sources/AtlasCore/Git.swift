@@ -95,8 +95,6 @@ public class Git {
         
         let files = history.replacingOccurrences(of: "\n", with: " ")
         
-//        _ = run("rm", arguments: [filePath])
-//        _ = commit()
         _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(files)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
