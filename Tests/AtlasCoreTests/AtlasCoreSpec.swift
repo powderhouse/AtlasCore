@@ -147,7 +147,7 @@ class AtlasCoreSpec: QuickSpec {
 
                 context("log") {
                     
-                    let project1Name = "General"
+                    let project1Name = "General Project"
                     let project2Name = "AnotherProject"
                     var project1: Project!
                     var project2: Project!
@@ -216,7 +216,7 @@ Multiline
                     }
                     
                     it("should only return the commits for a project if specified") {
-                        let log = atlasCore.log(projectName: "General")
+                        let log = atlasCore.log(projectName: "General Project")
                         
                         expect(log.count).to(equal(1))
 
@@ -232,7 +232,7 @@ Multiline
                             
                             expect(lastCommit.projects.count).to(equal(1))
                             if let project = lastCommit.projects.first {
-                                expect(project.name).to(equal("General"))
+                                expect(project.name).to(equal("General Project"))
                             } else {
                                 expect(false).to(beTrue(), description: "project missing")
                             }
@@ -243,7 +243,7 @@ Multiline
                 context("purge") {
 
                     var project: Project!
-                    let projectName = "General"
+                    let projectName = "General Project"
                     let fileName = "index.html"
                     let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
                     var commitFolder: URL!
@@ -327,7 +327,7 @@ Multiline
                 context("purge (removing two files with more than two files)") {
 
                     var project: Project!
-                    let projectName = "General"
+                    let projectName = "General Project"
                     let fileName1 = "index1.html"
                     let fileName2 = "index2.html"
                     let fileName3 = "index3.html"

@@ -93,9 +93,12 @@ public class Git {
             return false
         }
         
-        let files = history.replacingOccurrences(of: "\n", with: " ")
-        
-        _ = run("filter-branch", arguments: ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(files)", "--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
+        let files = history.components(separatedBy: "\n").filter { return $0.count > 0 }
+        let escapedFiles = files.map { return "\"\($0)\"" }
+        var filterBranchArguments = ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
+        filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
+
+        _ = run("filter-branch", arguments: filterBranchArguments)
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
         _ = run("gc", arguments: ["--prune=now"])
@@ -104,6 +107,7 @@ public class Git {
 
 //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
+
         return true
     }
         
@@ -130,9 +134,9 @@ public class Git {
         }
         
         if projectName != nil {
-            arguments.append("\(projectName!)/committed")
+            arguments.append(projectName!)
         }
-    
+        
         let log = run("log", arguments: arguments)
 
         var data: [[String:Any]] = []
