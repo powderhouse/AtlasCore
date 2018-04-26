@@ -58,9 +58,9 @@ public class Git {
     
     public func projects() -> [String] {
         let result = run("ls-tree", arguments: ["-d", "--name-only", "HEAD", "."])
-        var unescapedResult = result.replacingOccurrences(of: "\"\\\"", with: "\"")
-        unescapedResult = unescapedResult.replacingOccurrences(of: "\\\"\"", with: "\"")
-        return unescapedResult.split(separator: "\n").map { String($0) }
+        let names = result.split(separator: "\n").map { String($0) }
+        let cleanNames = names.map { $0.starts(with: "\"") ? String($0.dropFirst().dropLast()) : $0 }
+        return cleanNames.map { $0.unescaped }
     }
     
     public func writeGitIgnore() {

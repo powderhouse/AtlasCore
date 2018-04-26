@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3A3C79352091241000C4D933 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C79342091241000C4D933 /* String.swift */; };
 		3A78CD20207D024200E05444 /* PerformanceSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A78CD1F207D024200E05444 /* PerformanceSpec.swift */; };
 		OBJ_132 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_138 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* Package.swift */; };
@@ -168,6 +169,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3A3C79342091241000C4D933 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		3A78CD1F207D024200E05444 /* PerformanceSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceSpec.swift; sourceTree = "<group>"; };
 		"AtlasCore::AtlasCore::Product" /* AtlasCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AtlasCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"AtlasCore::AtlasCoreTests::Product" /* AtlasCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AtlasCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -327,6 +329,7 @@
 				OBJ_16 /* GitHub.swift */,
 				OBJ_17 /* Glue.swift */,
 				OBJ_18 /* Project.swift */,
+				3A3C79342091241000C4D933 /* String.swift */,
 			);
 			name = AtlasCore;
 			path = Sources/AtlasCore;
@@ -929,6 +932,7 @@
 				OBJ_266 /* AtlasCore.swift in Sources */,
 				OBJ_267 /* AtlasProcess.swift in Sources */,
 				OBJ_268 /* Credentials.swift in Sources */,
+				3A3C79352091241000C4D933 /* String.swift in Sources */,
 				OBJ_269 /* FileSystem.swift in Sources */,
 				OBJ_270 /* Git.swift in Sources */,
 				OBJ_271 /* GitHub.swift in Sources */,
