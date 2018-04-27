@@ -321,6 +321,7 @@
 		OBJ_10 /* AtlasCore */ = {
 			isa = PBXGroup;
 			children = (
+				3A3C79342091241000C4D933 /* String.swift */,
 				OBJ_11 /* AtlasCore.swift */,
 				OBJ_12 /* AtlasProcess.swift */,
 				OBJ_13 /* Credentials.swift */,
@@ -329,7 +330,6 @@
 				OBJ_16 /* GitHub.swift */,
 				OBJ_17 /* Glue.swift */,
 				OBJ_18 /* Project.swift */,
-				3A3C79342091241000C4D933 /* String.swift */,
 			);
 			name = AtlasCore;
 			path = Sources/AtlasCore;
