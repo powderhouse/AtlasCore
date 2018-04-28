@@ -87,8 +87,6 @@ public class GitHub {
         
         _ = setRepositoryLink()
         
-        _ = setPostCommitHook()
-        
         return repoResult![0]
     }
     

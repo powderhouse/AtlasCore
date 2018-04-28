@@ -98,16 +98,21 @@ public class AtlasCore {
         
         if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
-            if !gitHub.setRepositoryLink() {
-                _ = gitHub.createRepository()
+            if gitHub.setPostCommitHook() {
                 if !gitHub.setRepositoryLink() {
-                    print("Failed to set repository link.")
-                    return false
-                }
+                    _ = gitHub.createRepository()
+                    if !gitHub.setRepositoryLink() {
+                        print("Failed to set repository link.")
+                        return false
+                    }
 
+                    return true
+                }
                 return true
+            } else {
+                print("Failed to create post commit hooks")
+                return false
             }
-            return true
         }
         print("Failed to create Git repository.")
         return false

@@ -85,6 +85,14 @@ class GitHubSpec: QuickSpec {
                             expect(gitHub?.repositoryLink).to(contain(credentials.username))
                             expect(gitHub?.repositoryLink).to(contain(repositoryName))
                         }
+                    }
+                    
+                    context("setPostCommitHook") {
+                        beforeEach {
+                            if !gitHub!.setPostCommitHook() {
+                                expect(false).to(beTrue(), description: "Failed to set post-commit hook")
+                            }
+                        }
                         
                         it("should create a post-commit hook") {
                             let gitURL = directory.appendingPathComponent(".git")
@@ -93,6 +101,7 @@ class GitHubSpec: QuickSpec {
                             let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)
                             expect(exists).to(beTrue(), description: "No post-commit found")
                         }
+
                     }
                 }
                 
