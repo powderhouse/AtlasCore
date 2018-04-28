@@ -134,19 +134,50 @@ public class GitHub {
         let gitURL = git.directory.appendingPathComponent(".git")
         let hooksURL = gitURL.appendingPathComponent("hooks")
         let postCommitURL = hooksURL.appendingPathComponent("post-commit")
+        let atlasScriptURL = hooksURL.appendingPathComponent("atlas-sync.sh")
+
+        let script = """
+#!/bin/sh
+
+DATE=`date '+%Y-%m-%d %H:%M:%S'`
+
+echo ""
+echo "<STARTENTRY>"
+echo ""
+echo "Recorded: ${DATE}"
+echo ""
+
+git pull
+git push --set-upstream origin master
+
+echo ""
+echo "</ENDENTRY>"
+"""
+        guard write(script, to: atlasScriptURL) else {
+            return false
+        }
 
         let hook = """
 #!/bin/sh
-git push --set-upstream origin master >/dev/null 2>&1 &
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${DIR}/atlas_sync.sh" >>../log.txt 2>&1 &
 """
+        return write(hook, to: postCommitURL)
+    }
+    
+    public func write(_ script: String, to url: URL) -> Bool {
         do {
-            try hook.write(to: postCommitURL, atomically: true, encoding: .utf8)
+            try script.write(to: url, atomically: true, encoding: .utf8)
         } catch {
             return false
         }
         
-        _ = Glue.runProcess("chmod", arguments: ["a+x", "post-commit"], currentDirectory: hooksURL)
-        
+        _ = Glue.runProcess(
+            "chmod",
+            arguments: ["a+x", "post-commit"],
+            currentDirectory: url.deletingLastPathComponent()
+        )
         return true
     }
     
