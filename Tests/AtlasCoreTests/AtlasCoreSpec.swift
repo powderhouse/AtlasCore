@@ -106,7 +106,7 @@ class AtlasCoreSpec: QuickSpec {
                     expect(project?.commitStaged()).to(beTrue())
                     atlasCore.commitChanges()
                     
-                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch master set up to track remote branch master from origin."), timeout: TimeInterval(10))
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch master set up to track remote branch master from origin."), timeout: TimeInterval(30), description: "\(atlasCore.remote()) -- \(try? String(contentsOf: logUrl, encoding: .utf8))")
                 }
 
                 context("future instances of AtlasCore") {
@@ -229,13 +229,13 @@ Multiline
                         expect(project2?.commitMessage(message2)).to(beTrue())
                         expect(project2?.commitStaged()).to(beTrue())
                         atlasCore.commitChanges(message2)
+                        
+                        expect(atlasCore.log().count).toEventually(equal(2), timeout: TimeInterval(30))
                     }
 
                     it("should return an array of commit information ordered by date submitted") {
                         let log = atlasCore.log()
  
-                        expect(log.count).to(equal(2))
-                        
                         if let lastCommit = log.last {
                             expect(lastCommit.message).to(contain(message2))
                             expect(lastCommit.files.count).to(equal(2))
@@ -247,7 +247,7 @@ Multiline
                     }
                     
                     it("should only return the commits for a project if specified") {
-                        expect(atlasCore.log(projectName: project1Name).count).toEventually(equal(1), timeout: TimeInterval(10))
+                        expect(atlasCore.log(projectName: project1Name).count).toEventually(equal(1), timeout: TimeInterval(30))
                         
                         let log = atlasCore.log(projectName: project1Name)
                         
