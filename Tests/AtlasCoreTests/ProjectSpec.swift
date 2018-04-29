@@ -161,6 +161,7 @@ class ProjectSpec: QuickSpec {
                     expect(duplicateSlug).to(contain("-2-2"))
                     commitFolder = project.directory("committed").appendingPathComponent(duplicateSlug)
                 }
+                
             }
             
             context("copy") {

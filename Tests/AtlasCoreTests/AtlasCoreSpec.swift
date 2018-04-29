@@ -77,6 +77,42 @@ class AtlasCoreSpec: QuickSpec {
                         expect(false).to(beTrue(), description: "Atlas directory was not set")
                     }
                 }
+                
+                it("successfully syncs with GitHub after a commit") {
+                    let projectName = "General Project"
+                    let file = "index1.html"
+
+                    let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(file, directory: fileDirectory)
+
+                    expect(atlasCore.initProject(projectName)).to(beTrue())
+                    let project = atlasCore.project(projectName)
+                    
+                    let filePath = fileDirectory.appendingPathComponent(file).path
+                    expect(project?.copyInto([filePath])).to(beTrue())
+                    atlasCore.atlasCommit()
+                    
+                    sleep(5)
+                    
+                    expect(project?.commitMessage("Commit Message")).to(beTrue())
+                    expect(project?.commitStaged()).to(beTrue())
+                    atlasCore.commitChanges()
+                        
+                    let logUrl = atlasCore.userDirectory!.appendingPathComponent("log.txt")
+                    let exists = fileManager.fileExists(atPath: logUrl.path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "Unable to find log")
+                    
+                    do {
+                        let logContents = try String(contentsOf: logUrl, encoding: .utf8)
+                        waitUntil { done in
+                            expect(logContents).to(contain("Branch master set up to track remote branch master from origin."))
+                            done()
+                        }
+                    } catch {
+                        expect(false).to(beTrue(), description: "Unable to read contents of log")
+                    }
+                }
 
                 context("future instances of AtlasCore") {
                     var atlasCore2: AtlasCore!
@@ -144,7 +180,7 @@ class AtlasCoreSpec: QuickSpec {
                         }
                     }
                 }
-
+                
                 context("log") {
                     
                     let project1Name = "General Project"

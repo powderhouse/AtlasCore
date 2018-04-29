@@ -159,7 +159,7 @@ echo "</ENDENTRY>"
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/atlas_sync.sh" >>../log.txt 2>&1 &
+source "${DIR}/atlas-sync.sh" >>../log.txt 2>&1 &
 """
         return write(hook, to: postCommitURL)
     }

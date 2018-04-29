@@ -134,6 +134,7 @@ class GitHubSpec: QuickSpec {
 
                     it("should return true if the repository does not yet exist") {
                         _ = gitHub?.createRepository()
+                        sleep(3)
                         expect(gitHub?.setRepositoryLink()).to(beTrue())
                         expect(gitHub?.repositoryLink).to(equal("https://github.com/atlastest/testGitHub"))
                     }
