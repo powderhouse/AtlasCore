@@ -290,4 +290,8 @@ public class AtlasCore {
         
         return git.remote()
     }
+    
+    public func validRepository() -> Bool {
+        return gitHub?.validRepository() ?? false
+    }
 }

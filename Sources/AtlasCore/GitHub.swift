@@ -83,11 +83,24 @@ public class GitHub {
             of: "https://",
             with: "https://\(credentials.username):\(credentials.token!)@"
         )
+        
         _ = git.run("remote", arguments: ["add", "origin", authenticatedPath])
+
+        if validRepository() {
+            if setRepositoryLink() {
+                return repoResult![0]
+            }
+        }
         
-        _ = setRepositoryLink()
-        
-        return repoResult![0]
+        return nil        
+    }
+    
+    public func validRepository() -> Bool {
+        let update = git.run("remote", arguments: ["update"])
+        print("UPDATE: \(update)")
+        if update.count == 0 { return false }
+        if update.contains("fatal") { return false }
+        return true
     }
     
     public func deleteRepository() {
@@ -145,7 +158,7 @@ echo ""
 echo "Recorded: ${DATE}"
 echo ""
 
-git pull
+git pull origin master
 git push --set-upstream origin master
 
 echo ""

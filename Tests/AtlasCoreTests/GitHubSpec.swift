@@ -38,8 +38,15 @@ class GitHubSpec: QuickSpec {
                     let filePath = directory.path
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                     expect(exists).to(beTrue(), description: "No folder found")
+                    
+                    if let token = GitHub.getAuthenticationToken(credentials) {
+                        credentials.setAuthenticationToken(token: token)
+                    } else {
+                        expect(false).to(beTrue(), description: "Failed to get token")
+                    }
 
                     git = Git(directory)
+                    _  = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                 }
@@ -60,20 +67,19 @@ class GitHubSpec: QuickSpec {
                     
                     var results: [String:Any]?
                     
-                    beforeEach {
-                        results = gitHub?.createRepository()
-                    }
-                    
-                    it("should fail without token") {
-                        expect(results).to(beNil())
-                    }
-                    
-                    context("with token") {
-                    
+                    context("without token") {
                         beforeEach {
-                            if let token = GitHub.getAuthenticationToken(credentials) {
-                                credentials.setAuthenticationToken(token: token)
-                            }
+                            credentials.setAuthenticationToken(token: nil)
+                            results = gitHub?.createRepository()
+                        }
+                        
+                        it("should fail without token") {
+                            expect(results).to(beNil())
+                        }
+                    }
+
+                    context("with token") {
+                        beforeEach {
                             results = gitHub?.createRepository()
                         }
 
@@ -126,6 +132,11 @@ class GitHubSpec: QuickSpec {
                 }
                 
                 context("setRepositoryLink") {
+                    beforeEach {
+                        if let token = GitHub.getAuthenticationToken(credentials) {
+                            credentials.setAuthenticationToken(token: token)
+                        }
+                    }
                     
                     it("should return false if the repository does not yet exist") {
                         expect(gitHub?.setRepositoryLink()).to(beFalse())
@@ -133,8 +144,7 @@ class GitHubSpec: QuickSpec {
                     }
 
                     it("should return true if the repository already exists") {
-                        expect(gitHub?.createRepository()).to(beNil())
-                        expect(gitHub?.createRepository()).toNot(beNil())
+                        expect(gitHub?.createRepository()?["clone_url"] as? String).toNot(beNil())
                         expect(gitHub?.setRepositoryLink()).to(beTrue())
                         expect(gitHub?.repositoryLink).to(equal("https://github.com/atlastest/testGitHub"))
                     }

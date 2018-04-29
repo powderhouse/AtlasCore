@@ -64,7 +64,7 @@ public class Credentials {
         }
     }
     
-    public func setAuthenticationToken(token: String) {
+    public func setAuthenticationToken(token: String?) {
         self.token = token
     }
     
