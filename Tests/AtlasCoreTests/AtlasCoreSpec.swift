@@ -19,8 +19,9 @@ class AtlasCoreSpec: QuickSpec {
             var atlasCore: AtlasCore!
             
             var directory: URL!
+            let username = "atlastest"
             let credentials = Credentials(
-                "atlastest",
+                username,
                 password: "1a2b3c4d",
                 token: nil
             )
@@ -79,6 +80,8 @@ class AtlasCoreSpec: QuickSpec {
                 }
                 
                 it("successfully syncs with GitHub after a commit") {
+                    expect(atlasCore.remote()).toEventually(contain("github.com/\(username)/Atlas.git"), timeout: TimeInterval(10))
+                    
                     let projectName = "General Project"
                     let file = "index1.html"
 
@@ -92,26 +95,18 @@ class AtlasCoreSpec: QuickSpec {
                     let filePath = fileDirectory.appendingPathComponent(file).path
                     expect(project?.copyInto([filePath])).to(beTrue())
                     atlasCore.atlasCommit()
-                    
-                    sleep(5)
-                    
-                    expect(project?.commitMessage("Commit Message")).to(beTrue())
-                    expect(project?.commitStaged()).to(beTrue())
-                    atlasCore.commitChanges()
-                        
+
                     let logUrl = atlasCore.userDirectory!.appendingPathComponent("log.txt")
                     let exists = fileManager.fileExists(atPath: logUrl.path, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "Unable to find log")
+
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("</ENDENTRY>"), timeout: TimeInterval(10))
+
+                    expect(project?.commitMessage("Commit Message")).to(beTrue())
+                    expect(project?.commitStaged()).to(beTrue())
+                    atlasCore.commitChanges()
                     
-                    do {
-                        let logContents = try String(contentsOf: logUrl, encoding: .utf8)
-                        waitUntil { done in
-                            expect(logContents).to(contain("Branch master set up to track remote branch master from origin."))
-                            done()
-                        }
-                    } catch {
-                        expect(false).to(beTrue(), description: "Unable to read contents of log")
-                    }
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch master set up to track remote branch master from origin."), timeout: TimeInterval(10))
                 }
 
                 context("future instances of AtlasCore") {
@@ -252,10 +247,10 @@ Multiline
                     }
                     
                     it("should only return the commits for a project if specified") {
-                        let log = atlasCore.log(projectName: "General Project")
+                        expect(atlasCore.log(projectName: project1Name).count).toEventually(equal(1), timeout: TimeInterval(10))
                         
-                        expect(log.count).to(equal(1))
-
+                        let log = atlasCore.log(projectName: project1Name)
+                        
                         if let lastCommit = log.last {
                             expect(lastCommit.message).to(contain(message1))
                             expect(lastCommit.files.count).to(equal(1))

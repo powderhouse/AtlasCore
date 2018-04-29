@@ -56,6 +56,14 @@ public class Git {
         return result
     }
     
+    public func remote() -> String? {
+        let result = run("remote", arguments: ["-v"])
+        if (result == "") {
+            return nil
+        }
+        return result
+    }
+    
     public func projects() -> [String] {
         let result = run("ls-tree", arguments: ["-d", "--name-only", "HEAD", "."])
         let names = result.split(separator: "\n").map { String($0) }

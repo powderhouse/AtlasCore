@@ -282,4 +282,12 @@ public class AtlasCore {
         
         return git.status()
     }
+    
+    public func remote() -> String? {
+        guard git != nil else {
+            return nil
+        }
+        
+        return git.remote()
+    }
 }
