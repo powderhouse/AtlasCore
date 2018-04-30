@@ -270,6 +270,10 @@ Multiline
                             }
                         }
                     }
+                    
+                    it("should create syncLogEntries") {
+                        expect(atlasCore.syncLogEntries().count).to(equal(4))
+                    }
                 }
                 
                 context("purge") {

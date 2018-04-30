@@ -294,4 +294,13 @@ public class AtlasCore {
     public func validRepository() -> Bool {
         return gitHub?.validRepository() ?? false
     }
+    
+    public func syncLogEntries() -> [String] {
+        if let logUrl = userDirectory?.appendingPathComponent(GitHub.log) {
+            if let log = try? String(contentsOf: logUrl, encoding: .utf8) {
+                return log.components(separatedBy: "<STARTENTRY>")
+            }
+        }
+        return []
+    }
 }

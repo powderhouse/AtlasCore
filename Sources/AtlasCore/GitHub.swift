@@ -9,6 +9,8 @@ import Foundation
 
 public class GitHub {
     
+    static let log = "log.txt"
+    
     public var credentials: Credentials!
     public var git: Git!
     
