@@ -303,4 +303,9 @@ public class AtlasCore {
         }
         return []
     }
+    
+    public func sync() {
+        let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
+        _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])
+    }
 }

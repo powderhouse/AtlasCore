@@ -10,6 +10,8 @@ import Foundation
 public class GitHub {
     
     static let log = "log.txt"
+    static let syncScriptName = "atlas-sync.sh"
+    static let postCommitScriptName = "post-commit"
     
     public var credentials: Credentials!
     public var git: Git!
@@ -143,11 +145,16 @@ public class GitHub {
         return true
     }
     
-    public func setPostCommitHook() -> Bool {
+    public func hooks() -> URL {
         let gitURL = git.directory.appendingPathComponent(".git")
-        let hooksURL = gitURL.appendingPathComponent("hooks")
-        let postCommitURL = hooksURL.appendingPathComponent("post-commit")
-        let atlasScriptURL = hooksURL.appendingPathComponent("atlas-sync.sh")
+        return gitURL.appendingPathComponent("hooks")
+    }
+    
+    public func setPostCommitHook() -> Bool {
+        let hooksURL = hooks()
+        let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)
+        let atlasScriptURL = hooksURL.appendingPathComponent(GitHub.syncScriptName)
+        let logURL = git.directory.appendingPathComponent("../\(GitHub.log)")
 
         let script = """
 #!/bin/sh
@@ -174,7 +181,7 @@ echo "</ENDENTRY>"
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/atlas-sync.sh" >>../log.txt 2>&1 &
+source "${DIR}/atlas-sync.sh" >>\(logURL.path) 2>&1 &
 """
         return write(hook, to: postCommitURL)
     }
@@ -188,7 +195,7 @@ source "${DIR}/atlas-sync.sh" >>../log.txt 2>&1 &
         
         _ = Glue.runProcess(
             "chmod",
-            arguments: ["a+x", "post-commit"],
+            arguments: ["777", url.path],
             currentDirectory: url.deletingLastPathComponent()
         )
         return true

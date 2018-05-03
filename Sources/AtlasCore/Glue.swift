@@ -24,4 +24,19 @@ public class Glue {
         return process.runAndWait()
     }
     
+    public class func runProcessError(_ command: String, arguments: [String]?=[], currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
+        var process = atlasProcess
+        
+        process.launchPath = "/usr/bin/env"
+        //        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = [command] + (arguments ?? [])
+        
+        if currentDirectory != nil {
+            //            process.currentDirectoryURL = currentDirectory
+            process.currentDirectoryPath = currentDirectory!.path
+        }
+        
+        return process.runAndWaitError()
+    }
+    
 }

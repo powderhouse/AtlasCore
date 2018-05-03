@@ -14,6 +14,7 @@ public protocol AtlasProcess {
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
     func runAndWait() -> String
+    func runAndWaitError() -> String
 }
 
 public protocol AtlasProcessFactory {
@@ -33,6 +34,24 @@ extension Process: AtlasProcess {
 //        }
 //        waitUntilExit()
         
+        let file:FileHandle = pipe.fileHandleForReading
+        let data =  file.readDataToEndOfFile()
+        return String(data: data, encoding: String.Encoding.utf8) as String!
+    }
+    
+    public func runAndWaitError() -> String {
+        let pipe = Pipe()
+        standardOutput = pipe
+        standardError = pipe
+    
+        launch()
+        //        do {
+        //            try run()
+        //        } catch {
+        //            return "AtlasProcess Error: \(error)"
+        //        }
+        //        waitUntilExit()
+    
         let file:FileHandle = pipe.fileHandleForReading
         let data =  file.readDataToEndOfFile()
         return String(data: data, encoding: String.Encoding.utf8) as String!
