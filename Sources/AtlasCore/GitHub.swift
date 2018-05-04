@@ -182,7 +182,7 @@ echo "</ENDENTRY>"
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-(cd "${DIR}" && ./atlas-sync.sh) >>\(logURL.path) 2>&1 &
+(cd "${DIR}" && ./atlas-sync.sh) >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
 """
         return write(hook, to: postCommitURL)
     }
