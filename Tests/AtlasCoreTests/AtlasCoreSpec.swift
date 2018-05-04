@@ -278,8 +278,7 @@ Multiline
                     it("should create more syncLogEntries if sync is called (sorry borrowing setup)") {
                         expect(atlasCore.syncLogEntries().count).toEventually(equal(4))
                         atlasCore.sync()
-                        atlasCore.sync()
-                        expect(atlasCore.syncLogEntries().count).to(equal(5))
+                        expect(atlasCore.syncLogEntries().count).toEventually(equal(5))
                     }
                 }
                 
