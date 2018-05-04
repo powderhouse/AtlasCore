@@ -160,6 +160,7 @@ public class GitHub {
 #!/bin/sh
 
 DATE=`date '+%Y-%m-%d %H:%M:%S'`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo ""
 echo "<STARTENTRY>"
@@ -167,8 +168,8 @@ echo ""
 echo "Recorded: ${DATE}"
 echo ""
 
-git pull origin master
-git push --set-upstream origin master
+(cd "${DIR}" && cd "../.." && git pull origin master)
+(cd "${DIR}" && cd "../.." && git push --set-upstream origin master)
 
 echo ""
 echo "</ENDENTRY>"
@@ -181,7 +182,7 @@ echo "</ENDENTRY>"
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/atlas-sync.sh" >>\(logURL.path) 2>&1 &
+(cd "${DIR}" && ./atlas-sync.sh) >>\(logURL.path) 2>&1 &
 """
         return write(hook, to: postCommitURL)
     }
