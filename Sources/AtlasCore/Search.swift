@@ -48,7 +48,7 @@ public class Search {
         )
     }
 
-    public func search(_ terms: String) {
+    public func search(_ terms: String) -> [NSURL] {
         let stopwords: Set = ["all", "and", "its", "it's", "the"]
         
 //        let properties: [NSObject: AnyObject] = [
@@ -58,12 +58,10 @@ public class Search {
 //            NSString("kSKMinTermLength"): 3,
 //            NSString("kSKStopWords"): stopwords
 //        ]
-//
-//        let index = SKIndexCreateWithURL(nsUrl, nil, SKIndexType(kSKIndexInverted.rawValue), properties).takeRetainedValue()
         
         let query = NSString(string: terms)
         let options = SKSearchOptions(kSKSearchOptionDefault)
-        let search = SKSearchCreate(skIndex, query, options).takeRetainedValue()
+        let search = SKSearchCreate(skIndex, query, options).takeUnretainedValue()
         
         let limit = 10               // Maximum number of results
         let time: TimeInterval = 10 // Maximum time to get results, in seconds
@@ -77,9 +75,11 @@ public class Search {
         
         SKIndexCopyDocumentURLsForDocumentIDs(skIndex, count, &documentIDs, &urls)
         
+        print("COUNT: \(count), DOCUMENT IDS: \(documentIDs), URLS: \(urls)")
+        
         let results: [NSURL] = zip(urls[0 ..< count], scores).flatMap({
             (cfurl, score) -> NSURL? in
-            guard let url = cfurl?.takeRetainedValue() as NSURL?
+            guard let url = cfurl?.takeUnretainedValue() as NSURL?
                 else { return nil }
             
             print("- \(url): \(score)")
@@ -87,6 +87,7 @@ public class Search {
         })
 
         print("RESULTS: \(results) - \(hasMoreResults)")
+        return results
     }
     
     public func close() {

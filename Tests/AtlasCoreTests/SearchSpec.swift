@@ -64,8 +64,8 @@ class SearchSpec: QuickSpec {
 
                 it("should return results when searched") {
                     if search != nil {
-                        search!.search("test")
-                        expect(false).to(beTrue())
+                        let results = search!.search("test")
+                        expect(results).toNot(beEmpty())
                     } else {
                         expect(false).to(beTrue(), description: "Search is nil")
                     }
