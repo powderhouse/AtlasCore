@@ -18,32 +18,19 @@ public class Search {
         self.directory = directory
         self.indexURL = NSURL(fileURLWithPath: directory.appendingPathComponent("search.index").path)
         
-        print("INDEX: \(self.indexURL)")
-        
         let type: SKIndexType = kSKIndexInverted
         
-        var unmanagedSKIndex = SKIndexOpenWithURL(self.indexURL, self.indexName, true)
+        skIndex = SKIndexOpenWithURL(self.indexURL, self.indexName, true)?.takeUnretainedValue()
         
-        print("XXX INITIAL UNMANAGED: \(unmanagedSKIndex)")
-        
-        if unmanagedSKIndex == nil {
-            unmanagedSKIndex = SKIndexCreateWithURL(
+        if skIndex == nil {
+            skIndex = SKIndexCreateWithURL(
                 self.indexURL,
                 self.indexName,
                 type,
                 nil
-            )
-            print("XXX SECOND UNMANAGED: \(unmanagedSKIndex)")
+            ).takeRetainedValue()
         }
 
-        guard unmanagedSKIndex != nil else { return nil }
-
-        unmanagedSKIndex?.retain()
-        
-        print("XXX UNMANAGED: \(unmanagedSKIndex)")
-        skIndex = unmanagedSKIndex!.takeRetainedValue()
-
-        print("XXX RETAINED: \(skIndex)")
         guard skIndex != nil else { return nil }
 
         SKLoadDefaultExtractorPlugIns()

@@ -53,20 +53,24 @@ class SearchSpec: QuickSpec {
                 }
             }
             
-//            context("search") {
-//                beforeEach {
-//                    if search != nil {
-//                        expect(search!.add(file)).to(beTrue())
-//                    } else {
-//                        expect(false).to(beTrue(), description: "Search is nil")
-//                    }
-//                }
-//
-//                it("should return results when searched") {
-////                    search.search("some")
-//                    expect(false).to(beTrue())
-//                }
-//            }
+            context("search") {
+                beforeEach {
+                    if search != nil {
+                        expect(search!.add(file)).to(beTrue())
+                    } else {
+                        expect(false).to(beTrue(), description: "Search is nil")
+                    }
+                }
+
+                it("should return results when searched") {
+                    if search != nil {
+                        search!.search("test")
+                        expect(false).to(beTrue())
+                    } else {
+                        expect(false).to(beTrue(), description: "Search is nil")
+                    }
+                }
+            }
         }
     }
 }
