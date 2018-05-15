@@ -28,7 +28,7 @@ public class Search {
                 self.indexName,
                 type,
                 nil
-            ).takeRetainedValue()
+            ).takeUnretainedValue()
         }
 
         guard skIndex != nil else { return nil }
