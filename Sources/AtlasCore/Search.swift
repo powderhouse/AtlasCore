@@ -38,6 +38,8 @@ public class Search {
 
         guard unmanagedSKIndex != nil else { return nil }
 
+        unmanagedSKIndex?.retain()
+        
         print("XXX UNMANAGED: \(unmanagedSKIndex)")
         skIndex = unmanagedSKIndex!.takeRetainedValue()
 

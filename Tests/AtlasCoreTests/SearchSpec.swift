@@ -36,21 +36,20 @@ class SearchSpec: QuickSpec {
             }
             
             afterEach {
-//                if search != nil {
-//                    search!.close()
-//                    expect(search!.skIndex).toEventually(beNil())
-//                }
+                if search != nil {
+                    search!.close()
+                    expect(search!.skIndex).toEventually(beNil())
+                }
                 FileSystem.deleteDirectory(directory)
             }
             
             context("add") {
                 it("should successfully add a file to the search index") {
-//                    if search != nil {
-//                        expect(search!.add(file)).to(beTrue())
-//                    } else {
-//                        expect(false).to(beTrue(), description: "Search is nil")
-//                    }
-                    expect(true).to(beTrue())
+                    if search != nil {
+                        expect(search!.add(file)).to(beTrue())
+                    } else {
+                        expect(false).to(beTrue(), description: "Search is nil")
+                    }
                 }
             }
             
