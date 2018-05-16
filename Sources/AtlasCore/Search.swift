@@ -28,7 +28,7 @@ public class Search {
                 self.indexName,
                 type,
                 nil
-            ).takeUnretainedValue()
+            )?.takeUnretainedValue()
         }
 
         guard skIndex != nil else { return nil }
@@ -115,12 +115,12 @@ public class Search {
     
     
     public func search(_ terms: String) -> [NSURL] {
-        let stopwords: Set = ["all", "and", "its", "it's", "the"]
-
+//        let stopwords: Set = ["all", "and", "its", "it's", "the"]
+//
 //        let properties: [NSObject: AnyObject] = [
-////            NSString("kSKStartTermChars"): "", // additional starting-characters for terms
-////            NSString("kSKTermChars"): "-_@.'", // additional characters within terms
-////            NSString("kSKEndTermChars"): "",   // additional ending-characters for terms
+//            NSString("kSKStartTermChars"): "", // additional starting-characters for terms
+//            NSString("kSKTermChars"): "-_@.'", // additional characters within terms
+//            NSString("kSKEndTermChars"): "",   // additional ending-characters for terms
 //            NSString("kSKMinTermLength"): 3,
 //            NSString("kSKStopWords"): stopwords
 //        ]
@@ -129,8 +129,8 @@ public class Search {
         let options = SKSearchOptions(kSKSearchOptionDefault)
         let search = SKSearchCreate(skIndex, query, options).takeUnretainedValue()
 
-        let limit = 10               // Maximum number of results
-        let time: TimeInterval = 1 // Maximum time to get results, in seconds
+        let limit = 10
+        let time: TimeInterval = 1
 
         var documentIDs: [SKDocumentID] = Array(repeating: 0, count: limit)
         var urls: [Unmanaged<CFURL>?] = Array(repeating: nil, count: limit)

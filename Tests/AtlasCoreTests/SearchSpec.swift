@@ -65,12 +65,7 @@ class SearchSpec: QuickSpec {
                         expect(search!.add(file1)).to(beTrue())
                         expect(search!.add(file2)).to(beTrue())
                         let docCount = SKIndexGetDocumentCount(search?.skIndex).distance(to: 0) * -1
-                        expect(docCount).toEventually(beGreaterThan(0))
-                        print("")
-                        print("")
-                        print("DOC COUNT: \(docCount)")
-                        print("")
-                        print("")
+                        expect(docCount).toEventually(equal(9))
                     } else {
                         expect(false).to(beTrue(), description: "Search is nil")
                     }
@@ -88,15 +83,19 @@ class SearchSpec: QuickSpec {
                     }
                 }
 
-                it("should return results when searched") {
+//                it("should return results when searching name of file") {
+//                    if search != nil {
+//                        let results = search!.search("test1")
+//                        expect(results.count).toEventually(equal(1))
+//                    } else {
+//                        expect(false).to(beTrue(), description: "Search is nil")
+//                    }
+//                }
+
+                it("should return results when searching contents of file") {
                     if search != nil {
-                        let results = search!.search("text")
-                        expect(results).toEventuallyNot(beEmpty())
-                        print("")
-                        print("")
-                        print("RESULTS: \(results)")
-                        print("")
-                        print("")
+                        let results = search!.search("more")
+                        expect(results.count).toEventually(equal(2))
                     } else {
                         expect(false).to(beTrue(), description: "Search is nil")
                     }
