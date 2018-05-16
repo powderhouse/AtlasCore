@@ -129,8 +129,8 @@ public class Search {
         let options = SKSearchOptions(kSKSearchOptionDefault)
         let search = SKSearchCreate(skIndex, query, options).takeUnretainedValue()
 
-        let limit = 1               // Maximum number of results
-        let time: TimeInterval = 10 // Maximum time to get results, in seconds
+        let limit = 10               // Maximum number of results
+        let time: TimeInterval = 1 // Maximum time to get results, in seconds
 
         var documentIDs: [SKDocumentID] = Array(repeating: 0, count: limit)
         var urls: [Unmanaged<CFURL>?] = Array(repeating: nil, count: limit)
@@ -141,18 +141,14 @@ public class Search {
 
         SKIndexCopyDocumentURLsForDocumentIDs(skIndex, count, &documentIDs, &urls)
 
-        print("COUNT: \(count), DOCUMENT IDS: \(documentIDs), URLS: \(urls)")
-
         let results: [NSURL] = zip(urls[0 ..< count], scores).flatMap({
             (cfurl, score) -> NSURL? in
             guard let url = cfurl?.takeUnretainedValue() as NSURL?
                 else { return nil }
 
-            print("- \(url): \(score)")
             return url
         })
 
-        print("RESULTS: \(results) - \(hasMoreResults)")
         return results
     }
     
