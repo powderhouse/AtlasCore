@@ -64,8 +64,7 @@ class SearchSpec: QuickSpec {
                         expect(search!.add(file)).to(beTrue())
                         expect(search!.add(file1)).to(beTrue())
                         expect(search!.add(file2)).to(beTrue())
-                        let docCount = SKIndexGetDocumentCount(search?.skIndex).distance(to: 0) * -1
-                        expect(docCount).toEventually(equal(9))
+                        expect(search!.documentCount()).toEventually(equal(9))
                     } else {
                         expect(false).to(beTrue(), description: "Search is nil")
                     }

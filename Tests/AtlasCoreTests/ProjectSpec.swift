@@ -223,6 +223,33 @@ class ProjectSpec: QuickSpec {
                 }
             }
             
+            context("allFileUrls") {
+                
+                let stagedName = "staged.html"
+                let unstagedName = "unstaged.html"
+                let commitedName = "committed.html"
+                let commitMessage = "A commit"
+                
+                beforeEach {
+                    let stagedDirectory = project.directory("staged")
+                    Helper.addFile(commitedName, directory: stagedDirectory)
+                    
+                    _ = project.commitSlug(commitMessage)
+                    
+                    expect(project.commitMessage(commitMessage)).to(beTrue())
+                    expect(project.commitStaged()).to(beTrue())
+                    
+                    Helper.addFile(stagedName, directory: stagedDirectory)
+                    Helper.addFile(unstagedName, directory: stagedDirectory)
+                    _ = project.changeState([unstagedName], to: "unstaged")
+                }
+                
+                it("should return all files") {
+                    expect(project.allFileUrls().count).to(equal(4))
+                }
+                
+            }
+            
         }
     }
 }

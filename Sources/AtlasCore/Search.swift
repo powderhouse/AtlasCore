@@ -88,6 +88,10 @@ public class Search {
         return allResults
     }
     
+    public func documentCount() -> Int {
+        return SKIndexGetDocumentCount(self.skIndex).distance(to: 0) * -1
+    }
+    
     public func close() {
         SKIndexClose(self.skIndex)
         self.skIndex = nil
