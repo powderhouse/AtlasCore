@@ -43,6 +43,7 @@ class AtlasCoreSpec: QuickSpec {
             }
             
             afterEach {
+                atlasCore.closeSearch()
                 atlasCore.deleteGitHubRepository()
                 FileSystem.deleteDirectory(directory)
             }
@@ -108,6 +109,11 @@ class AtlasCoreSpec: QuickSpec {
                     atlasCore.commitChanges()
                     
                     expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch master set up to track remote branch master from origin."), timeout: TimeInterval(30))
+                }
+                
+                it("initializes search successfully") {
+                    expect(atlasCore.initSearch()).to(beTrue())
+                    expect(atlasCore.search?.documentCount()).to(equal(0))
                 }
 
                 context("future instances of AtlasCore") {
@@ -177,7 +183,7 @@ class AtlasCoreSpec: QuickSpec {
                     }
                 }
                 
-                context("log") {
+                context("complex setup") {
                     
                     let project1Name = "General Project"
                     let project2Name = "AnotherProject"
@@ -233,53 +239,73 @@ Multiline
                         
                         expect(atlasCore.log().count).toEventually(equal(2), timeout: TimeInterval(30))
                     }
+                    
+                    context("log") {
 
-                    it("should return an array of commit information ordered by date submitted") {
-                        let log = atlasCore.log()
- 
-                        if let lastCommit = log.last {
-                            expect(lastCommit.message).to(contain(message2))
-                            expect(lastCommit.files.count).to(equal(2))
-                            if let firstFile = lastCommit.files.first {
-                                expect(firstFile.name).to(equal(file2))
-                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/\(lastCommit.hash)/\(project2Name)/committed/\(slug2)/\(file2)"))
+                        it("should return an array of commit information ordered by date submitted") {
+                            let log = atlasCore.log()
+     
+                            if let lastCommit = log.last {
+                                expect(lastCommit.message).to(contain(message2))
+                                expect(lastCommit.files.count).to(equal(2))
+                                if let firstFile = lastCommit.files.first {
+                                    expect(firstFile.name).to(equal(file2))
+                                    expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/\(lastCommit.hash)/\(project2Name)/committed/\(slug2)/\(file2)"))
+                                }
                             }
                         }
-                    }
-                    
-                    it("should only return the commits for a project if specified") {
-                        expect(atlasCore.log(projectName: project1Name).count).toEventually(equal(1), timeout: TimeInterval(30))
                         
-                        let log = atlasCore.log(projectName: project1Name)
-                        
-                        if let lastCommit = log.last {
-                            expect(lastCommit.message).to(contain(message1))
-                            expect(lastCommit.files.count).to(equal(1))
-                            if let firstFile = lastCommit.files.first {
-                                expect(firstFile.name).to(equal(file1))
-                                expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/\(lastCommit.hash)/\(project1Name)/committed/\(slug1)/\(file1)"))
-                            } else {
-                                expect(false).to(beTrue(), description: "file missing")
-                            }
+                        it("should only return the commits for a project if specified") {
+                            expect(atlasCore.log(projectName: project1Name).count).toEventually(equal(1), timeout: TimeInterval(30))
                             
-                            expect(lastCommit.projects.count).to(equal(1))
-                            if let project = lastCommit.projects.first {
-                                expect(project.name).to(equal("General Project"))
-                            } else {
-                                expect(false).to(beTrue(), description: "project missing")
+                            let log = atlasCore.log(projectName: project1Name)
+                            
+                            if let lastCommit = log.last {
+                                expect(lastCommit.message).to(contain(message1))
+                                expect(lastCommit.files.count).to(equal(1))
+                                if let firstFile = lastCommit.files.first {
+                                    expect(firstFile.name).to(equal(file1))
+                                    expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/\(lastCommit.hash)/\(project1Name)/committed/\(slug1)/\(file1)"))
+                                } else {
+                                    expect(false).to(beTrue(), description: "file missing")
+                                }
+                                
+                                expect(lastCommit.projects.count).to(equal(1))
+                                if let project = lastCommit.projects.first {
+                                    expect(project.name).to(equal("General Project"))
+                                } else {
+                                    expect(false).to(beTrue(), description: "project missing")
+                                }
                             }
+                        }
+                        
+                        it("should create syncLogEntries") {
+                            expect(atlasCore.syncLogEntries().count).to(equal(4))
+                        }
+                    
+                    }
+                    
+                    context("syncLogEntries") {
+                        it("should create more syncLogEntries if sync is called") {
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(4))
+                            atlasCore.sync()
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(5))
                         }
                     }
                     
-                    it("should create syncLogEntries") {
-                        expect(atlasCore.syncLogEntries().count).to(equal(4))
-                    }
-                    
-                    it("should create more syncLogEntries if sync is called (sorry borrowing setup)") {
-                        expect(atlasCore.syncLogEntries().count).toEventually(equal(4))
-                        atlasCore.sync()
-                        expect(atlasCore.syncLogEntries().count).toEventually(equal(5))
-                    }
+//                    context("search") {
+//                        beforeEach {
+//                            expect(atlasCore.initSearch()).to(beTrue())
+//                        }
+//                        
+//                        it("initializes correctly, consuming existing files") {
+//                            expect(atlasCore.search.documentCount()).to(beGreaterThan(0))
+//                        }
+//                        
+//                        it("processes a new file") {
+//                            
+//                        }
+//                    }
                 }
                 
                 context("purge") {

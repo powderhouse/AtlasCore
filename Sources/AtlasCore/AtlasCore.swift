@@ -22,7 +22,7 @@ public class AtlasCore {
     public var atlasDirectory: URL?
     var git: Git!
     var gitHub: GitHub!
-    var search: Search!
+    public var search: Search!
     
     
     public init(_ baseDirectory: URL?=nil) {
@@ -34,7 +34,7 @@ public class AtlasCore {
         
         if let credentials = getCredentials() {
             _ = initGitAndGitHub(credentials)
-            initSearch()
+//            _ = initSearch()
         }
         
     }
@@ -142,18 +142,29 @@ public class AtlasCore {
         return true
     }
     
-    public func initSearch() {
-        guard userDirectory != nil else { return }
+    public func initSearch() -> Bool {
+        guard search == nil else { return true }
+        
+        guard userDirectory != nil else { return false }
         
         search = Search(userDirectory!)
+        
+        guard search != nil else { return false }
         
         if search.documentCount() == 0 {
             for project in projects() {
                 for file in project.allFileUrls() {
-                    search.add(file)
+                    if !search.add(file) {
+                        return false
+                    }
                 }
             }
         }
+        return true
+    }
+    
+    public func closeSearch() {
+        search?.close()
     }
     
     public func deleteGitHubRepository() {
