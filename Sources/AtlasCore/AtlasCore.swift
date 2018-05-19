@@ -34,7 +34,9 @@ public class AtlasCore {
         
         if let credentials = getCredentials() {
             _ = initGitAndGitHub(credentials)
-//            _ = initSearch()
+            if userDirectory != nil && Search.exists(userDirectory!) {
+                _ = initSearch()
+            }
         }
         
     }

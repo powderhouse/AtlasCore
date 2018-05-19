@@ -9,18 +9,27 @@ import Cocoa
 
 public class Search {
     
+    public static let indexFileName = "search.index"
+    
     var directory: URL!
     var indexURL: NSURL!
     public weak var skIndex: SKIndex!
     let indexName = NSString(string: "SearchIndex")
     
+    public class func exists(_ directory: URL) -> Bool {
+        let indexURL = directory.appendingPathComponent(Search.indexFileName)
+        return FileSystem.fileExists(indexURL)
+    }
+    
     public init?(_ directory: URL) {
         self.directory = directory
-        self.indexURL = NSURL(fileURLWithPath: directory.appendingPathComponent("search.index").path)
+        self.indexURL = NSURL(fileURLWithPath: directory.appendingPathComponent(Search.indexFileName).path)
         
         let type: SKIndexType = kSKIndexInverted
         
-        skIndex = SKIndexOpenWithURL(self.indexURL, self.indexName, true)?.takeUnretainedValue()
+        if Search.exists(directory) {
+            skIndex = SKIndexOpenWithURL(self.indexURL, self.indexName, true)?.takeUnretainedValue()
+        }
         
         if skIndex == nil {
             skIndex = SKIndexCreateWithURL(

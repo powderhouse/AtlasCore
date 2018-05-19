@@ -60,6 +60,8 @@ class AtlasCoreSpec: QuickSpec {
                 beforeEach {
                     expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: TimeInterval(30))
+
+                    expect(atlasCore.initSearch()).to(beTrue())
                 }
 
                 it("saves the credentials to the filesystem") {
@@ -112,19 +114,40 @@ class AtlasCoreSpec: QuickSpec {
                 }
                 
                 it("initializes search successfully") {
-                    expect(atlasCore.initSearch()).to(beTrue())
                     expect(atlasCore.search?.documentCount()).to(equal(0))
+
+                    let searchIndexPath = atlasCore.userDirectory?.appendingPathComponent(Search.indexFileName).path
+                    let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "No search index found")
                 }
 
                 context("future instances of AtlasCore") {
                     var atlasCore2: AtlasCore!
 
                     beforeEach {
+                        atlasCore.closeSearch()
+                        
+                        let searchIndexPath = atlasCore.userDirectory?.appendingPathComponent(Search.indexFileName).path
+                        let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No search index found")
+
                         atlasCore2 = AtlasCore(directory)
+                    }
+                    
+                    afterEach {
+                        atlasCore2.closeSearch()
                     }
 
                     it("automatically inits git") {
                         expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
+                    }
+                    
+                    it("automatically inits search") {
+                        expect(atlasCore2.search).toNot(beNil())
+                        
+                        let searchIndexPath = atlasCore2.userDirectory?.appendingPathComponent(Search.indexFileName).path
+                        let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No search index found")
                     }
 
                     context("initialized again") {
