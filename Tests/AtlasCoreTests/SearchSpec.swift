@@ -85,52 +85,54 @@ class SearchSpec: QuickSpec {
                     }
                 }
                 
-//                context("move") {
-//
-//                    it("should return the new file path") {
-//                        var newFile2 = file2.deletingLastPathComponent()
-//                        let newDir = newFile2.appendingPathComponent("NEWDIR")
-//                        newFile2 = newDir.appendingPathComponent(fileName2)
-//
-//                        FileSystem.createDirectory(newDir)
-//                        expect(FileSystem.move(file2.path, into: newDir)).to(beTrue())
-//
-//                        if search != nil {
-//                            expect(search!.move(from: file2, to: newFile2)).to(beTrue())
-//
-//                            let results = search!.search("even more text")
-//                            expect(results.count).toEventually(equal(1))
-//
-//                            let iterator = SKIndexDocumentIteratorCreate(search?.skIndex, nil).takeUnretainedValue()
-//                            var document = SKIndexDocumentIteratorCopyNext(iterator)
-//
-//                            print("")
-//                            print("")
-//                            print("")
-//                            print("DOC COUNT: \(search?.documentCount())")
-//                            print("")
-//                            while document != nil {
-//                                var parent = document?.takeRetainedValue()
-//                                while parent != nil {
-//                                    let docURL = SKDocumentCopyURL(parent).takeRetainedValue()
-//                                    print("DOC: \(docURL)")
-//                                    print("")
-//                                    parent = SKDocumentGetParent(parent)?.takeRetainedValue()
-//                                    print("")
-//                                    print("PARENT: \(parent)")
-//                                }
-//                                document = SKIndexDocumentIteratorCopyNext(iterator)
-//                            }
-//                            print("")
-//                            print("")
-//                            print("")
-//
-//                            expect(results.first?.path).to(contain("NEWDIR"))
-//                        } else {
-//                            expect(false).to(beTrue(), description: "Search is nil")
-//                        }
-//                    }
-//                }
+                context("move") {
+
+                    it("should return the new file path") {
+                        print("START DOC COUNT: \(search?.documentCount())")
+                        
+                        var newFile2 = file2.deletingLastPathComponent()
+                        let newDir = newFile2.appendingPathComponent("NEWDIR")
+                        newFile2 = newDir.appendingPathComponent(fileName2)
+
+                        FileSystem.createDirectory(newDir)
+                        expect(FileSystem.move(file2.path, into: newDir)).to(beTrue())
+
+                        if search != nil {
+                            expect(search!.move(from: file2, to: newFile2)).to(beTrue())
+
+                            let results = search!.search("even more text")
+                            expect(results.count).toEventually(equal(1))
+
+                            let iterator = SKIndexDocumentIteratorCreate(search?.skIndex, nil).takeUnretainedValue()
+                            var document = SKIndexDocumentIteratorCopyNext(iterator)
+
+                            print("")
+                            print("")
+                            print("")
+                            print("DOC COUNT: \(search?.documentCount())")
+                            print("")
+                            while document != nil {
+                                var parent = document?.takeRetainedValue()
+                                while parent != nil {
+                                    let docURL = SKDocumentCopyURL(parent).takeRetainedValue()
+                                    print("DOC: \(docURL)")
+                                    print("")
+                                    parent = SKDocumentGetParent(parent)?.takeRetainedValue()
+                                    print("")
+                                    print("PARENT: \(parent)")
+                                }
+                                document = SKIndexDocumentIteratorCopyNext(iterator)
+                            }
+                            print("")
+                            print("")
+                            print("")
+
+                            expect(results.first?.path).to(contain("NEWDIR"))
+                        } else {
+                            expect(false).to(beTrue(), description: "Search is nil")
+                        }
+                    }
+                }
                 
                 context("remove") {
                     it("should remove the file from the index") {

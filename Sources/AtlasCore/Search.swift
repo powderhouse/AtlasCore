@@ -66,22 +66,24 @@ public class Search {
     }
     
     public func move(from: URL, to: URL) -> Bool {
-        let fromDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: from.path))
-        
-        var toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: to.path))
-        if from.lastPathComponent == to.lastPathComponent {
-            let toDirectory = to.deletingLastPathComponent()
-            toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: toDirectory.path))
-        }
-        
-        let success = SKIndexMoveDocument(
-            self.skIndex,
-            fromDoc?.takeUnretainedValue(),
-            toDoc?.takeUnretainedValue()
-        )
+        let success = add(to)
+
+//        let fromDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: from.path))
+//
+//        var toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: to.path))
+//        if from.lastPathComponent == to.lastPathComponent {
+//            let toDirectory = to.deletingLastPathComponent()
+//            toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: toDirectory.path))
+//        }
+//
+//        let success = SKIndexMoveDocument(
+//            self.skIndex,
+//            fromDoc?.takeUnretainedValue(),
+//            toDoc?.takeUnretainedValue()
+//        )
         
         if success {
-            return SKIndexFlush(self.skIndex)
+            return remove(from)            
         }
         
         return false
