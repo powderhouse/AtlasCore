@@ -14,6 +14,7 @@ public class Search {
     var directory: URL!
     var indexURL: NSURL!
     public weak var skIndex: SKIndex!
+    var indexFileName: String!
     let indexName = NSString(string: "SearchIndex")
     
     public class func exists(_ directory: URL) -> Bool {
@@ -21,9 +22,10 @@ public class Search {
         return FileSystem.fileExists(indexURL)
     }
     
-    public init?(_ directory: URL) {
+    public init?(_ directory: URL, indexFileName: String?=Search.indexFileName) {
         self.directory = directory
-        self.indexURL = NSURL(fileURLWithPath: directory.appendingPathComponent(Search.indexFileName).path)
+        self.indexFileName = indexFileName
+        self.indexURL = NSURL(fileURLWithPath: directory.appendingPathComponent(self.indexFileName).path)
         
         let type: SKIndexType = kSKIndexInverted
         
@@ -63,8 +65,36 @@ public class Search {
         return false
     }
     
+    public func move(from: URL, to: URL) -> Bool {
+        let fromDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: from.path))
+        
+        var toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: to.path))
+        if from.lastPathComponent == to.lastPathComponent {
+            let toDirectory = to.deletingLastPathComponent()
+            toDoc = SKDocumentCreateWithURL(NSURL(fileURLWithPath: toDirectory.path))
+        }
+        
+        let success = SKIndexMoveDocument(
+            self.skIndex,
+            fromDoc?.takeUnretainedValue(),
+            toDoc?.takeUnretainedValue()
+        )
+        
+        if success {
+            return SKIndexFlush(self.skIndex)
+        }
+        
+        return false
+    }
+    
+    public func remove(_ file: URL) -> Bool {
+        let document = SKDocumentCreateWithURL(NSURL(fileURLWithPath: file.path))
+        return SKIndexRemoveDocument(self.skIndex, document?.takeUnretainedValue())
+    }
     
     public func search(_ terms: String) -> [NSURL] {
+        guard SKIndexFlush(self.skIndex) else { return [] }
+        
         let query = NSString(string: terms)
         let options = SKSearchOptions(kSKSearchOptionDefault)
         let search = SKSearchCreate(skIndex, query, options).takeUnretainedValue()

@@ -21,10 +21,13 @@ public class Project {
     
     public static let commitMessageFile = "commit_message.txt"
     public static let readme = "readme.md"
+    
+    var search: Search?
 
-    public init(_ name: String, baseDirectory: URL) {
+    public init(_ name: String, baseDirectory: URL, search: Search?=nil) {
         self.name = name
         self.projectDirectory = createFolder(name, in: baseDirectory)
+        self.search = search
 
         initFoldersAndReadmes()
     }
@@ -115,6 +118,7 @@ public class Project {
         } catch {
             return false
         }
+        
         return true
     }
     
