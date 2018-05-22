@@ -21,10 +21,13 @@ public class Project {
     
     public static let commitMessageFile = "commit_message.txt"
     public static let readme = "readme.md"
+    
+    var search: Search?
 
-    public init(_ name: String, baseDirectory: URL) {
+    public init(_ name: String, baseDirectory: URL, search: Search?=nil) {
         self.name = name
         self.projectDirectory = createFolder(name, in: baseDirectory)
+        self.search = search
 
         initFoldersAndReadmes()
     }
@@ -91,6 +94,23 @@ public class Project {
         return FileSystem.filesInDirectory(directory(state), excluding: [Project.readme])
     }
     
+    public func allFileUrls() -> [URL] {
+        var all: [URL] = []
+        for state in states {
+            if state == "committed" {
+                let commits = files(state)
+                for commit in commits {
+                    let commitDirectory = directory(state).appendingPathComponent(commit)
+                    let commitFiles = FileSystem.filesInDirectory(commitDirectory)
+                    all += commitFiles.map { commitDirectory.appendingPathComponent($0) }
+                }
+            } else {
+                all += files(state).map { directory(state).appendingPathComponent($0) }
+            }
+        }
+        return all
+    }
+    
     public func commitMessage(_ message: String) -> Bool {
         let commitMessageURL = directory().appendingPathComponent(Project.commitMessageFile)
         do {
@@ -98,6 +118,7 @@ public class Project {
         } catch {
             return false
         }
+        
         return true
     }
     
