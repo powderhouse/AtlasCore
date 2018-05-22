@@ -15,6 +15,8 @@ class ProjectSpec: QuickSpec {
     override func spec() {
         describe("Project") {
             
+            var baseDirectory: URL!
+            
             let projectName = "Project"
             var project: Project!
             var directory: URL!
@@ -23,12 +25,17 @@ class ProjectSpec: QuickSpec {
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
+            var search: Search!
+            
             beforeEach {
-                directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testProject")
-                project = Project(projectName, baseDirectory: directory)
+                baseDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+                search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
+                directory = baseDirectory.appendingPathComponent("testProject")
+                project = Project(projectName, baseDirectory: directory, search: search)
             }
             
             afterEach {
+                search.close()
                 FileSystem.deleteDirectory(directory)
             }
             
@@ -160,6 +167,20 @@ class ProjectSpec: QuickSpec {
                     
                     expect(duplicateSlug).to(contain("-2-2"))
                     commitFolder = project.directory("committed").appendingPathComponent(duplicateSlug)
+                }
+                
+                it("will make the commit message accessible via search") {
+                    let searchTerms = "a commit"
+                    let commitMessageFileUrl = commitFolder.appendingPathComponent("readme.md")
+                    do {
+                        let contents = try String(contentsOf: commitMessageFileUrl, encoding: .utf8)
+                        expect(contents).to(contain(searchTerms))
+                    } catch {
+                        expect(false).to(beTrue(), description: "unable to find search terms in file")
+                    }
+                    
+                    expect(search.search(searchTerms).count).toEventually(equal(1))
+//                    expect(search.search("index").count).toEventually(equal(1))
                 }
                 
             }

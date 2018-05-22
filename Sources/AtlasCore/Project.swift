@@ -156,7 +156,15 @@ public class Project {
         
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
-        return FileSystem.move(filePaths, into: commitUrl)
+        if !FileSystem.move(filePaths, into: commitUrl) {
+            return false
+        }
+        
+        for file in FileSystem.filesInDirectory(commitUrl) {
+            _ = search?.add(commitUrl.appendingPathComponent(file))
+        }
+        
+        return true
     }
     
     public func commitSlug(_ message: String) -> String {

@@ -22,7 +22,7 @@ class SearchSpec: QuickSpec {
             let fileName1 = "test1.txt"
             var file1: URL!
 
-            let fileName2 = "test2.txt"
+            let fileName2 = "readme.md"
             var file2: URL!
 
             var search: Search?
@@ -42,7 +42,7 @@ class SearchSpec: QuickSpec {
                 file1 = directory.appendingPathComponent(fileName1)
                 expect(try? String(contentsOf: file1, encoding: .utf8)).to(contain("more text"))
 
-                Helper.addFile(fileName2, directory: directory, contents: "even more text another might search")
+                Helper.addFile(fileName2, directory: directory, contents: "even more text this time in a readme")
                 file2 = directory.appendingPathComponent(fileName2)
                 expect(try? String(contentsOf: file2, encoding: .utf8)).to(contain("even more text"))
 
@@ -88,8 +88,6 @@ class SearchSpec: QuickSpec {
                 context("move") {
 
                     it("should return the new file path") {
-                        print("START DOC COUNT: \(search?.documentCount())")
-                        
                         var newFile2 = file2.deletingLastPathComponent()
                         let newDir = newFile2.appendingPathComponent("NEWDIR")
                         newFile2 = newDir.appendingPathComponent(fileName2)
@@ -100,32 +98,8 @@ class SearchSpec: QuickSpec {
                         if search != nil {
                             expect(search!.move(from: file2, to: newFile2)).to(beTrue())
 
-                            let results = search!.search("even more text")
+                            let results = search!.search("this time in a readme")
                             expect(results.count).toEventually(equal(1))
-
-                            let iterator = SKIndexDocumentIteratorCreate(search?.skIndex, nil).takeUnretainedValue()
-                            var document = SKIndexDocumentIteratorCopyNext(iterator)
-
-                            print("")
-                            print("")
-                            print("")
-                            print("DOC COUNT: \(search?.documentCount())")
-                            print("")
-                            while document != nil {
-                                var parent = document?.takeRetainedValue()
-                                while parent != nil {
-                                    let docURL = SKDocumentCopyURL(parent).takeRetainedValue()
-                                    print("DOC: \(docURL)")
-                                    print("")
-                                    parent = SKDocumentGetParent(parent)?.takeRetainedValue()
-                                    print("")
-                                    print("PARENT: \(parent)")
-                                }
-                                document = SKIndexDocumentIteratorCopyNext(iterator)
-                            }
-                            print("")
-                            print("")
-                            print("")
 
                             expect(results.first?.path).to(contain("NEWDIR"))
                         } else {

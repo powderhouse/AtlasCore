@@ -195,7 +195,7 @@ public class AtlasCore {
         }
         
         if !Project.exists(name, in: atlasDirectory!) {
-            _ = Project(name, baseDirectory: atlasDirectory!)
+            _ = Project(name, baseDirectory: atlasDirectory!, search: search)
         }
         
         return true
@@ -214,7 +214,7 @@ public class AtlasCore {
             return nil
         }
 
-        return Project(name, baseDirectory: atlasDirectory!)
+        return Project(name, baseDirectory: atlasDirectory!, search: search)
     }
     
     public func log(projectName: String?=nil, full: Bool=false) -> [Commit] {

@@ -51,10 +51,15 @@ public class Search {
         let nsFile = NSURL(fileURLWithPath: file.path)
         let doc = SKDocumentCreateWithURL(nsFile)
         
+        var mimeType: NSString? = nil
+        if file.lastPathComponent.contains(".md") {
+            mimeType = NSString(string: "text/plain")
+        }
+        
         let success = SKIndexAddDocument(
             skIndex,
             doc?.takeUnretainedValue(),
-            nil,
+            mimeType,
             true
         )
         
