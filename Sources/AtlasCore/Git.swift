@@ -125,7 +125,7 @@ public class Git {
         return run("commit", arguments: ["-am", message ?? "Atlas commit"])
     }
     
-    public func log(projectName: String?=nil, full: Bool=true) -> [[String: Any]] {
+    public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {
         var arguments = [
             "--pretty=format:<START COMMIT>%H<DELIMITER>%B<DELIMITER>",
             "--reverse",
@@ -155,11 +155,22 @@ public class Git {
             let components = commit.components(separatedBy: "<DELIMITER>")
             if let hash = components.first {
                 let message = components[1]
-                if let files = components.last {
+                if let fileString = components.last {
+                    let files = fileString.components(separatedBy: "\n").filter { $0.count > 0 }
+                    if commitSlugFilter != nil {
+                        if let file = files.first {
+                            let fileComponents = file.components(separatedBy: "/")
+                            let commitSlug = fileComponents[fileComponents.count - 2]
+                            if !commitSlugFilter!.contains(commitSlug) {
+                                continue
+                            }
+                        }
+                    }
+                    
                     data.append([
                         "message": message,
                         "hash": hash,
-                        "files": files.components(separatedBy: "\n").filter { $0.count > 0 }
+                        "files": files
                     ])
                 }
             }

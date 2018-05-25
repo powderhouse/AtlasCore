@@ -302,6 +302,27 @@ Multiline
                             }
                         }
                         
+                        it("should only return a specific commits if a commitSlug is specified") {
+                            let log = atlasCore.log(commitSlugFilter: [slug2])
+                            expect(log.count).toEventually(equal(1), timeout: TimeInterval(10))
+                            
+                            if let lastCommit = log.last {
+                                expect(lastCommit.message).to(contain(message2))
+                                expect(lastCommit.files.count).to(equal(2))
+                            }
+                        }
+
+                        it("should only return multiple specific commits if multiple commitSlugs are specified") {
+                            let log = atlasCore.log(commitSlugFilter: [slug1, slug2])
+                            expect(log.count).toEventually(equal(2), timeout: TimeInterval(10))
+                            
+                            if let firstCommit = log.first {
+                                expect(firstCommit.message).to(contain(message1))
+                                expect(firstCommit.files.count).to(equal(1))
+                            }
+                        }
+
+                        
                         it("should create syncLogEntries") {
                             expect(atlasCore.syncLogEntries().count).to(equal(4))
                         }
