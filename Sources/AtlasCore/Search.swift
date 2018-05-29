@@ -34,11 +34,15 @@ public class Search {
         }
         
         if skIndex == nil {
+            let options: CFDictionary = [
+                kSKMinTermLength as String : 1
+            ] as CFDictionary
+            
             skIndex = SKIndexCreateWithURL(
                 self.indexURL,
                 self.indexName,
                 type,
-                nil
+                options
             )?.takeUnretainedValue()
         }
 
