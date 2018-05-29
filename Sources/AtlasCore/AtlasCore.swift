@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "0.9.4"
+    public static let version = "0.9.5"
     public let appName = "Atlas"
     public let repositoryName = "Atlas"
     public var baseDirectory: URL!
@@ -154,7 +154,7 @@ public class AtlasCore {
         
         guard search != nil else { return false }
         
-        if search.documentCount() == 0 {
+        if true || search.documentCount() == 0 {
             for project in projects() {
                 for file in project.allFileUrls() {
                     if !search.add(file) {
