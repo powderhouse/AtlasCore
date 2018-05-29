@@ -160,8 +160,12 @@ public class Git {
                     if commitSlugFilter != nil {
                         if let file = files.first {
                             let fileComponents = file.components(separatedBy: "/")
+                            guard fileComponents.count > 1 else {
+                                continue
+                            }
+                            
                             let commitSlug = fileComponents[fileComponents.count - 2]
-                            if !commitSlugFilter!.contains(commitSlug) {
+                            guard commitSlugFilter!.contains(commitSlug) else {
                                 continue
                             }
                         }
