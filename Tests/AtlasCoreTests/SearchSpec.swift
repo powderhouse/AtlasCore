@@ -111,7 +111,7 @@ class SearchSpec: QuickSpec {
                 context("remove") {
                     it("should remove the file from the index") {
                         if search != nil {
-                            let searchText = "even more text"
+                            let searchText = "\"even more text\""
                             expect(search?.documentCount()).to(equal(9))
                             expect(search!.search(searchText).count).toEventually(equal(1))
 
@@ -125,19 +125,37 @@ class SearchSpec: QuickSpec {
                 }
             
                 context("search") {
-    //                it("should return results when searching name of file") {
-    //                    if search != nil {
-    //                        let results = search!.search("test1")
-    //                        expect(results.count).toEventually(equal(1))
-    //                    } else {
-    //                        expect(false).to(beTrue(), description: "Search is nil")
-    //                    }
-    //                }
+                    it("should return results when searching name of file") {
+                        if search != nil {
+                            let results = search!.search("test1")
+                            expect(results.count).toEventually(equal(1))
+                        } else {
+                            expect(false).to(beTrue(), description: "Search is nil")
+                        }
+                    }
 
                     it("should return results when searching contents of file") {
                         if search != nil {
                             let results = search!.search("more")
                             expect(results.count).toEventually(equal(2))
+                        } else {
+                            expect(false).to(beTrue(), description: "Search is nil")
+                        }
+                    }
+                    
+                    it("should search terms independently") {
+                        if search != nil {
+                            let results = search!.search("even more")
+                            expect(results.count).toEventually(equal(2))
+                        } else {
+                            expect(false).to(beTrue(), description: "Search is nil")
+                        }
+                    }
+
+                    it("should search phrases when quotes are used") {
+                        if search != nil {
+                            let results = search!.search("\"even more\"")
+                            expect(results.count).toEventually(equal(1))
                         } else {
                             expect(false).to(beTrue(), description: "Search is nil")
                         }

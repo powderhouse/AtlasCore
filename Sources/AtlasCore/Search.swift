@@ -17,6 +17,8 @@ public class Search {
     var indexFileName: String!
     let indexName = NSString(string: "SearchIndex")
     
+    var files: [String:String] = [:]
+    
     public class func exists(_ directory: URL) -> Bool {
         let indexURL = directory.appendingPathComponent(Search.indexFileName)
         return FileSystem.fileExists(indexURL)
@@ -35,7 +37,7 @@ public class Search {
         
         if skIndex == nil {
             let options: CFDictionary = [
-                kSKMinTermLength as String : 1
+                kSKMinTermLength: 1
             ] as CFDictionary
             
             skIndex = SKIndexCreateWithURL(
@@ -52,6 +54,8 @@ public class Search {
     }
     
     public func add(_ file: URL) -> Bool {
+        files[file.lastPathComponent] = file.path
+        
         let nsFile = NSURL(fileURLWithPath: file.path)
         let doc = SKDocumentCreateWithURL(nsFile)
         
@@ -107,7 +111,8 @@ public class Search {
         guard SKIndexFlush(self.skIndex) else { return [] }
         
         let query = NSString(string: terms)
-        let options = SKSearchOptions(kSKSearchOptionDefault)
+        let options: SKSearchOptions = SKSearchOptions(kSKSearchOptionSpaceMeansOR)
+
         let search = SKSearchCreate(skIndex, query, options).takeUnretainedValue()
 
         let limit = 10
@@ -133,6 +138,14 @@ public class Search {
                 return url
             })
             allResults += results
+        }
+        
+        for fileName in files.keys {
+            if fileName.contains(terms) {
+                if let filePath = files[fileName] {
+                    allResults.append(NSURL(fileURLWithPath: filePath))
+                }
+            }
         }
 
         return allResults
