@@ -17,7 +17,7 @@ public class Search {
     var indexFileName: String!
     let indexName = NSString(string: "SearchIndex")
     
-    var files: [String:String] = [:]
+    var files: [URL] = []
     
     public class func exists(_ directory: URL) -> Bool {
         let indexURL = directory.appendingPathComponent(Search.indexFileName)
@@ -54,7 +54,7 @@ public class Search {
     }
     
     public func add(_ file: URL) -> Bool {
-        files[file.lastPathComponent] = file.path
+        files.append(file)
         
         let nsFile = NSURL(fileURLWithPath: file.path)
         let doc = SKDocumentCreateWithURL(nsFile)
@@ -140,11 +140,10 @@ public class Search {
             allResults += results
         }
         
-        for fileName in files.keys {
+        for file in files {
+            let fileName = file.lastPathComponent
             if fileName.contains(terms) {
-                if let filePath = files[fileName] {
-                    allResults.append(NSURL(fileURLWithPath: filePath))
-                }
+                allResults.append(NSURL(fileURLWithPath: file.path))
             }
         }
 

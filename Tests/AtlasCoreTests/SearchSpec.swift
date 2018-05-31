@@ -127,8 +127,8 @@ class SearchSpec: QuickSpec {
                 context("search") {
                     it("should return results when searching name of file") {
                         if search != nil {
-                            let results = search!.search("test1")
-                            expect(results.count).toEventually(equal(1))
+                            let results = search!.search("test")
+                            expect(results.count).toEventually(equal(2))
                         } else {
                             expect(false).to(beTrue(), description: "Search is nil")
                         }
