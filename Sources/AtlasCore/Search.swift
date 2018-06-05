@@ -142,7 +142,7 @@ public class Search {
         
         for file in files {
             let fileName = file.lastPathComponent.lowercased()
-            if fileName.contains(terms.lowercased()) {
+            if fileName != Project.readme && fileName.contains(terms.lowercased()) {
                 allResults.append(NSURL(fileURLWithPath: file.path))
             }
         }

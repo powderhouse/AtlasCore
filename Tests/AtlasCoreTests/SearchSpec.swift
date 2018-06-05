@@ -133,6 +133,15 @@ class SearchSpec: QuickSpec {
                             expect(false).to(beTrue(), description: "Search is nil")
                         }
                     }
+                    
+                    it("should ignore readme.md when searching filenames") {
+                        if search != nil {
+                            let results = search!.search("read")
+                            expect(results.count).toEventually(equal(0))
+                        } else {
+                            expect(false).to(beTrue(), description: "Search is nil")
+                        }
+                    }
 
                     it("should return results when searching contents of file") {
                         if search != nil {
