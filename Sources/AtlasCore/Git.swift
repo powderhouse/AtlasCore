@@ -105,7 +105,7 @@ public class Git {
         
         let files = history.components(separatedBy: "\n").filter { return $0.count > 0 }
         let escapedFiles = files.map { return "\"\($0)\"" }
-        var filterBranchArguments = ["--force", "--index-filter", "git rm --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
+        var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
 
         _ = run("filter-branch", arguments: filterBranchArguments)

@@ -391,7 +391,7 @@ Multiline
                         
                         expect(atlasCore.log(full: true).count).to(equal(1))
                     }
-                    
+
                     context("after commit") {
 
                         beforeEach {
@@ -432,11 +432,32 @@ Multiline
                             let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
                             expect(atlasCore.purge([nonexistentFilePath])).to(beFalse())
                         }
-
+                    }
+                    
+                    context("removing project folder") {
+                        
+                        beforeEach {
+                            expect(project.commitMessage(commitMessage)).to(beTrue())
+                            expect(project.commitStaged()).to(beTrue())
+                            
+                            atlasCore.atlasCommit()
+                            
+                            expect(atlasCore.purge([project.directory().path])).to(beTrue())
+                        }
+                        
+                        it("removes the folder") {
+                            let exists = fileManager.fileExists(atPath: project.directory().path, isDirectory: &isDirectory)
+                            expect(exists).to(beFalse(), description: "Project folder still found")
+                        }
+                        
+                        it("removes all mentions from the log") {
+                            let log = atlasCore.log()
+                            expect(log.count).to(equal(0))
+                        }
                     }
                 }
 
-                context("purge (removing two files with more than two files)") {
+                context("purge (removing two files when there are more than two files)") {
 
                     var project: Project!
                     let projectName = "General Project"
