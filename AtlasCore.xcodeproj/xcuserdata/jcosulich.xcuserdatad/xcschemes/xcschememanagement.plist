@@ -12,7 +12,7 @@
 		<key>AtlasCorePackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<key>AtlasCorePackageTests.xcscheme</key>
 		<dict>
@@ -27,7 +27,7 @@
 		<key>QuickPackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 	</dict>
 </dict>

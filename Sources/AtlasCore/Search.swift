@@ -130,7 +130,7 @@ public class Search {
             
             SKIndexCopyDocumentURLsForDocumentIDs(skIndex, count, &documentIDs, &urls)
             
-            let results: [NSURL] = zip(urls[0 ..< count], scores).flatMap({
+            let results: [NSURL] = zip(urls[0 ..< count], scores).compactMap({
                 (cfurl, score) -> NSURL? in
                 guard let url = cfurl?.takeUnretainedValue() as NSURL?
                     else { return nil }

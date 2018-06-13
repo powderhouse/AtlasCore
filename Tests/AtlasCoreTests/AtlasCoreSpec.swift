@@ -110,7 +110,7 @@ class AtlasCoreSpec: QuickSpec {
                     expect(project?.commitStaged()).to(beTrue())
                     atlasCore.commitChanges()
                     
-                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch master set up to track remote branch master from origin."), timeout: TimeInterval(30))
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch 'master' set up to track remote branch 'master' from 'origin'."), timeout: TimeInterval(30))
                 }
                 
                 it("initializes search successfully") {
