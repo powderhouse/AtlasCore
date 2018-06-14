@@ -13,7 +13,7 @@ public class Git {
     public var atlasProcessFactory: AtlasProcessFactory!
 
     static let gitIgnore = [
-        "DS_Store",
+        ".DS_Store",
         "credentials.json"
     ]
     
