@@ -26,6 +26,8 @@ public class Git {
         }
         
         writeGitIgnore()
+        _ = add()
+        _ = commit()
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {

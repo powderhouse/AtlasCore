@@ -101,6 +101,7 @@ public class AtlasCore {
         setUserDirectory(credentials)
         setAtlasDirectory()
         self.git = Git(self.atlasDirectory!)
+        atlasCommit()
         
         if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)

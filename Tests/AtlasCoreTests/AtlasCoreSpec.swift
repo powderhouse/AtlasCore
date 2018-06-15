@@ -368,7 +368,7 @@ Multiline
                         project = atlasCore.project(projectName)
                         atlasCore.atlasCommit()
 
-                        expect(atlasCore.log(full: true).count).to(equal(1))
+                        expect(atlasCore.log(full: true).count).to(equal(2))
 
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
@@ -381,7 +381,7 @@ Multiline
                         let exists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in staged directory")
 
-                        expect(atlasCore.log(full: true).count).to(equal(2))
+                        expect(atlasCore.log(full: true).count).to(equal(3))
 
                         let stagedFileRelativePath = "\(projectName)/staged/\(fileName)"
                         expect(atlasCore.purge([stagedFileRelativePath])).to(beTrue())
@@ -389,7 +389,7 @@ Multiline
                         let stillExists = fileManager.fileExists(atPath: stagedFilePath, isDirectory: &isFile)
                         expect(stillExists).to(beFalse(), description: "File still found in staged directory")
                         
-                        expect(atlasCore.log(full: true).count).to(equal(1))
+                        expect(atlasCore.log(full: true).count).to(equal(2))
                     }
 
                     context("after commit") {
