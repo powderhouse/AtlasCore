@@ -195,6 +195,7 @@ public class Project {
     }
     
     public class func exists(_ name: String, in directory: URL) -> Bool {
+        guard !Git.gitIgnore.contains(name) else { return false }
         let projectDirectory = directory.appendingPathComponent(name)
         return FileSystem.fileExists(projectDirectory, isDirectory: true)
     }

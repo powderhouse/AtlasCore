@@ -24,6 +24,8 @@ public class Git {
         if status() == nil {
             _ = runInit()
         }
+        
+        writeGitIgnore()
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -131,7 +133,8 @@ public class Git {
             "--reverse",
             "--name-only",
             "--relative",
-            "--"
+            "--",
+            ":!.gitignore"
         ]
         
         if !full {
@@ -158,7 +161,7 @@ public class Git {
                 if let fileString = components.last {
                     let files = fileString.components(separatedBy: "\n").filter { $0.count > 0 }
                     if commitSlugFilter != nil {
-                        if let file = files.first {
+                        if let file = files.last {
                             let fileComponents = file.components(separatedBy: "/")
                             guard fileComponents.count > 1 else {
                                 continue

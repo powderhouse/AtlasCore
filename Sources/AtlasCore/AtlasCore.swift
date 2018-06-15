@@ -246,8 +246,11 @@ public class AtlasCore {
                         let fileName = String(fileComponents.last!)
                         files.append(File(name: fileName, url: "\(rawGitHub)/\(hash)/\(filePath)"))
                         
-                        let projectName = String(fileComponents.first!)
-                        projects.append(Project(projectName, baseDirectory: atlasDirectory!))
+                        if let projectName = fileComponents.first {
+                            if Project.exists(projectName, in: atlasDirectory!) {
+                                projects.append(Project(projectName, baseDirectory: atlasDirectory!))
+                            }
+                        }
                     }
                 }
             }
