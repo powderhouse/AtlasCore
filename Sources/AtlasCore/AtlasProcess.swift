@@ -36,7 +36,10 @@ extension Process: AtlasProcess {
         
         let file:FileHandle = pipe.fileHandleForReading
         let data =  file.readDataToEndOfFile()
-        return String(data: data, encoding: String.Encoding.utf8) as String!
+        if let result = String(data: data, encoding: String.Encoding.utf8) {
+            return result
+        }
+        return ""
     }
     
     public func runAndWaitError() -> String {

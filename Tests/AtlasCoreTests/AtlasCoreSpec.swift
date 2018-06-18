@@ -86,7 +86,7 @@ class AtlasCoreSpec: QuickSpec {
                 it("successfully syncs with GitHub after a commit") {
                     expect(atlasCore.remote()).toEventually(contain("github.com/\(username)/Atlas.git"), timeout: TimeInterval(10))
                     
-                    let projectName = "General Project"
+                    let projectName = "Project"
                     let file = "index1.html"
 
                     let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
@@ -208,7 +208,7 @@ class AtlasCoreSpec: QuickSpec {
                 
                 context("complex setup") {
                     
-                    let project1Name = "General Project"
+                    let project1Name = "Project"
                     let project2Name = "AnotherProject"
                     var project1: Project!
                     var project2: Project!
@@ -295,7 +295,7 @@ Multiline
                                 
                                 expect(lastCommit.projects.count).to(equal(1))
                                 if let project = lastCommit.projects.first {
-                                    expect(project.name).to(equal("General Project"))
+                                    expect(project.name).to(equal("Project"))
                                 } else {
                                     expect(false).to(beTrue(), description: "project missing")
                                 }
@@ -355,7 +355,7 @@ Multiline
                 context("purge") {
 
                     var project: Project!
-                    let projectName = "General Project"
+                    let projectName = "Project"
                     let fileName = "index.html"
                     let commitMessage = "Here is a commit I wanted to commit so I clicked commit and it committed the commit!"
                     var commitFolder: URL!
@@ -460,7 +460,7 @@ Multiline
                 context("purge (removing two files when there are more than two files)") {
 
                     var project: Project!
-                    let projectName = "General Project"
+                    let projectName = "Project"
                     let fileName1 = "index1.html"
                     let fileName2 = "index2.html"
                     let fileName3 = "index3.html"
