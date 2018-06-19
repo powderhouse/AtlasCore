@@ -25,6 +25,7 @@
 		3A3C7A25209E189500C4D933 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C7A24209E189500C4D933 /* Search.swift */; };
 		3A3C7A28209E223D00C4D933 /* SearchSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C7A26209E21B700C4D933 /* SearchSpec.swift */; };
 		3A78CD20207D024200E05444 /* PerformanceSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A78CD1F207D024200E05444 /* PerformanceSpec.swift */; };
+		3A7B4CBD20D831CD000C8266 /* GitAnnex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7B4CBB20D831CD000C8266 /* GitAnnex.swift */; };
 		OBJ_132 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_138 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* Package.swift */; };
 		OBJ_144 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_120 /* Package.swift */; };
@@ -175,6 +176,7 @@
 		3A3C7A24209E189500C4D933 /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
 		3A3C7A26209E21B700C4D933 /* SearchSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSpec.swift; sourceTree = "<group>"; };
 		3A78CD1F207D024200E05444 /* PerformanceSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceSpec.swift; sourceTree = "<group>"; };
+		3A7B4CBB20D831CD000C8266 /* GitAnnex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitAnnex.swift; sourceTree = "<group>"; };
 		"AtlasCore::AtlasCore::Product" /* AtlasCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AtlasCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"AtlasCore::AtlasCoreTests::Product" /* AtlasCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AtlasCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Nimble::Nimble::Product" /* Nimble.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Nimble.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -330,6 +332,7 @@
 				OBJ_12 /* AtlasProcess.swift */,
 				OBJ_13 /* Credentials.swift */,
 				OBJ_14 /* FileSystem.swift */,
+				3A7B4CBB20D831CD000C8266 /* GitAnnex.swift */,
 				OBJ_15 /* Git.swift */,
 				OBJ_16 /* GitHub.swift */,
 				OBJ_17 /* Glue.swift */,
@@ -938,6 +941,7 @@
 			files = (
 				OBJ_266 /* AtlasCore.swift in Sources */,
 				OBJ_267 /* AtlasProcess.swift in Sources */,
+				3A7B4CBD20D831CD000C8266 /* GitAnnex.swift in Sources */,
 				OBJ_268 /* Credentials.swift in Sources */,
 				3A3C79352091241000C4D933 /* String.swift in Sources */,
 				OBJ_269 /* FileSystem.swift in Sources */,

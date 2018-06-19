@@ -11,6 +11,8 @@ public class Git {
     
     var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
+    
+    public var gitAnnex: GitAnnex? = nil
 
     static let gitIgnore = [
         ".DS_Store",
@@ -28,6 +30,8 @@ public class Git {
         writeGitIgnore()
         _ = add()
         _ = commit()
+        
+        gitAnnex = GitAnnex(directory)
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -58,6 +62,10 @@ public class Git {
             return nil
         }
         return result
+    }
+    
+    public func annexInfo() -> String {
+        return gitAnnex?.info() ?? "Git Annex Not Initialized"
     }
     
     public func remote() -> String? {

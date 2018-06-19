@@ -56,7 +56,13 @@ class GitSpec: QuickSpec {
                     expect(status).to(contain("On branch master"))
                     expect(status).to(contain("nothing to commit"))
                 }
-                
+
+                it("initializes git annex") {
+                    let annexStatus = git.annexInfo()
+                    expect(annexStatus).to(contain("local annex keys: 0"))
+                    expect(annexStatus).to(contain("annexed files in working tree: 0"))
+                }
+
                 context("when reinitialized") {
                     
                     var git2: Git!
