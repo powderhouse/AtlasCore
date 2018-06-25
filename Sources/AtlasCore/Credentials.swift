@@ -13,11 +13,22 @@ public class Credentials {
     public let username: String
     public let password: String?
     public var token: String?
-    
-    public init(_ username: String, password: String?=nil, token: String?=nil) {
+
+    public let s3AccessKey: String?
+    public let s3SecretAccessKey: String?
+
+    public init(_ username: String,
+        password: String?=nil,
+        token: String?=nil,
+        s3AccessKey: String?=nil,
+        s3SecretAccessKey: String?=nil
+    ) {
         self.username = username
         self.password = password
         self.token = token
+
+        self.s3AccessKey = s3AccessKey
+        self.s3SecretAccessKey = s3SecretAccessKey
     }
     
     public func sync(_ credentials: Credentials) {
@@ -27,6 +38,15 @@ public class Credentials {
             }
         }
     }
+    
+    public func complete() -> Bool {
+        guard s3AccessKey != nil else { return false }
+        guard s3SecretAccessKey != nil else { return false }
+
+        if password == nil && token == nil { return false }
+        
+        return true
+    }
 
     public func save(_ directory: URL) {
         guard token != nil else {
@@ -35,11 +55,21 @@ public class Credentials {
         }
         
         do {
+            var credentialsHash: [String: String] = [
+                "username": username,
+                "token": token!
+            ]
+            
+            if s3AccessKey != nil {
+                credentialsHash["s3AccessKey"] = s3AccessKey
+            }
+
+            if s3SecretAccessKey != nil {
+                credentialsHash["s3SecretAccessKey"] = s3SecretAccessKey
+            }
+
             let jsonCredentials = try JSONSerialization.data(
-                withJSONObject: [
-                    "username": username,
-                    "token": token!
-                ],
+                withJSONObject: credentialsHash,
                 options: .prettyPrinted
             )
             
@@ -86,7 +116,9 @@ public class Credentials {
                             return [Credentials(
                                 username,
                                 password: nil,
-                                token: token
+                                token: token,
+                                s3AccessKey: credentialsDict["s3AccessKey"],
+                                s3SecretAccessKey: credentialsDict["s3SecretAccessKey"]
                             )]
                         }
                     }

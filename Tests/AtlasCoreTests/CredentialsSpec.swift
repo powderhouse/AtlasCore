@@ -125,6 +125,41 @@ class CredentialsSpec: QuickSpec {
                 }
             }
             
+            context("complete") {
+                let s3AccessKey = "S3ACCESSKEY"
+                let s3SecretAccessKey = "S3SECRETACCESSKEY"
+
+                it("should be complete if user, token, and s3 access keys are presnt") {
+                    credentials = Credentials(
+                        username,
+                        token: token,
+                        s3AccessKey: s3AccessKey,
+                        s3SecretAccessKey: s3SecretAccessKey
+                    )
+                    expect(credentials.complete()).to(beTrue())
+                }
+                
+                it("should be complete if user, password, and s3 access keys are presnt") {
+                    credentials = Credentials(
+                        username,
+                        password: password,
+                        s3AccessKey: s3AccessKey,
+                        s3SecretAccessKey: s3SecretAccessKey
+                    )
+                    expect(credentials.complete()).to(beTrue())
+                }
+                
+                it("should not be complete if s3 access keys are missing") {
+                    credentials = Credentials(
+                        username,
+                        password: password
+                    )
+                    expect(credentials.complete()).to(beFalse())
+
+                }
+                
+            }
+            
         }
     }
 }
