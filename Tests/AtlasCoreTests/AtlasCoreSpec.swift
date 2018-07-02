@@ -422,7 +422,7 @@ Multiline
 
                             gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
                             
-                            sleep(10)
+//                            sleep(10)
 
                             expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
                         }
@@ -461,7 +461,7 @@ Multiline
                                 atlasCore.completedLogEntries().count
                             ).toEventually(equal(logEntryCount + 1), timeout: 30)
                             
-                            sleep(10)
+//                            sleep(10)
                             expect(atlasCore.purge([project.directory().path])).to(beTrue())
                         }
                         
@@ -518,7 +518,7 @@ Multiline
                         let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: projectName)
                         let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: projectName)
                         
-                        sleep(10)
+//                        sleep(10)
                         
                         expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
                     }

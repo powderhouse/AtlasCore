@@ -101,7 +101,6 @@ public class GitHub {
     
     public func validRepository() -> Bool {
         let update = git.run("remote", arguments: ["update"])
-        print("UPDATE: \(update)")
         if update.count == 0 { return false }
         if update.contains("fatal") { return false }
         return true
