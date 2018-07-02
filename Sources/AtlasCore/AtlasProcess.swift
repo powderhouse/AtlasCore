@@ -13,6 +13,7 @@ public protocol AtlasProcess {
     var executableURL: URL? { get set }
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
+    var environment: [String: String]? { get set }
     func runAndWait() -> String
     func runAndWaitError() -> String
 }

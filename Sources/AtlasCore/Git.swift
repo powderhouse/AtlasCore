@@ -19,19 +19,17 @@ public class Git {
         "credentials.json"
     ]
     
-    public init(_ directory: URL, processFactory: AtlasProcessFactory?=ProcessFactory()) {
+    public init(_ directory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
         self.directory = directory
         self.atlasProcessFactory = processFactory
         
-        if status() == nil {
-            _ = runInit()
-        }
-        
+        _ = runInit()
+
         writeGitIgnore()
         _ = add()
         _ = commit()
-        
-        gitAnnex = GitAnnex(directory)
+
+        gitAnnex = GitAnnex(directory, credentials: credentials)
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -103,6 +101,11 @@ public class Git {
     }
     
     public func add(_ filter: String=".") -> Bool {
+        
+        if gitAnnex != nil {
+            return gitAnnex!.add(filter)
+        }
+        
         _ = run("add", arguments: [filter])
         
         return true
@@ -120,6 +123,7 @@ public class Git {
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
 
+        _ = gitAnnex?.deleteFile(filePath)
         _ = run("filter-branch", arguments: filterBranchArguments)
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])

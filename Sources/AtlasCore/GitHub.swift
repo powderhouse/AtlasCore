@@ -170,6 +170,7 @@ echo ""
 
 (cd "${DIR}" && cd "../.." && git pull origin master)
 (cd "${DIR}" && cd "../.." && git push --set-upstream origin master)
+(cd "${DIR}" && cd "../.." && git annex sync --content)
 
 echo ""
 echo "</ENDENTRY>"

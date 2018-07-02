@@ -21,4 +21,13 @@ class Helper {
         }
     }
     
+    class func deleteBaseDirectory(_ url: URL) {
+        _ = Glue.runProcess(
+            "chmod",
+            arguments: ["-R", "u+w", url.path],
+            currentDirectory: url.deletingLastPathComponent()
+        )
+        FileSystem.deleteDirectory(url)
+    }
+    
 }

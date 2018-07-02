@@ -5,13 +5,24 @@
 //  Created by Jared Cosulich on 6/18/18.
 //
 
+//Add one file first.
+//git annex init
+//export AWS_ACCESS_KEY_ID="AKIAIZOX3I3MWEZIRR2Q"
+//export AWS_SECRET_ACCESS_KEY="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"
+//git annex initremote publics3 type=S3 encryption=none bucket=atlas-jaredcosulich exporttree=yes public=yes encryption=none
+//git annex export --tracking master --to publics3
+//git annex add .
+//git commit -am "blah blah"
+//git push
+//git annex sync --content
+
 import Foundation
 
 public class GitAnnex {
     
     public let directory: URL!
     
-    public init(_ directory: URL) {
+    public init(_ directory: URL, credentials: Credentials) {
         self.directory = directory
         
         if !installed() {
@@ -19,6 +30,7 @@ public class GitAnnex {
         }
         
         _ = initDirectory()
+        initializeS3(credentials)
     }
     
     public func installed() -> Bool {
@@ -31,11 +43,24 @@ public class GitAnnex {
         return result.contains("start git-annex")
     }
     
+    public func initializeS3(_ credentials: Credentials) {
+        if let s3AccessKey = credentials.s3AccessKey {
+            if let s3SecretAccessKey = credentials.s3SecretAccessKey {
+                _ = run("initremote", arguments: ["atlasS3", "type=S3", "encryption=none",
+                    "bucket=atlas-\(credentials.username)", "exporttree=yes",
+                    "public=yes", "encryption=none"
+                    ], environment_variables: ["AWS_ACCESS_KEY_ID": s3AccessKey, "AWS_SECRET_ACCESS_KEY":  s3SecretAccessKey]
+                )
+                _ = run("export", arguments: ["--tracking", "master", "--to", "atlasS3"])
+            }
+        }
+    }
+    
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
         return [command] + additionalArguments
     }
     
-    func run(_ command: String, arguments: [String]=[]) -> String {
+    func run(_ command: String, arguments: [String]=[], environment_variables:[String:String]?=nil) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -43,6 +68,7 @@ public class GitAnnex {
         
         return Glue.runProcess("git",
                                arguments: ["annex"] + fullArguments,
+                               environment_variables: environment_variables,
                                currentDirectory: directory
         )
     }
@@ -61,6 +87,16 @@ public class GitAnnex {
         return run("info")
     }
 
-    
+    public func deleteFile(_ filePath: String) -> String {
+        return run("drop", arguments: ["--force", "file"])
+    }
+
+    public func status() -> String {
+        return run("status", arguments: ["--short"])
+    }
+
+    public func sync() {
+        _ = run("sync")
+    }
     
 }

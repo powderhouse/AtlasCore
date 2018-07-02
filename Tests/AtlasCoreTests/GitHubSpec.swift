@@ -45,7 +45,7 @@ class GitHubSpec: QuickSpec {
                         expect(false).to(beTrue(), description: "Failed to get token")
                     }
 
-                    git = Git(directory)
+                    git = Git(directory, credentials: credentials)
                     _  = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)

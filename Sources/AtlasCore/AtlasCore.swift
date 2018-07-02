@@ -102,7 +102,7 @@ public class AtlasCore {
 
         setUserDirectory(credentials)
         setAtlasDirectory()
-        self.git = Git(self.atlasDirectory!)
+        self.git = Git(self.atlasDirectory!, credentials: credentials)
         atlasCommit()
         
         if initGitRepository(credentials) {
@@ -142,7 +142,6 @@ public class AtlasCore {
                 return false
             }
             
-            _ = git!.runInit()
         }
         
         return true
@@ -319,7 +318,7 @@ public class AtlasCore {
         
         return git.status()
     }
-    
+
     public func remote() -> String? {
         guard git != nil else {
             return nil
@@ -340,7 +339,12 @@ public class AtlasCore {
         }
         return []
     }
-    
+
+    public func completedLogEntries() -> [String] {
+        let logEntries = syncLogEntries()
+        return logEntries.filter { $0.contains("</ENDENTRY>")}
+    }
+
     public func sync() {
         let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
         _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])
