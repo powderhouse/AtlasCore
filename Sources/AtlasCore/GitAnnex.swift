@@ -5,17 +5,6 @@
 //  Created by Jared Cosulich on 6/18/18.
 //
 
-//Add one file first.
-//git annex init
-//export AWS_ACCESS_KEY_ID="AKIAIZOX3I3MWEZIRR2Q"
-//export AWS_SECRET_ACCESS_KEY="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"
-//git annex initremote publics3 type=S3 encryption=none bucket=atlas-jaredcosulich exporttree=yes public=yes encryption=none
-//git annex export --tracking master --to publics3
-//git annex add .
-//git commit -am "blah blah"
-//git push
-//git annex sync --content
-
 import Foundation
 
 public class GitAnnex {
