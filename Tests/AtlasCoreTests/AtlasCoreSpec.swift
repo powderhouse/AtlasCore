@@ -48,77 +48,78 @@ class AtlasCoreSpec: QuickSpec {
             }
 
 
-//            context("getDefaultBaseDirectory") {
-//                it("should provide the Application Support folder") {
-//                    let path = atlasCore.getDefaultBaseDirectory().path
-//                    expect(path).to(contain("Application Support"))
-//                }
-//            }
+            context("getDefaultBaseDirectory") {
+                it("should provide the Application Support folder") {
+                    let path = atlasCore.getDefaultBaseDirectory().path
+                    expect(path).to(contain("Application Support"))
+                }
+            }
 
             context("with git and GitHub initialized") {
                 beforeEach {
                     expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
+                    print(atlasCore.baseDirectory)
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: TimeInterval(30))
 
                     expect(atlasCore.initSearch()).to(beTrue())
                 }
 
-//                it("saves the credentials to the filesystem") {
-//                    if let credentialsFile = atlasCore.baseDirectory?.appendingPathComponent("credentials.json") {
-//                        let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
-//                        expect(exists).to(beTrue(), description: "No credentials.json found")
-//                    } else {
-//                        expect(false).to(beTrue(), description: "User directory was not set")
-//                    }
-//
-//                }
-//
-//                it("saves a readme to the filesystem") {
-//                    if let readmeFile = atlasCore.atlasDirectory?.appendingPathComponent(Project.readme) {
-//                        let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
-//                        expect(exists).to(beTrue(), description: "No \(Project.readme) found")
-//                    } else {
-//                        expect(false).to(beTrue(), description: "Atlas directory was not set")
-//                    }
-//                }
-//
-//                it("successfully syncs with GitHub after a commit") {
-//                    expect(atlasCore.remote()).toEventually(contain("github.com/\(username)/Atlas.git"), timeout: TimeInterval(10))
-//
-//                    let projectName = "Project"
-//                    let file = "index1.html"
-//
-//                    let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
-//                    FileSystem.createDirectory(fileDirectory)
-//                    Helper.addFile(file, directory: fileDirectory)
-//
-//                    expect(atlasCore.initProject(projectName)).to(beTrue())
-//                    let project = atlasCore.project(projectName)
-//
-//                    let filePath = fileDirectory.appendingPathComponent(file).path
-//                    expect(project?.copyInto([filePath])).to(beTrue())
-//                    atlasCore.atlasCommit()
-//
-//                    let logUrl = atlasCore.userDirectory!.appendingPathComponent("log.txt")
-//                    let exists = fileManager.fileExists(atPath: logUrl.path, isDirectory: &isFile)
-//                    expect(exists).to(beTrue(), description: "Unable to find log")
-//
-//                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("</ENDENTRY>"), timeout: TimeInterval(10))
-//
-//                    expect(project?.commitMessage("Commit Message")).to(beTrue())
-//                    expect(project?.commitStaged()).to(beTrue())
-//                    atlasCore.commitChanges()
-//
-//                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch 'master' set up to track remote branch 'master' from 'origin'."), timeout: TimeInterval(30))
-//                }
-//
-//                it("initializes search successfully") {
-//                    expect(atlasCore.search?.documentCount()).to(equal(0))
-//
-//                    let searchIndexPath = atlasCore.userDirectory?.appendingPathComponent(Search.indexFileName).path
-//                    let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
-//                    expect(exists).to(beTrue(), description: "No search index found")
-//                }
+                it("saves the credentials to the filesystem") {
+                    if let credentialsFile = atlasCore.baseDirectory?.appendingPathComponent("credentials.json") {
+                        let exists = fileManager.fileExists(atPath: credentialsFile.path, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No credentials.json found")
+                    } else {
+                        expect(false).to(beTrue(), description: "User directory was not set")
+                    }
+
+                }
+
+                it("saves a readme to the filesystem") {
+                    if let readmeFile = atlasCore.atlasDirectory?.appendingPathComponent(Project.readme) {
+                        let exists = fileManager.fileExists(atPath: readmeFile.path, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No \(Project.readme) found")
+                    } else {
+                        expect(false).to(beTrue(), description: "Atlas directory was not set")
+                    }
+                }
+
+                it("successfully syncs with GitHub after a commit") {
+                    expect(atlasCore.remote()).toEventually(contain("github.com/\(username)/Atlas.git"), timeout: TimeInterval(10))
+
+                    let projectName = "Project"
+                    let file = "index1.html"
+
+                    let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
+                    FileSystem.createDirectory(fileDirectory)
+                    Helper.addFile(file, directory: fileDirectory)
+
+                    expect(atlasCore.initProject(projectName)).to(beTrue())
+                    let project = atlasCore.project(projectName)
+
+                    let filePath = fileDirectory.appendingPathComponent(file).path
+                    expect(project?.copyInto([filePath])).to(beTrue())
+                    atlasCore.atlasCommit()
+
+                    let logUrl = atlasCore.userDirectory!.appendingPathComponent("log.txt")
+                    let exists = fileManager.fileExists(atPath: logUrl.path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "Unable to find log")
+
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("</ENDENTRY>"), timeout: TimeInterval(30))
+
+                    expect(project?.commitMessage("Commit Message")).to(beTrue())
+                    expect(project?.commitStaged()).to(beTrue())
+                    atlasCore.commitChanges()
+
+                    expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch 'master' set up to track remote branch 'master' from 'origin'."), timeout: TimeInterval(30))
+                }
+
+                it("initializes search successfully") {
+                    expect(atlasCore.search?.documentCount()).to(equal(0))
+
+                    let searchIndexPath = atlasCore.userDirectory?.appendingPathComponent(Search.indexFileName).path
+                    let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "No search index found")
+                }
 
                 context("future instances of AtlasCore") {
                     var atlasCore2: AtlasCore!
@@ -137,17 +138,17 @@ class AtlasCoreSpec: QuickSpec {
                         atlasCore2.closeSearch()
                     }
 
-//                    it("automatically inits git") {
-//                        expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
-//                    }
-//
-//                    it("automatically inits search") {
-//                        expect(atlasCore2.search).toNot(beNil())
-//
-//                        let searchIndexPath = atlasCore2.userDirectory?.appendingPathComponent(Search.indexFileName).path
-//                        let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
-//                        expect(exists).to(beTrue(), description: "No search index found")
-//                    }
+                    it("automatically inits git") {
+                        expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
+                    }
+
+                    it("automatically inits search") {
+                        expect(atlasCore2.search).toNot(beNil())
+
+                        let searchIndexPath = atlasCore2.userDirectory?.appendingPathComponent(Search.indexFileName).path
+                        let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
+                        expect(exists).to(beTrue(), description: "No search index found")
+                    }
 
                     context("initialized again") {
                         var result: Bool!
@@ -179,30 +180,30 @@ class AtlasCoreSpec: QuickSpec {
                         _ = atlasCore.initProject(projectName)
                     }
 
-//                    it("should create a folder in the Atlas directory with a readme") {
-//                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
-//                            let exists = fileManager.fileExists(atPath: projectFolder.path, isDirectory: &isDirectory)
-//                            expect(exists).to(beTrue(), description: "No project folder found for \(projectName)")
-//                        } else {
-//                            expect(false).to(beTrue(), description: "Atlas directory was not set")
-//                        }
-//                    }
-//
-//                    it("should create three subfolders, each with a readme, in the project folder") {
-//                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
-//                            for folderName in ["unstaged", "staged", "committed"] {
-//                                let subfolderURL = projectFolder.appendingPathComponent(folderName)
-//                                let exists = fileManager.fileExists(atPath: subfolderURL.path, isDirectory: &isDirectory)
-//                                expect(exists).to(beTrue(), description: "No project subfolder found: \(folderName)")
-//
-//                                let readmePath = subfolderURL.appendingPathComponent(Project.readme).path
-//                                let readmeExists = fileManager.fileExists(atPath: readmePath, isDirectory: &isFile)
-//                                expect(readmeExists).to(beTrue(), description: "No readme found in subfolder: \(folderName)")
-//                            }
-//                        } else {
-//                            expect(false).to(beTrue(), description: "Atlas directory was not set")
-//                        }
-//                    }
+                    it("should create a folder in the Atlas directory with a readme") {
+                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
+                            let exists = fileManager.fileExists(atPath: projectFolder.path, isDirectory: &isDirectory)
+                            expect(exists).to(beTrue(), description: "No project folder found for \(projectName)")
+                        } else {
+                            expect(false).to(beTrue(), description: "Atlas directory was not set")
+                        }
+                    }
+
+                    it("should create three subfolders, each with a readme, in the project folder") {
+                        if let projectFolder = atlasCore.atlasDirectory?.appendingPathComponent(projectName) {
+                            for folderName in ["unstaged", "staged", "committed"] {
+                                let subfolderURL = projectFolder.appendingPathComponent(folderName)
+                                let exists = fileManager.fileExists(atPath: subfolderURL.path, isDirectory: &isDirectory)
+                                expect(exists).to(beTrue(), description: "No project subfolder found: \(folderName)")
+
+                                let readmePath = subfolderURL.appendingPathComponent(Project.readme).path
+                                let readmeExists = fileManager.fileExists(atPath: readmePath, isDirectory: &isFile)
+                                expect(readmeExists).to(beTrue(), description: "No readme found in subfolder: \(folderName)")
+                            }
+                        } else {
+                            expect(false).to(beTrue(), description: "Atlas directory was not set")
+                        }
+                    }
                 }
                 
                 context("complex setup") {
@@ -422,14 +423,15 @@ Multiline
 
                             gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
                             
-//                            sleep(10)
+                            var stillExists = true
+                            var tries = 0
+                            while stillExists && tries < 5 {
+                                expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
+                                stillExists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
+                                tries += 1
+                            }
 
-                            expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
-                        }
-
-                        it("removes the files from the commit folder") {
-                            let exists = fileManager.fileExists(atPath: committedFilePath, isDirectory: &isFile)
-                            expect(exists).to(beFalse(), description: "File still found in commited directory")
+                            expect(stillExists).to(beFalse(), description: "File still found in commited directory")
                         }
 
                         it("removes the commit from the projects' log") {
@@ -461,12 +463,14 @@ Multiline
                                 atlasCore.completedLogEntries().count
                             ).toEventually(equal(logEntryCount + 1), timeout: 30)
                             
-//                            sleep(10)
-                            expect(atlasCore.purge([project.directory().path])).to(beTrue())
-                        }
-                        
-                        it("removes the folder") {
-                            let exists = fileManager.fileExists(atPath: project.directory().path, isDirectory: &isDirectory)
+                            var exists = true
+                            var tries = 0
+                            while exists && tries < 5 {
+                                expect(atlasCore.purge([project.directory().path])).to(beTrue())
+                                exists = fileManager.fileExists(atPath: project.directory().path, isDirectory: &isDirectory)
+                                tries += 1
+                            }
+                            
                             expect(exists).to(beFalse(), description: "Project folder still found")
                         }
 
@@ -518,15 +522,18 @@ Multiline
                         let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: projectName)
                         let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: projectName)
                         
-//                        sleep(10)
+                        var exists = true
+                        var tries = 0
+                        while exists && tries < 5 {
+                            expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
+                            exists = fileManager.fileExists(atPath: committedFilePath1, isDirectory: &isFile)
+                            tries += 1
+                        }
                         
-                        expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
+                        expect(exists).to(beFalse(), description: "File 1 still found in commited directory")
                     }
 
                     it("removes the files from the commit folder") {
-                        let exists1 = fileManager.fileExists(atPath: committedFilePath1, isDirectory: &isFile)
-                        expect(exists1).to(beFalse(), description: "File 1 still found in commited directory")
-
                         let exists2 = fileManager.fileExists(atPath: committedFilePath2, isDirectory: &isFile)
                         expect(exists2).to(beFalse(), description: "File 2 still found in commited directory")
 
