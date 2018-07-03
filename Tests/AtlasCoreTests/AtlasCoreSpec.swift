@@ -30,6 +30,8 @@ class AtlasCoreSpec: QuickSpec {
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
+            var logEntries = 0
+            
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 FileSystem.createDirectory(directory)
@@ -42,6 +44,7 @@ class AtlasCoreSpec: QuickSpec {
             }
             
             afterEach {
+                logEntries = 0
                 atlasCore.closeSearch()
                 atlasCore.deleteGitHubRepository()
                 Helper.deleteBaseDirectory(directory)
@@ -99,6 +102,9 @@ class AtlasCoreSpec: QuickSpec {
                     let filePath = fileDirectory.appendingPathComponent(file).path
                     expect(project?.copyInto([filePath])).to(beTrue())
                     atlasCore.atlasCommit()
+                    
+                    logEntries += 1
+                    expect(atlasCore.completedLogEntries().count).toEventually(equal(logEntries), timeout: 10)
 
                     let logUrl = atlasCore.userDirectory!.appendingPathComponent("log.txt")
                     let exists = fileManager.fileExists(atPath: logUrl.path, isDirectory: &isFile)
@@ -109,6 +115,9 @@ class AtlasCoreSpec: QuickSpec {
                     expect(project?.commitMessage("Commit Message")).to(beTrue())
                     expect(project?.commitStaged()).to(beTrue())
                     atlasCore.commitChanges()
+                   
+                    logEntries += 1
+                    expect(atlasCore.completedLogEntries().count).toEventually(equal(logEntries), timeout: 10)
 
                     expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch 'master' set up to track remote branch 'master' from 'origin'."), timeout: TimeInterval(30))
                 }
@@ -243,12 +252,22 @@ Multiline
                         expect(project1?.copyInto([filePath1])).to(beTrue())
                         atlasCore.atlasCommit()
                         
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                            ).toEventually(equal(logEntries), timeout: 30, description: "Log Entries Failed: \(atlasCore.syncLogEntries())")
+                        
                         slug1 = project1!.commitSlug(message1)
                         slug2 = project2!.commitSlug(message2)
 
                         expect(project1?.commitMessage(message1)).to(beTrue())
                         expect(project1?.commitStaged()).to(beTrue())
                         atlasCore.commitChanges(message1)
+                        
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                        ).toEventually(equal(logEntries), timeout: 30)
 
                         let filePath2 = fileDirectory.appendingPathComponent(file2).path
                         expect(project2?.copyInto([filePath2])).to(beTrue())
@@ -370,18 +389,21 @@ Multiline
                         let logCount = atlasCore.log(full: true).count
                         
                         atlasCore.atlasCommit()
-
-                        expect(atlasCore.log(full: true).count).to(equal(logCount + 1))
+                        
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                            ).toEventually(equal(logEntries), timeout: 10)
 
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
 
-                        let syncLogCount = atlasCore.completedLogEntries().count
                         atlasCore.atlasCommit()
                         
+                        logEntries += 1
                         expect(
                             atlasCore.completedLogEntries().count
-                        ).toEventually(equal(syncLogCount + 1), timeout: 30)
+                        ).toEventually(equal(logEntries), timeout: 10)
                     }
                     
                     it("should remove the staged file and atlasCore commit") {
@@ -408,12 +430,13 @@ Multiline
                             expect(project.commitMessage(commitMessage)).to(beTrue())
                             expect(project.commitStaged()).to(beTrue())
 
-                            let syncLogCount = atlasCore.completedLogEntries().count
                             atlasCore.atlasCommit()
+                            
+                            logEntries += 1
                             expect(
                                 atlasCore.completedLogEntries().count
-                            ).toEventually(equal(syncLogCount + 1), timeout: 30)
-
+                                ).toEventually(equal(logEntries), timeout: 10)
+                            
                             commitFolder = project.directory("committed").appendingPathComponent(slug)
 
                             committedFilePath = commitFolder.appendingPathComponent(fileName).path
@@ -456,12 +479,12 @@ Multiline
                             expect(project.commitMessage(commitMessage)).to(beTrue())
                             expect(project.commitStaged()).to(beTrue())
                             
-                            let logEntryCount = atlasCore.completedLogEntries().count
                             atlasCore.atlasCommit()
 
+                            logEntries += 1
                             expect(
                                 atlasCore.completedLogEntries().count
-                            ).toEventually(equal(logEntryCount + 1), timeout: 30)
+                            ).toEventually(equal(logEntries), timeout: 10)
                             
                             var exists = true
                             var tries = 0
@@ -504,6 +527,11 @@ Multiline
                         Helper.addFile(fileName3, directory: stagedDirectory)
 
                         atlasCore.atlasCommit()
+                        
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                        ).toEventually(equal(logEntries), timeout: 10)
 
                         let slug = project.commitSlug(commitMessage)
 
@@ -511,7 +539,10 @@ Multiline
                         expect(project.commitStaged()).to(beTrue())
 
                         atlasCore.atlasCommit()
-                        expect(atlasCore.completedLogEntries().count).toEventually(equal(1), timeout: 30)
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                        ).toEventually(equal(logEntries), timeout: 10)
 
                         commitFolder = project.directory("committed").appendingPathComponent(slug)
 
