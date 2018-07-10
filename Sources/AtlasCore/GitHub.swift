@@ -12,7 +12,7 @@ public class GitHub {
     static let log = "log.txt"
     static let syncScriptName = "atlas-sync.sh"
     static let postCommitScriptName = "post-commit"
-    
+
     public var credentials: Credentials!
     public var git: Git!
     

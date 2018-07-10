@@ -115,6 +115,7 @@ public class AtlasCore {
                         return false
                     }
 
+                    atlasCommit()
                     return true
                 }
                 return true
@@ -294,11 +295,14 @@ public class AtlasCore {
                 }
             }
         }
+
+        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: atlasDirectory!)
         
         return success
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
+        sleep(1)
         _ = git?.add()
         _ = git?.commit(commitMessage)
     }
@@ -331,11 +335,16 @@ public class AtlasCore {
         return gitHub?.validRepository() ?? false
     }
     
-    public func syncLogEntries() -> [String] {
+    public func syncLog() -> String? {
         if let logUrl = userDirectory?.appendingPathComponent(GitHub.log) {
-            if let log = try? String(contentsOf: logUrl, encoding: .utf8) {
-                return log.components(separatedBy: "<STARTENTRY>")
-            }
+            return try? String(contentsOf: logUrl, encoding: .utf8)
+        }
+        return nil
+    }
+    
+    public func syncLogEntries() -> [String] {
+        if let log = syncLog() {
+            return log.components(separatedBy: "<STARTENTRY>")
         }
         return []
     }

@@ -130,7 +130,7 @@ public class Git {
         _ = run("gc", arguments: ["--prune=now"])
         _ = run("push", arguments: ["origin", "--force", "--all"])
         _ = run("push", arguments: ["origin", "--force", "--tags"])
-
+                
 //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
 
