@@ -111,6 +111,33 @@ public class Git {
         return true
     }
     
+    public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+        return move([filePath], into: directory, renamedTo: newName)
+    }
+    
+    public func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
+
+        for filePath in filePaths {
+            if let fileName = filePath.split(separator: "/").last {
+                let destinationName = newName == nil ? String(fileName) : newName!
+                let destination = directory.appendingPathComponent(destinationName)
+                
+                _ = run("mv", arguments: [filePath, destination.path])
+                
+                if !FileSystem.fileExists(destination) {
+                    return false
+                }
+                if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
+                    return false
+                }
+            } else {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
     public func removeFile(_ filePath: String) -> Bool {
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         

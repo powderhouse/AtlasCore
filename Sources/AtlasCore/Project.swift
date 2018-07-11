@@ -23,11 +23,13 @@ public class Project {
     public static let readme = "readme.md"
     
     var search: Search?
+    var git: Git!
 
-    public init(_ name: String, baseDirectory: URL, search: Search?=nil) {
+    public init(_ name: String, baseDirectory: URL, git: Git, search: Search?=nil) {
         self.name = name
         self.projectDirectory = createFolder(name, in: baseDirectory)
         self.search = search
+        self.git = git
 
         initFoldersAndReadmes()
     }
@@ -150,14 +152,18 @@ public class Project {
         let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage!.text))
         FileSystem.createDirectory(commitUrl)
         
-        if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
-            return false
+        if !git.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
+            if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
+                return false
+            }
         }
         
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
-        if !FileSystem.move(filePaths, into: commitUrl) {
-            return false
+        if !git.move(filePaths, into: commitUrl) {
+            if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
+                return false
+            }
         }
         
         for file in FileSystem.filesInDirectory(commitUrl) {

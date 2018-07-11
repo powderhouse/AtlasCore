@@ -25,13 +25,25 @@ class ProjectSpec: QuickSpec {
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
+            let credentials = Credentials(
+                "atlastest",
+                password: "1a2b3c4d",
+                token: nil
+            )
+            
             var search: Search!
+            var git: Git!
             
             beforeEach {
-                baseDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
-                search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
+                baseDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
+                FileSystem.createDirectory(baseDirectory)
+
                 directory = baseDirectory.appendingPathComponent("testProject")
-                project = Project(projectName, baseDirectory: directory, search: search)
+
+                search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
+                git = Git(baseDirectory, credentials: credentials)
+
+                project = Project(projectName, baseDirectory: directory, git: git, search: search)
             }
             
             afterEach {
@@ -107,6 +119,9 @@ class ProjectSpec: QuickSpec {
                 beforeEach {
                     let stagedDirectory = project.directory("staged")
                     Helper.addFile(fileName, directory: stagedDirectory)
+                    
+                    _ = git?.add()
+                    _ = git?.commit("staging file")
 
                     let slug = project.commitSlug(commitMessage)
 
@@ -149,6 +164,9 @@ class ProjectSpec: QuickSpec {
                 
                 it("will not use duplicate slugs") {
                     Helper.addFile("index2.html", directory: project.directory("staged"))
+                    
+                    _ = git?.add()
+                    _ = git?.commit("staging file")
 
                     let slug = project.commitSlug(commitMessage)
 
@@ -159,6 +177,9 @@ class ProjectSpec: QuickSpec {
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
 
                     Helper.addFile("index3.html", directory: project.directory("staged"))
+                    
+                    _ = git?.add()
+                    _ = git?.commit("staging file")
                     
                     let duplicateSlug = project.commitSlug(commitMessage.appending("-2"))
                     
@@ -254,6 +275,9 @@ class ProjectSpec: QuickSpec {
                 beforeEach {
                     let stagedDirectory = project.directory("staged")
                     Helper.addFile(commitedName, directory: stagedDirectory)
+                    
+                    _ = git?.add()
+                    _ = git?.commit("staging file")
                     
                     _ = project.commitSlug(commitMessage)
                     

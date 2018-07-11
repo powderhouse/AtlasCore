@@ -199,7 +199,7 @@ public class AtlasCore {
         }
         
         if !Project.exists(name, in: atlasDirectory!) {
-            _ = Project(name, baseDirectory: atlasDirectory!, search: search)
+            _ = Project(name, baseDirectory: atlasDirectory!, git: git, search: search)
         }
         
         return true
@@ -218,7 +218,7 @@ public class AtlasCore {
             return nil
         }
 
-        return Project(name, baseDirectory: atlasDirectory!, search: search)
+        return Project(name, baseDirectory: atlasDirectory!, git: git, search: search)
     }
     
     public func log(projectName: String?=nil, full: Bool=false, commitSlugFilter: [String]?=nil) -> [Commit] {
@@ -251,7 +251,7 @@ public class AtlasCore {
                         
                         if let projectName = fileComponents.first {
                             if Project.exists(projectName, in: atlasDirectory!) {
-                                projects.append(Project(projectName, baseDirectory: atlasDirectory!))
+                                projects.append(Project(projectName, baseDirectory: atlasDirectory!, git: git))
                             }
                         }
                     }
