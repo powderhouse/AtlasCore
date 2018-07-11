@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.0.7"
+    public static let version = "1.0.8"
     public static let defaultProjectName = "General"
 
     public let appName = "Atlas"
@@ -302,9 +302,21 @@ public class AtlasCore {
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
-        sleep(1)
-        _ = git?.add()
-        _ = git?.commit(commitMessage)
+        let group = DispatchGroup()
+        group.enter()
+        
+        DispatchQueue.global().async {
+            if let status = self.git.status() {
+                if !status.contains("up-to-date") {
+                    _ = self.git?.add()
+                    _ = self.git?.commit(commitMessage)
+                    group.leave()
+
+                }
+            }
+        }
+        
+        group.wait()
     }
     
     public func atlasCommit(_ message: String?=nil) {
