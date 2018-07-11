@@ -263,7 +263,7 @@ Multiline
                         logEntries += 1
                         expect(
                             atlasCore.completedLogEntries().count
-                        ).toEventually(equal(logEntries), timeout: 30, description: "Log Entries Failed: \(atlasCore.syncLogEntries())")
+                        ).toEventually(equal(logEntries), timeout: 30)
                         
                         slug1 = project1!.commitSlug(message1)
                         slug2 = project2!.commitSlug(message2)
@@ -282,6 +282,13 @@ Multiline
 
                         let filePath3 = fileDirectory.appendingPathComponent(file3).path
                         expect(project2?.copyInto([filePath3])).to(beTrue())
+
+                        atlasCore.atlasCommit()
+                        
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                        ).toEventually(equal(logEntries), timeout: 30)
 
                         expect(project2?.commitMessage(message2)).to(beTrue())
                         expect(project2?.commitStaged()).to(beTrue())
@@ -351,16 +358,16 @@ Multiline
 
 
                         it("should create syncLogEntries") {
-                            expect(atlasCore.syncLogEntries().count).to(equal(5))
+                            expect(atlasCore.syncLogEntries().count).to(equal(6))
                         }
 
                     }
                     
                     context("syncLogEntries") {
                         it("should create more syncLogEntries if sync is called") {
-                            expect(atlasCore.syncLogEntries().count).toEventually(equal(5))
-                            atlasCore.sync()
                             expect(atlasCore.syncLogEntries().count).toEventually(equal(6))
+                            atlasCore.sync()
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(7))
                         }
                     }
                     

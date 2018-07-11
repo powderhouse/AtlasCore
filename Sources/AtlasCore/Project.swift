@@ -149,7 +149,8 @@ public class Project {
         }
         
         let commitedUrl = directory("committed")
-        let commitUrl = commitedUrl.appendingPathComponent(commitSlug(commitMessage!.text))
+        let slug = commitSlug(commitMessage!.text)
+        let commitUrl = commitedUrl.appendingPathComponent(slug)
         FileSystem.createDirectory(commitUrl)
         
         if !git.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
@@ -161,14 +162,40 @@ public class Project {
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
         if !git.move(filePaths, into: commitUrl) {
-            if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
+            if !FileSystem.move(filePaths, into: commitUrl) {
                 return false
+            }
+        }
+        
+        let group = DispatchGroup()
+        group.enter()
+        
+        DispatchQueue.global().async {
+            if let status = self.git.status() {
+                var statusComplete = true
+                
+                if !status.contains(slug) {
+                    statusComplete = false
+                }
+                
+//                for filePath in filePaths {
+//                    let fileName = URL(fileURLWithPath: filePath).lastPathComponent
+//                    if !status.contains(fileName) {
+//                        statusComplete = false
+//                    }
+//                }
+                
+                if statusComplete {
+                    group.leave()
+                }
             }
         }
         
         for file in FileSystem.filesInDirectory(commitUrl) {
             _ = search?.add(commitUrl.appendingPathComponent(file))
         }
+        
+        group.wait()
         
         return true
     }
