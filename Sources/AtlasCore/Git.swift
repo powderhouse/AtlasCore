@@ -124,9 +124,20 @@ public class Git {
                 
                 _ = run("mv", arguments: [filePath, destination.path])
                 
-                if !FileSystem.fileExists(destination) {
+                let directoryComponents = directory.path.components(separatedBy: "/")
+                let destinationComponents = destination.path.components(separatedBy: "/")
+                let relativeComponents = destinationComponents[
+                    directoryComponents.count..<destinationComponents.count
+                ]
+                
+                if let currentStatus = status() {
+                    if !currentStatus.contains(relativeComponents.joined(separator: "/")) {
+                        return false
+                    }
+                } else {
                     return false
                 }
+                
                 if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
                     return false
                 }
