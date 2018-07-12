@@ -178,12 +178,12 @@ public class Project {
                     statusComplete = false
                 }
                 
-//                for filePath in filePaths {
-//                    let fileName = URL(fileURLWithPath: filePath).lastPathComponent
-//                    if !status.contains(fileName) {
-//                        statusComplete = false
-//                    }
-//                }
+                for filePath in filePaths {
+                    let fileName = URL(fileURLWithPath: filePath).lastPathComponent
+                    if !status.contains(fileName) {
+                        statusComplete = false
+                    }
+                }
                 
                 if statusComplete {
                     group.leave()
