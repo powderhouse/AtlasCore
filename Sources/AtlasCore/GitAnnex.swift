@@ -12,6 +12,12 @@ public class GitAnnex {
     let remoteName = "atlasS3"
     public let directory: URL!
     var credentials: Credentials!
+    
+    var s3Path: String {
+        get {
+            return "https://s3.amazonaws.com/atlas-\(credentials.username)"
+        }
+    }
 
     public init(_ directory: URL, credentials: Credentials) {
         self.directory = directory

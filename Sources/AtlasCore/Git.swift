@@ -19,6 +19,16 @@ public class Git {
         "credentials.json"
     ]
     
+    public var annexRoot: String {
+        get {
+            if let annex = gitAnnex {
+                return annex.s3Path
+            } else {
+                return ""
+            }
+        }
+    }
+    
     public init(_ directory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
         self.directory = directory
         self.atlasProcessFactory = processFactory

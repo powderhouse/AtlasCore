@@ -239,20 +239,13 @@ public class AtlasCore {
             
             if let fileInfo = data["files"] as? [String] {
                 for filePath in fileInfo {
-                    if let repositoryLink = gitHub.repositoryLink {
-                        let rawGitHub = repositoryLink.replacingOccurrences(
-                            of: "github.com",
-                            with: "raw.githubusercontent.com"
-                        )
-                        
-                        let fileComponents = filePath.components(separatedBy: "/")
-                        let fileName = String(fileComponents.last!)
-                        files.append(File(name: fileName, url: "\(rawGitHub)/\(hash)/\(filePath)"))
-                        
-                        if let projectName = fileComponents.first {
-                            if Project.exists(projectName, in: atlasDirectory!) {
-                                projects.append(Project(projectName, baseDirectory: atlasDirectory!, git: git))
-                            }
+                    let fileComponents = filePath.components(separatedBy: "/")
+                    let fileName = String(fileComponents.last!)
+                    files.append(File(name: fileName, url: "\(git.annexRoot)/\(filePath)"))
+                    
+                    if let projectName = fileComponents.first {
+                        if Project.exists(projectName, in: atlasDirectory!) {
+                            projects.append(Project(projectName, baseDirectory: atlasDirectory!, git: git))
                         }
                     }
                 }
