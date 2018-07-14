@@ -307,7 +307,7 @@ Multiline
                                 expect(lastCommit.files.count).to(equal(2))
                                 if let firstFile = lastCommit.files.first {
                                     expect(firstFile.name).to(equal(file2))
-                                    expect(firstFile.url).to(equal("https://raw.githubusercontent.com/\(credentials.username)/Atlas/\(lastCommit.hash)/\(project2Name)/committed/\(slug2)/\(file2)"))
+                                    expect(firstFile.url).to(equal("https://s3.amazonaws.com/atlas-atlastest/\(project2Name)/committed/\(slug2)/\(file2)"))
                                 }
                             }
                         }

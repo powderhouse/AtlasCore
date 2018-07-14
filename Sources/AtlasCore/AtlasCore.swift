@@ -18,8 +18,8 @@ public class AtlasCore {
     public static let version = "1.1.4"
     public static let defaultProjectName = "General"
 
-    public let appName = "Atlas"
-    public let repositoryName = "Atlas"
+    public static let appName = "Atlas"
+    public static let repositoryName = "Atlas"
     public var baseDirectory: URL!
     public var userDirectory: URL?
     public var atlasDirectory: URL?
@@ -46,7 +46,7 @@ public class AtlasCore {
     
     public func getDefaultBaseDirectory() -> URL {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return URL(fileURLWithPath: paths[0]).appendingPathComponent(appName)
+        return URL(fileURLWithPath: paths[0]).appendingPathComponent(AtlasCore.appName)
     }
     
     public func setAtlasDirectory() {
@@ -54,7 +54,7 @@ public class AtlasCore {
             return
         }
         
-        self.atlasDirectory = userDirectory!.appendingPathComponent(repositoryName)
+        self.atlasDirectory = userDirectory!.appendingPathComponent(AtlasCore.repositoryName)
         FileSystem.createDirectory(self.atlasDirectory!)
     }
 
@@ -106,7 +106,7 @@ public class AtlasCore {
         atlasCommit()
         
         if initGitRepository(credentials) {
-            self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+            self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
             if gitHub.setPostCommitHook() {
                 if !gitHub.setRepositoryLink() {
                     _ = gitHub.createRepository()
