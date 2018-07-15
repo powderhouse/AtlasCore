@@ -240,7 +240,10 @@ public class Project {
             let file = directory(fromState).appendingPathComponent(fileName)
             filePaths.append(file.path)
         }
-        return FileSystem.move(filePaths, into: directory(state))
+        if !git.move(filePaths, into: directory(state)) {
+            return FileSystem.move(filePaths, into: directory(state)) 
+        }
+        return true
     }
     
     public func copyInto(_ filePaths: [String]) -> Bool {
