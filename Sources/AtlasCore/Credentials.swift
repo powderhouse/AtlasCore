@@ -14,8 +14,8 @@ public class Credentials {
     public let password: String?
     public var token: String?
 
-    public let s3AccessKey: String?
-    public let s3SecretAccessKey: String?
+    public var s3AccessKey: String?
+    public var s3SecretAccessKey: String?
 
     public init(_ username: String,
         password: String?=nil,
@@ -27,8 +27,13 @@ public class Credentials {
         self.password = password
         self.token = token
 
-        self.s3AccessKey = s3AccessKey
-        self.s3SecretAccessKey = s3SecretAccessKey
+        if s3AccessKey?.count ?? 0 > 0 {
+            self.s3AccessKey = s3AccessKey
+        }
+        
+        if s3SecretAccessKey?.count ?? 0 > 0 {
+            self.s3SecretAccessKey = s3SecretAccessKey
+        }
     }
     
     public func sync(_ credentials: Credentials) {
