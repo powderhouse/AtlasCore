@@ -307,7 +307,7 @@ Multiline
                                 expect(lastCommit.files.count).to(equal(2))
                                 if let firstFile = lastCommit.files.first {
                                     expect(firstFile.name).to(equal(file2))
-                                    expect(firstFile.url).to(equal("https://s3.amazonaws.com/atlas-atlastest/\(project2Name)/committed/\(slug2)/\(file2)"))
+                                    expect(firstFile.url).to(equal("/\(project2Name)/committed/\(slug2)/\(file2)"))
                                 }
                             }
                         }
@@ -322,7 +322,7 @@ Multiline
                                 expect(lastCommit.files.count).to(equal(1))
                                 if let firstFile = lastCommit.files.first {
                                     expect(firstFile.name).to(equal(file1))
-                                    expect(firstFile.url).to(equal("https://s3.amazonaws.com/atlas-\(credentials.username)/\(project1Name)/committed/\(slug1)/\(file1)"))
+                                    expect(firstFile.url).to(equal("/\(project1Name)/committed/\(slug1)/\(file1)"))
                                 } else {
                                     expect(false).to(beTrue(), description: "file missing")
                                 }

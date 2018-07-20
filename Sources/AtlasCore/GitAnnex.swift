@@ -86,7 +86,7 @@ public class GitAnnex {
 
     public func add(_ filter: String=".") -> Bool {
         let result = run("add", arguments: [filter])
-        return result.contains("added")
+        return result.contains("ok")
     }
     
     public func info() -> String {

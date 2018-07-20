@@ -39,7 +39,9 @@ public class Git {
         _ = add()
         _ = commit()
 
-        gitAnnex = GitAnnex(directory, credentials: credentials)
+        if credentials.complete() {
+            gitAnnex = GitAnnex(directory, credentials: credentials)
+        }
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
