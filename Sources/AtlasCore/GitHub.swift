@@ -170,9 +170,9 @@ echo ""
 export AWS_ACCESS_KEY_ID=\(credentials.s3AccessKey ?? "")
 export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
 
-(cd "${DIR}" && cd "../.." && git pull origin master)
-(cd "${DIR}" && cd "../.." && git push --set-upstream origin master)
-(cd "${DIR}" && cd "../.." && git annex sync --content)
+(cd "${DIR}" && cd "../.." && git pull origin master) || true
+(cd "${DIR}" && cd "../.." && git push --set-upstream origin master) || true
+(cd "${DIR}" && cd "../.." && git annex sync --content) || true
 
 echo ""
 echo "</ENDENTRY>"

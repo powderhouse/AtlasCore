@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.1.9"
+    public static let version = "1.2.0"
     public static let defaultProjectName = "General"
 
     public static let appName = "Atlas"
@@ -184,7 +184,11 @@ public class AtlasCore {
     public func gitHubRepository() -> String? {
         return gitHub?.repositoryLink
     }
-    
+
+    public func s3Repository() -> String? {
+        return git.annexRoot.count == 0 ? nil : git.annexRoot
+    }
+
     public func createBaseDirectory() {
         FileSystem.createDirectory(baseDirectory)
     }
