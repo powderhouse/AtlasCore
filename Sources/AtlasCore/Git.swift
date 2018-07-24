@@ -9,6 +9,7 @@ import Foundation
 
 public class Git {
     
+    var userDirectory: URL!
     var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
     
@@ -29,15 +30,19 @@ public class Git {
         }
     }
     
-    public init(_ directory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
-        self.directory = directory
+    public init(_ userDirectory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
+        self.userDirectory = userDirectory
+        self.directory = userDirectory.appendingPathComponent(AtlasCore.appName)
         self.atlasProcessFactory = processFactory
         
-        _ = runInit()
+        if !clone(credentials.username) {
+            FileSystem.createDirectory(self.directory)
+            _ = runInit()
 
-        writeGitIgnore()
-        _ = add()
-        _ = commit()
+            writeGitIgnore()
+            _ = add()
+            _ = commit()
+        }
 
         if credentials.complete() {
             gitAnnex = GitAnnex(directory, credentials: credentials)
@@ -49,7 +54,7 @@ public class Git {
         return ["--git-dir=\(path)/.git", command] + additionalArguments
     }
     
-    func run(_ command: String, arguments: [String]=[], async: Bool=false) -> String {
+    func run(_ command: String, arguments: [String]=[], async: Bool=false, inDirectory: URL?=nil) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -57,7 +62,7 @@ public class Git {
         
         return Glue.runProcess("git",
                                arguments: fullArguments,
-                               currentDirectory: directory,
+                               currentDirectory: inDirectory ?? directory,
                                atlasProcess: atlasProcessFactory.build()
         )        
     }
@@ -65,13 +70,21 @@ public class Git {
     public func runInit() -> String {
         return run("init")
     }
-    
+
     public func status() -> String? {
         let result = run("status")
         if (result == "") {
             return nil
         }
         return result
+    }
+
+    public func clone(_ username: String) -> Bool {
+        _ = run("clone",
+                         arguments: ["https://github.com/\(username)/\(AtlasCore.appName).git"],
+                         inDirectory: userDirectory
+        )
+        return FileSystem.fileExists(directory, isDirectory: true)
     }
     
     public func annexInfo() -> String {
