@@ -15,6 +15,7 @@ class GitSpec: QuickSpec {
         describe("Git") {
             
             var directory: URL!
+            var appDirectory: URL!
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
@@ -46,6 +47,7 @@ class GitSpec: QuickSpec {
 
                 beforeEach {
                     git = Git(directory, credentials: credentials)
+                    appDirectory = git.directory
                 }
 
                 it("is not nil") {
@@ -53,7 +55,7 @@ class GitSpec: QuickSpec {
                 }
 
                 it("runs git init on the directory") {
-                    let gitPath = directory.appendingPathComponent(".git").path
+                    let gitPath = appDirectory.appendingPathComponent(".git").path
                     let exists = fileManager.fileExists(atPath: gitPath, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "No .git found")
                 }
@@ -87,7 +89,7 @@ class GitSpec: QuickSpec {
                 context("add") {
                     it("should do nothing when nothing is avalable to add") {
                         do {
-                            try fileManager.removeItem(atPath: "\(directory.path)/github.json")
+                            try fileManager.removeItem(atPath: "\(appDirectory.path)/github.json")
                         } catch {}
 
                         let preStatus = git.status()
@@ -102,7 +104,7 @@ class GitSpec: QuickSpec {
                     }
 
                     it("should add a file") {
-                        Helper.addFile("index.html", directory: directory)
+                        Helper.addFile("index.html", directory: appDirectory)
 
                         let preStatus = git.status()
                         expect(preStatus).to(contain("index.html"))
@@ -125,12 +127,12 @@ class GitSpec: QuickSpec {
                     var filePath: String!
 
                     beforeEach {
-                        filePath = directory.appendingPathComponent(fileName).path
-                        Helper.addFile(fileName, directory: directory)
+                        filePath = appDirectory.appendingPathComponent(fileName).path
+                        Helper.addFile(fileName, directory: appDirectory)
                     }
                     
                     it("returns false if file is not under version control") {
-                        expect(git.move(filePath, into: directory, renamedTo: newFileName)).to(beFalse())
+                        expect(git.move(filePath, into: appDirectory, renamedTo: newFileName)).to(beFalse())
                     }
                     
                     context("under version control") {
@@ -138,7 +140,7 @@ class GitSpec: QuickSpec {
                         
                         beforeEach {
                             _ = git.add()
-                            result = git.move(filePath, into: directory, renamedTo: newFileName)
+                            result = git.move(filePath, into: appDirectory, renamedTo: newFileName)
                         }
                         
                         it("returns true") {
@@ -149,7 +151,7 @@ class GitSpec: QuickSpec {
                             let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
                             expect(exists).to(beFalse(), description: "Original file still found")
 
-                            let newFilePath = directory.appendingPathComponent(newFileName).path
+                            let newFilePath = appDirectory.appendingPathComponent(newFileName).path
                             let newExists = fileManager.fileExists(atPath: newFilePath, isDirectory: &isFile)
                             expect(newExists).to(beTrue(), description: "New file not found")
                         }
@@ -158,7 +160,7 @@ class GitSpec: QuickSpec {
 
                 context("commit") {
                     it("commits successfully") {
-                        Helper.addFile("index.html", directory: directory)
+                        Helper.addFile("index.html", directory: appDirectory)
 
                         expect(git.add()).toNot(beNil())
 
@@ -185,7 +187,7 @@ class GitSpec: QuickSpec {
                         gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                         _ = gitHub.createRepository()
 
-                        Helper.addFile("index.html", directory: directory)
+                        Helper.addFile("index.html", directory: appDirectory)
                         expect(git.status()).toNot(contain("working tree clean"))
 
                         expect(git.add()).toNot(beNil())
@@ -208,7 +210,7 @@ class GitSpec: QuickSpec {
                     var gitIgnoreUrl: URL!
 
                     beforeEach {
-                        gitIgnoreUrl = directory.appendingPathComponent(".gitignore")
+                        gitIgnoreUrl = appDirectory.appendingPathComponent(".gitignore")
                         git.writeGitIgnore()
                     }
 

@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.2.1"
+    public static let version = "1.2.2"
     public static let defaultProjectName = "General"
 
     public static let appName = "Atlas"
@@ -23,7 +23,7 @@ public class AtlasCore {
     public var baseDirectory: URL!
     public var userDirectory: URL?
     public var appDirectory: URL?
-    var git: Git!
+    var git: Git?
     var gitHub: GitHub!
     public var search: Search!
     
@@ -93,7 +93,7 @@ public class AtlasCore {
 
         setUserDirectory(credentials)
         self.git = Git(self.userDirectory!, credentials: credentials)
-        appDirectory = git.directory
+        appDirectory = git!.directory
         atlasCommit()
         
         if initGitRepository(credentials) {
@@ -120,12 +120,12 @@ public class AtlasCore {
     }
     
     public func initGitRepository(_ credentials: Credentials) -> Bool {
-        guard git.directory != nil else {
+        guard git?.directory != nil else {
             print("Trying to create Git repository but Atlas directory not available.")
             return false
         }
         
-        let readme = git.directory.appendingPathComponent(Project.readme, isDirectory: false)
+        let readme = git!.directory.appendingPathComponent(Project.readme, isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
@@ -177,7 +177,7 @@ public class AtlasCore {
     }
 
     public func s3Repository() -> String? {
-        return git.annexRoot.count == 0 ? nil : git.annexRoot
+        return git?.annexRoot.count == 0 ? nil : git?.annexRoot
     }
 
     public func createBaseDirectory() {
@@ -189,31 +189,31 @@ public class AtlasCore {
     }
 
     public func initProject(_ name: String) -> Bool {
-        guard git.directory != nil else {
+        guard git?.directory != nil else {
             return false
         }
         
-        if !Project.exists(name, in: git.directory!) {
-            _ = Project(name, baseDirectory: git.directory!, git: git, search: search)
+        if !Project.exists(name, in: git!.directory!) {
+            _ = Project(name, baseDirectory: git!.directory!, git: git!, search: search)
         }
         
         return true
     }
     
     public func projects() -> [Project] {
-        guard git.directory != nil else {
+        guard git?.directory != nil else {
             return []
         }
         
-        return git.projects().map { project($0)! }
+        return git!.projects().map { project($0)! }
     }
     
     public func project(_ name: String) -> Project? {
-        guard git.directory != nil else {
+        guard git?.directory != nil else {
             return nil
         }
 
-        return Project(name, baseDirectory: git.directory!, git: git, search: search)
+        return Project(name, baseDirectory: git!.directory!, git: git!, search: search)
     }
     
     public func log(projectName: String?=nil, full: Bool=false, commitSlugFilter: [String]?=nil) -> [Commit] {
@@ -221,7 +221,7 @@ public class AtlasCore {
             return []
         }
 
-        let logData =  git.log(projectName: projectName, full: full, commitSlugFilter: commitSlugFilter)
+        let logData =  git!.log(projectName: projectName, full: full, commitSlugFilter: commitSlugFilter)
         
         var commits: [Commit] = []
         for data in logData {
@@ -236,11 +236,11 @@ public class AtlasCore {
                 for filePath in fileInfo {
                     let fileComponents = filePath.components(separatedBy: "/")
                     let fileName = String(fileComponents.last!)
-                    files.append(File(name: fileName, url: "\(git.annexRoot)/\(filePath)"))
+                    files.append(File(name: fileName, url: "\(git!.annexRoot)/\(filePath)"))
                     
                     if let projectName = fileComponents.first {
-                        if Project.exists(projectName, in: git.directory!) {
-                            projects.append(Project(projectName, baseDirectory: git.directory!, git: git))
+                        if Project.exists(projectName, in: git!.directory!) {
+                            projects.append(Project(projectName, baseDirectory: git!.directory!, git: git!))
                         }
                     }
                 }
@@ -254,7 +254,7 @@ public class AtlasCore {
     }
     
     public func purge(_ filePaths: [String]) -> Bool {
-        guard git != nil && git.directory != nil else {
+        guard git?.directory != nil else {
             return false
         }
         
@@ -274,7 +274,7 @@ public class AtlasCore {
         
         for directory in directories {
             if directory.contains("committed") {
-                let fullDirectory = git.directory!.appendingPathComponent(directory)
+                let fullDirectory = git!.directory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.readme) {
                     if !git!.removeFile("\(directory)/\(Project.readme)") {
@@ -284,7 +284,7 @@ public class AtlasCore {
             }
         }
 
-        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git.directory!)
+        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
         
         return success
     }
@@ -294,7 +294,7 @@ public class AtlasCore {
         group.enter()
         
         DispatchQueue.global().async {
-            if let status = self.git.status() {
+            if let status = self.git!.status() {
                 if !status.contains("up-to-date") {
                     _ = self.git?.add()
                     _ = self.git?.commit(commitMessage)
@@ -319,7 +319,7 @@ public class AtlasCore {
             return nil
         }
         
-        return git.status()
+        return git!.status()
     }
 
     public func remote() -> String? {
@@ -327,7 +327,7 @@ public class AtlasCore {
             return nil
         }
         
-        return git.remote()
+        return git!.remote()
     }
     
     public func validRepository() -> Bool {

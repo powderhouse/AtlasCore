@@ -32,7 +32,7 @@ class GitHubSpec: QuickSpec {
                 var gitHub: GitHub?
                 
                 beforeEach {
-                    directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName)
+                    directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName).appendingPathComponent(AtlasCore.appName)
                     
                     FileSystem.createDirectory(directory)
                     let filePath = directory.path

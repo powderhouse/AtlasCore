@@ -10,7 +10,7 @@ import Foundation
 public class Git {
     
     var userDirectory: URL!
-    var directory: URL!
+    public var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
     
     public var gitAnnex: GitAnnex? = nil
