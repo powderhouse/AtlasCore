@@ -290,20 +290,20 @@ public class AtlasCore {
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
-        let group = DispatchGroup()
-        group.enter()
-        
-        DispatchQueue.global().async {
+        let queue = DispatchQueue.global(qos: .userInitiated)
+        let timer = DispatchSource.makeTimerSource(queue: queue)
+        timer.schedule(deadline: .now(), repeating: .seconds(1), leeway: .seconds(1))
+        timer.setEventHandler(handler: {
             if let status = self.git!.status() {
+                print("STATUS: \(status)")
                 if !status.contains("up-to-date") {
                     _ = self.git?.add()
                     _ = self.git?.commit(commitMessage)
-                    group.leave()
+                    timer.cancel()
                 }
             }
-        }
-        
-        group.wait()
+        })
+        timer.resume()
     }
     
     public func atlasCommit(_ message: String?=nil) {
