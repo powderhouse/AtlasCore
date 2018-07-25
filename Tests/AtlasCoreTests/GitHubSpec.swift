@@ -23,6 +23,7 @@ class GitHubSpec: QuickSpec {
 
             context("initialized") {
                 var directory: URL!
+                var appDirectory: URL!
                 let fileManager = FileManager.default
                 var isFile : ObjCBool = false
                 var isDirectory : ObjCBool = true
@@ -32,7 +33,7 @@ class GitHubSpec: QuickSpec {
                 var gitHub: GitHub?
                 
                 beforeEach {
-                    directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName).appendingPathComponent(AtlasCore.appName)
+                    directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName)
                     
                     FileSystem.createDirectory(directory)
                     let filePath = directory.path
@@ -49,6 +50,8 @@ class GitHubSpec: QuickSpec {
                     _  = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+                    
+                    appDirectory = git.directory
                 }
 
                 afterEach {
@@ -101,7 +104,7 @@ class GitHubSpec: QuickSpec {
                         }
                         
                         it("should create a post-commit hook") {
-                            let gitURL = directory.appendingPathComponent(".git")
+                            let gitURL = appDirectory.appendingPathComponent(".git")
                             let hooksURL = gitURL.appendingPathComponent("hooks")
                             let postCommitPath = hooksURL.appendingPathComponent("post-commit").path
                             let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)

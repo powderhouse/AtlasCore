@@ -166,36 +166,10 @@ public class Project {
                 return false
             }
         }
-        
-        let group = DispatchGroup()
-        group.enter()
-        
-        DispatchQueue.global().async {
-            if let status = self.git.status() {
-                var statusComplete = true
                 
-                if !status.contains(slug) {
-                    statusComplete = false
-                }
-                
-                for filePath in filePaths {
-                    let fileName = URL(fileURLWithPath: filePath).lastPathComponent
-                    if !status.contains(fileName) {
-                        statusComplete = false
-                    }
-                }
-                
-                if statusComplete {
-                    group.leave()
-                }
-            }
-        }
-        
         for file in FileSystem.filesInDirectory(commitUrl) {
             _ = search?.add(commitUrl.appendingPathComponent(file))
         }
-        
-        group.wait()
         
         return true
     }
