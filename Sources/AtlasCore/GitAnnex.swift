@@ -56,6 +56,8 @@ public class GitAnnex {
             ]
         )
         
+        _ = run("enableremote", arguments: [remoteName])
+        
         _ = run("export", arguments: ["--tracking", "master", "--to", remoteName])
     }
     
