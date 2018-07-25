@@ -94,7 +94,6 @@ public class AtlasCore {
         setUserDirectory(credentials)
         self.git = Git(self.userDirectory!, credentials: credentials)
         appDirectory = git!.directory
-        atlasCommit()
         
         if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
@@ -290,20 +289,13 @@ public class AtlasCore {
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
-        let queue = DispatchQueue.global(qos: .userInitiated)
-        let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now(), repeating: .seconds(1), leeway: .seconds(1))
-        timer.setEventHandler(handler: {
-            if let status = self.git!.status() {
-                print("STATUS: \(status)")
-                if !status.contains("up-to-date") {
-                    _ = self.git?.add()
-                    _ = self.git?.commit(commitMessage)
-                    timer.cancel()
-                }
-            }
-        })
-        timer.resume()
+        var status = self.git?.status()
+        while !(status?.contains("Untracked files") ?? false) {
+            sleep(1)
+            status = self.git?.status()
+        }
+        _ = self.git?.add()
+        _ = self.git?.commit(commitMessage)
     }
     
     public func atlasCommit(_ message: String?=nil) {

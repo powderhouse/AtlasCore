@@ -38,7 +38,7 @@ class ProjectSpec: QuickSpec {
                 baseDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
                 FileSystem.createDirectory(baseDirectory)
 
-                directory = baseDirectory.appendingPathComponent("testProject")
+                directory = baseDirectory.appendingPathComponent("Atlas")
 
                 search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
                 git = Git(baseDirectory, credentials: credentials)

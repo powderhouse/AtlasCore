@@ -167,6 +167,23 @@ public class Project {
             }
         }
                 
+        var statusComplete = false
+        while !statusComplete {
+            if let status = git.status() {
+                print("STATUS: \(status)")
+                statusComplete = status.contains(slug)
+                for filePath in filePaths {
+                    let fileName = URL(fileURLWithPath: filePath).lastPathComponent
+                    if !status.contains(fileName) {
+                        statusComplete = false
+                    }
+                }
+            }
+            if (!statusComplete) {
+                sleep(1)
+            }
+        }
+        
         for file in FileSystem.filesInDirectory(commitUrl) {
             _ = search?.add(commitUrl.appendingPathComponent(file))
         }

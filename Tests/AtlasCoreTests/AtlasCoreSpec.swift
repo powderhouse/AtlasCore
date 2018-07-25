@@ -145,14 +145,14 @@ class AtlasCoreSpec: QuickSpec {
 
                     beforeEach {
                         atlasCore.closeSearch()
-                        
+
                         let searchIndexPath = atlasCore.userDirectory?.appendingPathComponent(Search.indexFileName).path
                         let exists = fileManager.fileExists(atPath: searchIndexPath!, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "No search index found")
 
                         atlasCore2 = AtlasCore(directory)
                     }
-                    
+
                     afterEach {
                         atlasCore2.closeSearch()
                     }
@@ -189,7 +189,7 @@ class AtlasCoreSpec: QuickSpec {
                             expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
                         }
                     }
-                    
+
                     context("initialized again after local directory deleted") {
                         var result: Bool!
                         let newCredentials = Credentials(
@@ -197,18 +197,18 @@ class AtlasCoreSpec: QuickSpec {
                             password: "1a2b3c4d",
                             token: nil
                         )
-                        
+
                         beforeEach {
                             let userDirectory = directory.appendingPathComponent(credentials.username)
                             let appDirectory = userDirectory.appendingPathComponent(AtlasCore.appName)
                             Helper.deleteBaseDirectory(appDirectory)
                             result = atlasCore.initGitAndGitHub(newCredentials)
                         }
-                        
+
                         it("allows you to initialize again") {
                             expect(result).to(beTrue())
                         }
-                        
+
                         it("sets the github repository link properly") {
                             expect(atlasCore2.gitHubRepository()).to(equal("https://github.com/atlastest/Atlas"))
                         }
