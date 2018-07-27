@@ -53,9 +53,17 @@ public class GitHub {
         return GitHub.api(arguments)
     }
 
-    public func createRepository() -> [String: Any]? {
+    public func createRepository() -> Bool {
+        if credentials.token != nil {
+            return createGitHubRepository()
+        } else {
+            return createLocalRepository()
+        }
+    }
+    
+    public func createGitHubRepository() -> Bool {
         guard credentials.token != nil else {
-            return nil
+            return false
         }
         
         let repoArguments = [
@@ -80,7 +88,7 @@ public class GitHub {
         }
         
         guard repoPath != nil else {
-            return nil
+            return false
         }
         
         let authenticatedPath = repoPath!.replacingOccurrences(
@@ -92,11 +100,37 @@ public class GitHub {
 
         if validRepository() {
             if setRepositoryLink() {
-                return repoResult![0]
+                return true
             }
         }
         
-        return nil        
+        return false
+    }
+    
+    public func createLocalRepository() -> Bool {
+        guard credentials.remotePath != nil else {
+            return false
+        }
+        
+        let remoteUrl = URL(fileURLWithPath: credentials.remotePath!, isDirectory: true).deletingLastPathComponent().appendingPathComponent("ATLAS_CORE_REMOTE")
+        
+        FileSystem.createDirectory(remoteUrl)
+        
+//        let x = git.run("init", inDirectory: remoteUrl)
+        let x = Glue.runProcess("git",
+                        arguments: ["init", "--bare"],
+                        currentDirectory: remoteUrl
+        )
+        
+        _ = git.run("remote", arguments: ["add", "origin", credentials.remotePath!])
+        
+        if validRepository() {
+            if setRepositoryLink() {
+                return true
+            }
+        }
+        
+        return false
     }
     
     public func validRepository() -> Bool {
@@ -123,15 +157,14 @@ public class GitHub {
     public func url() -> String {
         let authenticatedUrl = git.run("ls-remote", arguments: ["--get-url"])
 
-        guard authenticatedUrl.contains("https") else {
-            print("Authenticated url does not contain https: \(authenticatedUrl)")
-            return ""
+        if authenticatedUrl.contains("https") {
+            return authenticatedUrl.replacingOccurrences(
+                of: "https://\(credentials.username):\(credentials.token!)@",
+                with: "https://"
+            )
+        } else {
+            return authenticatedUrl
         }
-        
-        return authenticatedUrl.replacingOccurrences(
-            of: "https://\(credentials.username):\(credentials.token!)@",
-            with: "https://"
-        )
     }
     
     public func setRepositoryLink() -> Bool {

@@ -181,7 +181,7 @@ class GitSpec: QuickSpec {
 
                     beforeEach {
                         if let token = GitHub.getAuthenticationToken(credentials) {
-                            credentials.setAuthenticationToken(token: token)
+                            credentials.setAuthenticationToken(token)
                         }
 
                         gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)

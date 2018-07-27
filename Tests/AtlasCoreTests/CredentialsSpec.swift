@@ -19,6 +19,7 @@ class CredentialsSpec: QuickSpec {
             let username = "atlastest"
             let password = "1a2b3c4d"
             let token = "TOKEN"
+            let remotePath = "REMOTE_PATH"
 
             var directory: URL!
             
@@ -88,6 +89,32 @@ class CredentialsSpec: QuickSpec {
                         expect(exists).toNot(beTrue(), description: "Credentials json found but should not be")
                     }
                 }
+                
+                context("with remote path") {
+                    beforeEach {
+                        credentials = Credentials(username, remotePath: remotePath)
+                    }
+                    
+                    it("should initialize properly") {
+                        expect(credentials.username).to(equal(username))
+                        expect(credentials.password).to(beNil())
+                        expect(credentials.token).to(beNil())
+                        expect(credentials.remotePath).to(equal(remotePath))
+                    }
+                    
+                    context("save") {
+                        beforeEach {
+                            credentials.save(directory)
+                        }
+                        
+                        it("should not write the credentials to a file in the specified directory because the token is missing") {
+                            let filePath = "\(directory.path)/credentials.json"
+                            let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
+                            expect(exists).to(beTrue(), description: "Credentials json not found")
+                        }
+                    }
+                }
+
             }
             
             context("retrieve") {

@@ -13,6 +13,8 @@ public class Git {
     public var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
     
+    public var credentials: Credentials!
+    
     public var gitAnnex: GitAnnex? = nil
 
     static let gitIgnore = [
@@ -33,11 +35,12 @@ public class Git {
     public init(_ userDirectory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
         self.userDirectory = userDirectory
         self.directory = userDirectory.appendingPathComponent(AtlasCore.appName)
+        self.credentials = credentials
         self.atlasProcessFactory = processFactory
         
-        if !clone(credentials.username) {
+        if !clone() {
             FileSystem.createDirectory(self.directory)
-            _ = runInit()
+            let a = runInit()
 
             writeGitIgnore()
             _ = add()
@@ -54,7 +57,7 @@ public class Git {
         return ["--git-dir=\(path)/.git", command] + additionalArguments
     }
     
-    func run(_ command: String, arguments: [String]=[], async: Bool=false, inDirectory: URL?=nil) -> String {
+    func run(_ command: String, arguments: [String]=[], inDirectory: URL?=nil) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -79,9 +82,16 @@ public class Git {
         return result
     }
 
-    public func clone(_ username: String) -> Bool {
+    public func clone() -> Bool {
+        guard credentials != nil else {
+            return false
+        }
+        
+        let path = credentials!.remotePath ??
+                   "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
+
         _ = run("clone",
-                         arguments: ["https://github.com/\(username)/\(AtlasCore.appName).git"],
+                         arguments: [path],
                          inDirectory: userDirectory
         )
         return FileSystem.fileExists(directory, isDirectory: true)

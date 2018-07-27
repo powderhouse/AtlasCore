@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.2.5"
+    public static let version = "1.2.6"
     public static let defaultProjectName = "General"
 
     public static let appName = "Atlas"
@@ -78,14 +78,14 @@ public class AtlasCore {
             credentials.sync(existingCredentials)
         }
 
-        if credentials.token == nil {
+        if credentials.token == nil && credentials.remotePath == nil {
             if let token = GitHub.getAuthenticationToken(credentials) {
-                credentials.setAuthenticationToken(token: token)
+                credentials.setAuthenticationToken(token)
             }
         }
         
-        guard credentials.token != nil else {
-            print("No valid token found.")
+        guard credentials.token != nil || credentials.remotePath != nil else {
+            print("No valid token or remote path found.")
             return false
         }
 
