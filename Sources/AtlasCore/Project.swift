@@ -166,11 +166,10 @@ public class Project {
                 return false
             }
         }
-                
+        
         var statusComplete = false
         while !statusComplete {
             if let status = git.status() {
-                print("STATUS: \(status)")
                 statusComplete = status.contains(slug)
                 for filePath in filePaths {
                     let fileName = URL(fileURLWithPath: filePath).lastPathComponent

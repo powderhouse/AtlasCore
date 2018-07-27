@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.2.8"
+    public static let version = "1.2.9"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -298,13 +298,20 @@ public class AtlasCore {
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
+        let maxTries = 3
+        var tries = 0
         if var status = self.git?.status() {
-            while !(status.contains("Untracked files") || status.contains("Changes to be committed")) {
+            while tries < maxTries && !(status.contains("Untracked files") || status.contains("Changes to be committed")) {
                 sleep(1)
                 status = self.git?.status() ?? ""
+                tries += 1
             }
             _ = self.git?.add()
             _ = self.git?.commit(commitMessage)
+        }
+        
+        if tries >= maxTries {
+            print("No changes to commit.")
         }
     }
     
