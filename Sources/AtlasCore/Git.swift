@@ -40,7 +40,7 @@ public class Git {
         
         if !clone() {
             FileSystem.createDirectory(self.directory)
-            let a = runInit()
+            _ = runInit()
 
             writeGitIgnore()
             _ = add()
