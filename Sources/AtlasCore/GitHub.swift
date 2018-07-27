@@ -112,12 +112,11 @@ public class GitHub {
             return false
         }
         
-        let remoteUrl = URL(fileURLWithPath: credentials.remotePath!, isDirectory: true).deletingLastPathComponent().appendingPathComponent("ATLAS_CORE_REMOTE")
+        let remoteUrl = URL(fileURLWithPath: credentials.remotePath!, isDirectory: true)
         
         FileSystem.createDirectory(remoteUrl)
         
-//        let x = git.run("init", inDirectory: remoteUrl)
-        let x = Glue.runProcess("git",
+        _ = Glue.runProcess("git",
                         arguments: ["init", "--bare"],
                         currentDirectory: remoteUrl
         )

@@ -15,11 +15,12 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.2.6"
+    public static let version = "1.2.7"
     public static let defaultProjectName = "General"
-
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
+    public static let originName = "AtlasOrigin"
+
     public var baseDirectory: URL!
     public var userDirectory: URL?
     public var appDirectory: URL?
@@ -78,9 +79,18 @@ public class AtlasCore {
             credentials.sync(existingCredentials)
         }
 
+        setUserDirectory(credentials)
+
         if credentials.token == nil && credentials.remotePath == nil {
-            if let token = GitHub.getAuthenticationToken(credentials) {
-                credentials.setAuthenticationToken(token)
+            if credentials.password != nil {
+                if let token = GitHub.getAuthenticationToken(credentials) {
+                    credentials.setAuthenticationToken(token)
+                }
+            } else {
+                if let repository = userDirectory?.appendingPathComponent(AtlasCore.originName) {
+                    FileSystem.createDirectory(repository)
+                    credentials.setRemotePath(repository.path)
+                }
             }
         }
         
@@ -91,7 +101,6 @@ public class AtlasCore {
 
         credentials.save(baseDirectory!)
 
-        setUserDirectory(credentials)
         self.git = Git(self.userDirectory!, credentials: credentials)
         appDirectory = git!.directory
         

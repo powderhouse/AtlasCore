@@ -25,8 +25,6 @@ class AtlasCorePurgeSpec: QuickSpec {
                 username
             )
             
-            let remoteName = "ATLAS_CORE_REMOTE"
-            
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
@@ -36,10 +34,6 @@ class AtlasCorePurgeSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 FileSystem.createDirectory(directory)
-                
-                remote = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(remoteName)
-                FileSystem.createDirectory(remote)
-                credentials.setRemotePath(remote.path)
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
@@ -51,10 +45,8 @@ class AtlasCorePurgeSpec: QuickSpec {
             afterEach {
                 logEntries = 0
                 atlasCore.closeSearch()
-//                atlasCore.deleteGitHubRepository()
                 while FileSystem.fileExists(directory, isDirectory: true) {
                     Helper.deleteBaseDirectory(directory)
-                    Helper.deleteBaseDirectory(remote)
                 }
             }
             

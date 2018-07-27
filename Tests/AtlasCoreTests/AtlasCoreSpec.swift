@@ -19,14 +19,11 @@ class AtlasCoreSpec: QuickSpec {
             var atlasCore: AtlasCore!
             
             var directory: URL!
-            var remote: URL!
 
             let username = "atlastest"
             let credentials = Credentials(
                 username
             )
-            
-            let remoteName = "ATLAS_CORE_REMOTE"
             
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
@@ -38,10 +35,6 @@ class AtlasCoreSpec: QuickSpec {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 FileSystem.createDirectory(directory)
                 
-                remote = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(remoteName)
-                FileSystem.createDirectory(remote)
-                credentials.setRemotePath(remote.path)
-                
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                 expect(exists).to(beTrue(), description: "No folder found")
@@ -52,10 +45,8 @@ class AtlasCoreSpec: QuickSpec {
             afterEach {
                 logEntries = 0
                 atlasCore.closeSearch()
-//                atlasCore.deleteGitHubRepository()
                 while FileSystem.fileExists(directory, isDirectory: true) {
                     Helper.deleteBaseDirectory(directory)
-                    Helper.deleteBaseDirectory(remote)
                 }
             }
 
@@ -100,7 +91,7 @@ class AtlasCoreSpec: QuickSpec {
                 }
 
                 it("successfully syncs with GitHub after a commit") {
-                    expect(atlasCore.remote()).toEventually(contain(remoteName), timeout: 10)
+                    expect(atlasCore.remote()).toEventually(contain(AtlasCore.originName), timeout: 10)
 
                     let projectName = "Project"
                     let file = "index1.html"
@@ -165,7 +156,7 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                     it("automatically inits git") {
-                        expect(atlasCore2.gitHubRepository()).to(contain(remoteName))
+                        expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
                     }
 
                     it("automatically inits search") {
@@ -193,7 +184,7 @@ class AtlasCoreSpec: QuickSpec {
                         }
 
                         it("sets the github repository link properly") {
-                            expect(atlasCore2.gitHubRepository()).to(contain(remoteName))
+                            expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
                         }
                     }
 
@@ -217,7 +208,7 @@ class AtlasCoreSpec: QuickSpec {
                         }
 
                         it("sets the github repository link properly") {
-                            expect(atlasCore2.gitHubRepository()).to(contain(remoteName))
+                            expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
                         }
                     }
 
