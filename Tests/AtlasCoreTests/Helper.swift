@@ -10,6 +10,10 @@ import AtlasCore
 
 class Helper {
     
+    class func initializeTest() {
+        
+    }
+    
     class func addFile(_ name: String, directory: URL, contents: String="") {
         let filePath = "\(directory.path)/\(name)"
         let url = URL(fileURLWithPath: filePath)
@@ -19,6 +23,15 @@ class Helper {
         } catch {
             return
         }
+    }
+    
+    class func deleteBaseDirectory(_ url: URL) {
+        _ = Glue.runProcess(
+            "chmod",
+            arguments: ["-R", "u+w", url.path],
+            currentDirectory: url.deletingLastPathComponent()
+        )
+        FileSystem.deleteDirectory(url)
     }
     
 }

@@ -23,6 +23,7 @@ class GitHubSpec: QuickSpec {
 
             context("initialized") {
                 var directory: URL!
+                var appDirectory: URL!
                 let fileManager = FileManager.default
                 var isFile : ObjCBool = false
                 var isDirectory : ObjCBool = true
@@ -40,15 +41,17 @@ class GitHubSpec: QuickSpec {
                     expect(exists).to(beTrue(), description: "No folder found")
                     
                     if let token = GitHub.getAuthenticationToken(credentials) {
-                        credentials.setAuthenticationToken(token: token)
+                        credentials.setAuthenticationToken(token)
                     } else {
                         expect(false).to(beTrue(), description: "Failed to get token")
                     }
 
-                    git = Git(directory)
+                    git = Git(directory, credentials: credentials)
                     _  = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+                    
+                    appDirectory = git.directory
                 }
 
                 afterEach {
@@ -65,31 +68,49 @@ class GitHubSpec: QuickSpec {
                 
                 context("createRepository") {
                     
-                    var results: [String:Any]?
+                    var result: Bool?
                     
                     context("without token") {
                         beforeEach {
-                            credentials.setAuthenticationToken(token: nil)
-                            results = gitHub?.createRepository()
+                            credentials.setAuthenticationToken(nil)
+                            result = gitHub?.createRepository()
                         }
                         
                         it("should fail without token") {
-                            expect(results).to(beNil())
+                            expect(result).to(beFalse())
                         }
                     }
 
                     context("with token") {
                         beforeEach {
-                            results = gitHub?.createRepository()
+                            result = gitHub?.createRepository()
                         }
 
                         it("should provide results") {
-                            expect(results).toNot(beNil())
+                            expect(result).to(beTrue())
                         }
                         
                         it("should set the repository link") {
                             expect(gitHub?.repositoryLink).to(contain(credentials.username))
                             expect(gitHub?.repositoryLink).to(contain(repositoryName))
+                        }
+                    }
+                    
+                    context("with remotePath") {
+                        let path = "a path"
+                        
+                        beforeEach {
+                            credentials.setAuthenticationToken(nil)
+                            credentials.setRemotePath(path)
+                            result = gitHub?.createRepository()
+                        }
+                        
+                        it("should provide results") {
+                            expect(result).to(beTrue())
+                        }
+                        
+                        it("should set the repository link") {
+                            expect(gitHub?.repositoryLink).to(contain(path))
                         }
                     }
                     
@@ -101,7 +122,7 @@ class GitHubSpec: QuickSpec {
                         }
                         
                         it("should create a post-commit hook") {
-                            let gitURL = directory.appendingPathComponent(".git")
+                            let gitURL = appDirectory.appendingPathComponent(".git")
                             let hooksURL = gitURL.appendingPathComponent("hooks")
                             let postCommitPath = hooksURL.appendingPathComponent("post-commit").path
                             let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)
@@ -114,7 +135,7 @@ class GitHubSpec: QuickSpec {
                 context("url") {
                     beforeEach {
                         if let token = GitHub.getAuthenticationToken(credentials) {
-                            credentials.setAuthenticationToken(token: token)
+                            credentials.setAuthenticationToken(token)
                         }
                         _ = gitHub?.createRepository()
                     }
@@ -134,7 +155,7 @@ class GitHubSpec: QuickSpec {
                 context("setRepositoryLink") {
                     beforeEach {
                         if let token = GitHub.getAuthenticationToken(credentials) {
-                            credentials.setAuthenticationToken(token: token)
+                            credentials.setAuthenticationToken(token)
                         }
                     }
                     
@@ -144,7 +165,7 @@ class GitHubSpec: QuickSpec {
                     }
 
                     it("should return true if the repository already exists") {
-                        expect(gitHub?.createRepository()?["clone_url"] as? String).toNot(beNil())
+                        expect(gitHub?.createRepository()).to(beTrue())
                         expect(gitHub?.setRepositoryLink()).to(beTrue())
                         expect(gitHub?.repositoryLink).to(equal("https://github.com/atlastest/testGitHub"))
                     }

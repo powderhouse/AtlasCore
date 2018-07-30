@@ -42,8 +42,16 @@ public class FileSystem {
     public class func deleteDirectory(_ url: URL) {
         let fileManager = FileManager.default
         do {
+            _ = Glue.runProcess(
+                "chmod",
+                arguments: ["-R", "u+w", url.path],
+                currentDirectory: url.deletingLastPathComponent()
+            )
+            
             try fileManager.removeItem(at: url)
-        } catch {}
+        } catch {
+            print("UNABLE TO DELETE DIRECTORY: \(url) - \(error)")
+        }
     }
     
     public class func filesInDirectory(_ url: URL, excluding: [String]=[], directoriesOnly: Bool=false) -> [String] {

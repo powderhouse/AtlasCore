@@ -15,15 +15,16 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.0.4"
+    public static let version = "1.2.9"
     public static let defaultProjectName = "General"
+    public static let appName = "Atlas"
+    public static let repositoryName = "Atlas"
+    public static let originName = "AtlasOrigin"
 
-    public let appName = "Atlas"
-    public let repositoryName = "Atlas"
     public var baseDirectory: URL!
     public var userDirectory: URL?
-    public var atlasDirectory: URL?
-    var git: Git!
+    public var appDirectory: URL?
+    var git: Git?
     var gitHub: GitHub!
     public var search: Search!
     
@@ -46,18 +47,9 @@ public class AtlasCore {
     
     public func getDefaultBaseDirectory() -> URL {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        return URL(fileURLWithPath: paths[0]).appendingPathComponent(appName)
+        return URL(fileURLWithPath: paths[0]).appendingPathComponent(AtlasCore.appName)
     }
     
-    public func setAtlasDirectory() {
-        guard userDirectory != nil else {
-            return
-        }
-        
-        self.atlasDirectory = userDirectory!.appendingPathComponent(repositoryName)
-        FileSystem.createDirectory(self.atlasDirectory!)
-    }
-
     public func setUserDirectory(_ credentials: Credentials?=nil) {
         var activeCredentials = credentials
         if activeCredentials == nil {
@@ -87,26 +79,33 @@ public class AtlasCore {
             credentials.sync(existingCredentials)
         }
 
-        if credentials.token == nil {
-            if let token = GitHub.getAuthenticationToken(credentials) {
-                credentials.setAuthenticationToken(token: token)
+        setUserDirectory(credentials)
+
+        if credentials.token == nil && credentials.remotePath == nil {
+            if credentials.password != nil {
+                if let token = GitHub.getAuthenticationToken(credentials) {
+                    credentials.setAuthenticationToken(token)
+                }
+            } else {
+                if let repository = userDirectory?.appendingPathComponent(AtlasCore.originName) {
+                    FileSystem.createDirectory(repository)
+                    credentials.setRemotePath(repository.path)
+                }
             }
         }
         
-        guard credentials.token != nil else {
-            print("No valid token found.")
+        guard credentials.token != nil || credentials.remotePath != nil else {
+            print("No valid token or remote path found.")
             return false
         }
 
         credentials.save(baseDirectory!)
 
-        setUserDirectory(credentials)
-        setAtlasDirectory()
-        self.git = Git(self.atlasDirectory!)
-        atlasCommit()
+        self.git = Git(self.userDirectory!, credentials: credentials)
+        appDirectory = git!.directory
         
         if initGitRepository(credentials) {
-            self.gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+            self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
             if gitHub.setPostCommitHook() {
                 if !gitHub.setRepositoryLink() {
                     _ = gitHub.createRepository()
@@ -115,6 +114,7 @@ public class AtlasCore {
                         return false
                     }
 
+                    atlasCommit()
                     return true
                 }
                 return true
@@ -128,12 +128,12 @@ public class AtlasCore {
     }
     
     public func initGitRepository(_ credentials: Credentials) -> Bool {
-        guard atlasDirectory != nil else {
+        guard git?.directory != nil else {
             print("Trying to create Git repository but Atlas directory not available.")
             return false
         }
         
-        let readme = atlasDirectory!.appendingPathComponent(Project.readme, isDirectory: false)
+        let readme = git!.directory.appendingPathComponent(Project.readme, isDirectory: false)
         if !FileSystem.fileExists(readme, isDirectory: false) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
@@ -142,7 +142,6 @@ public class AtlasCore {
                 return false
             }
             
-            _ = git!.runInit()
         }
         
         return true
@@ -184,7 +183,11 @@ public class AtlasCore {
     public func gitHubRepository() -> String? {
         return gitHub?.repositoryLink
     }
-    
+
+    public func s3Repository() -> String? {
+        return git?.annexRoot.count == 0 ? nil : git?.annexRoot
+    }
+
     public func createBaseDirectory() {
         FileSystem.createDirectory(baseDirectory)
     }
@@ -194,31 +197,31 @@ public class AtlasCore {
     }
 
     public func initProject(_ name: String) -> Bool {
-        guard atlasDirectory != nil else {
+        guard git?.directory != nil else {
             return false
         }
         
-        if !Project.exists(name, in: atlasDirectory!) {
-            _ = Project(name, baseDirectory: atlasDirectory!, search: search)
+        if !Project.exists(name, in: git!.directory!) {
+            _ = Project(name, baseDirectory: git!.directory!, git: git!, search: search)
         }
         
         return true
     }
     
     public func projects() -> [Project] {
-        guard atlasDirectory != nil else {
+        guard git?.directory != nil else {
             return []
         }
         
-        return git.projects().map { project($0)! }
+        return git!.projects().map { project($0)! }
     }
     
     public func project(_ name: String) -> Project? {
-        guard atlasDirectory != nil else {
+        guard git?.directory != nil else {
             return nil
         }
 
-        return Project(name, baseDirectory: atlasDirectory!, search: search)
+        return Project(name, baseDirectory: git!.directory!, git: git!, search: search)
     }
     
     public func log(projectName: String?=nil, full: Bool=false, commitSlugFilter: [String]?=nil) -> [Commit] {
@@ -226,7 +229,7 @@ public class AtlasCore {
             return []
         }
 
-        let logData =  git.log(projectName: projectName, full: full, commitSlugFilter: commitSlugFilter)
+        let logData =  git!.log(projectName: projectName, full: full, commitSlugFilter: commitSlugFilter)
         
         var commits: [Commit] = []
         for data in logData {
@@ -239,20 +242,13 @@ public class AtlasCore {
             
             if let fileInfo = data["files"] as? [String] {
                 for filePath in fileInfo {
-                    if let repositoryLink = gitHub.repositoryLink {
-                        let rawGitHub = repositoryLink.replacingOccurrences(
-                            of: "github.com",
-                            with: "raw.githubusercontent.com"
-                        )
-                        
-                        let fileComponents = filePath.components(separatedBy: "/")
-                        let fileName = String(fileComponents.last!)
-                        files.append(File(name: fileName, url: "\(rawGitHub)/\(hash)/\(filePath)"))
-                        
-                        if let projectName = fileComponents.first {
-                            if Project.exists(projectName, in: atlasDirectory!) {
-                                projects.append(Project(projectName, baseDirectory: atlasDirectory!))
-                            }
+                    let fileComponents = filePath.components(separatedBy: "/")
+                    let fileName = String(fileComponents.last!)
+                    files.append(File(name: fileName, url: "\(git!.annexRoot)/\(filePath)"))
+                    
+                    if let projectName = fileComponents.first {
+                        if Project.exists(projectName, in: git!.directory!) {
+                            projects.append(Project(projectName, baseDirectory: git!.directory!, git: git!))
                         }
                     }
                 }
@@ -266,7 +262,7 @@ public class AtlasCore {
     }
     
     public func purge(_ filePaths: [String]) -> Bool {
-        guard git != nil && atlasDirectory != nil else {
+        guard git?.directory != nil else {
             return false
         }
         
@@ -286,7 +282,7 @@ public class AtlasCore {
         
         for directory in directories {
             if directory.contains("committed") {
-                let fullDirectory = atlasDirectory!.appendingPathComponent(directory)
+                let fullDirectory = git!.directory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.readme) {
                     if !git!.removeFile("\(directory)/\(Project.readme)") {
@@ -295,13 +291,28 @@ public class AtlasCore {
                 }
             }
         }
+
+        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
         
         return success
     }
         
     public func commitChanges(_ commitMessage: String?=nil) {
-        _ = git?.add()
-        _ = git?.commit(commitMessage)
+        let maxTries = 3
+        var tries = 0
+        if var status = self.git?.status() {
+            while tries < maxTries && !(status.contains("Untracked files") || status.contains("Changes to be committed")) {
+                sleep(1)
+                status = self.git?.status() ?? ""
+                tries += 1
+            }
+            _ = self.git?.add()
+            _ = self.git?.commit(commitMessage)
+        }
+        
+        if tries >= maxTries {
+            print("No changes to commit.")
+        }
     }
     
     public func atlasCommit(_ message: String?=nil) {
@@ -317,30 +328,40 @@ public class AtlasCore {
             return nil
         }
         
-        return git.status()
+        return git!.status()
     }
-    
+
     public func remote() -> String? {
         guard git != nil else {
             return nil
         }
         
-        return git.remote()
+        return git!.remote()
     }
     
     public func validRepository() -> Bool {
         return gitHub?.validRepository() ?? false
     }
     
-    public func syncLogEntries() -> [String] {
+    public func syncLog() -> String? {
         if let logUrl = userDirectory?.appendingPathComponent(GitHub.log) {
-            if let log = try? String(contentsOf: logUrl, encoding: .utf8) {
-                return log.components(separatedBy: "<STARTENTRY>")
-            }
+            return try? String(contentsOf: logUrl, encoding: .utf8)
+        }
+        return nil
+    }
+    
+    public func syncLogEntries() -> [String] {
+        if let log = syncLog() {
+            return log.components(separatedBy: "<STARTENTRY>")
         }
         return []
     }
-    
+
+    public func completedLogEntries() -> [String] {
+        let logEntries = syncLogEntries()
+        return logEntries.filter { $0.contains("</ENDENTRY>")}
+    }
+
     public func sync() {
         let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
         _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])

@@ -9,25 +9,47 @@ import Foundation
 
 public class Git {
     
-    var directory: URL!
+    var userDirectory: URL!
+    public var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
+    
+    public var credentials: Credentials!
+    
+    public var gitAnnex: GitAnnex? = nil
 
     static let gitIgnore = [
         ".DS_Store",
         "credentials.json"
     ]
     
-    public init(_ directory: URL, processFactory: AtlasProcessFactory?=ProcessFactory()) {
-        self.directory = directory
+    public var annexRoot: String {
+        get {
+            if let annex = gitAnnex {
+                return annex.s3Path
+            } else {
+                return ""
+            }
+        }
+    }
+    
+    public init(_ userDirectory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
+        self.userDirectory = userDirectory
+        self.directory = userDirectory.appendingPathComponent(AtlasCore.appName)
+        self.credentials = credentials
         self.atlasProcessFactory = processFactory
         
-        if status() == nil {
+        if !clone() {
+            FileSystem.createDirectory(self.directory)
             _ = runInit()
+
+            writeGitIgnore()
+            _ = add()
+            _ = commit()
         }
-        
-        writeGitIgnore()
-        _ = add()
-        _ = commit()
+
+        if credentials.complete() {
+            gitAnnex = GitAnnex(directory, credentials: credentials)
+        }
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -35,7 +57,7 @@ public class Git {
         return ["--git-dir=\(path)/.git", command] + additionalArguments
     }
     
-    func run(_ command: String, arguments: [String]=[], async: Bool=false) -> String {
+    func run(_ command: String, arguments: [String]=[], inDirectory: URL?=nil) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -43,7 +65,7 @@ public class Git {
         
         return Glue.runProcess("git",
                                arguments: fullArguments,
-                               currentDirectory: directory,
+                               currentDirectory: inDirectory ?? directory,
                                atlasProcess: atlasProcessFactory.build()
         )        
     }
@@ -51,13 +73,32 @@ public class Git {
     public func runInit() -> String {
         return run("init")
     }
-    
+
     public func status() -> String? {
         let result = run("status")
         if (result == "") {
             return nil
         }
         return result
+    }
+
+    public func clone() -> Bool {
+        guard credentials != nil else {
+            return false
+        }
+        
+        let path = credentials!.remotePath ??
+                   "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
+
+        _ = run("clone",
+                         arguments: [path],
+                         inDirectory: userDirectory
+        )
+        return FileSystem.fileExists(directory, isDirectory: true)
+    }
+    
+    public func annexInfo() -> String {
+        return gitAnnex?.info() ?? "Git Annex Not Initialized"
     }
     
     public func remote() -> String? {
@@ -95,7 +136,50 @@ public class Git {
     }
     
     public func add(_ filter: String=".") -> Bool {
+        
+        if gitAnnex != nil {
+            return gitAnnex!.add(filter)
+        }
+        
         _ = run("add", arguments: [filter])
+        
+        return true
+    }
+    
+    public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+        return move([filePath], into: directory, renamedTo: newName)
+    }
+    
+    public func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
+
+        for filePath in filePaths {
+            if let fileName = filePath.split(separator: "/").last {
+                let destinationName = newName == nil ? String(fileName) : newName!
+                let destination = directory.appendingPathComponent(destinationName)
+                
+                _ = run("mv", arguments: [filePath, destination.path])
+                
+                let directoryComponents = directory.path.components(separatedBy: "/")
+                let destinationComponents = destination.path.components(separatedBy: "/")
+                let relativeComponents = destinationComponents[
+                    directoryComponents.count..<destinationComponents.count
+                ]
+                
+                if let currentStatus = status() {
+                    if !currentStatus.contains(relativeComponents.joined(separator: "/")) {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+                
+                if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
+                    return false
+                }
+            } else {
+                return false
+            }
+        }
         
         return true
     }
@@ -112,13 +196,14 @@ public class Git {
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
 
+        _ = gitAnnex?.deleteFile(filePath)
         _ = run("filter-branch", arguments: filterBranchArguments)
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
         _ = run("gc", arguments: ["--prune=now"])
         _ = run("push", arguments: ["origin", "--force", "--all"])
         _ = run("push", arguments: ["origin", "--force", "--tags"])
-
+                
 //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
 

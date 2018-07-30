@@ -12,7 +12,7 @@ public class GitHub {
     static let log = "log.txt"
     static let syncScriptName = "atlas-sync.sh"
     static let postCommitScriptName = "post-commit"
-    
+
     public var credentials: Credentials!
     public var git: Git!
     
@@ -53,9 +53,17 @@ public class GitHub {
         return GitHub.api(arguments)
     }
 
-    public func createRepository() -> [String: Any]? {
+    public func createRepository() -> Bool {
+        if credentials.token != nil {
+            return createGitHubRepository()
+        } else {
+            return createLocalRepository()
+        }
+    }
+    
+    public func createGitHubRepository() -> Bool {
         guard credentials.token != nil else {
-            return nil
+            return false
         }
         
         let repoArguments = [
@@ -80,7 +88,7 @@ public class GitHub {
         }
         
         guard repoPath != nil else {
-            return nil
+            return false
         }
         
         let authenticatedPath = repoPath!.replacingOccurrences(
@@ -92,16 +100,40 @@ public class GitHub {
 
         if validRepository() {
             if setRepositoryLink() {
-                return repoResult![0]
+                return true
             }
         }
         
-        return nil        
+        return false
+    }
+    
+    public func createLocalRepository() -> Bool {
+        guard credentials.remotePath != nil else {
+            return false
+        }
+        
+        let remoteUrl = URL(fileURLWithPath: credentials.remotePath!, isDirectory: true)
+        
+        FileSystem.createDirectory(remoteUrl)
+        
+        _ = Glue.runProcess("git",
+                        arguments: ["init", "--bare"],
+                        currentDirectory: remoteUrl
+        )
+        
+        _ = git.run("remote", arguments: ["add", "origin", credentials.remotePath!])
+        
+        if validRepository() {
+            if setRepositoryLink() {
+                return true
+            }
+        }
+        
+        return false
     }
     
     public func validRepository() -> Bool {
         let update = git.run("remote", arguments: ["update"])
-        print("UPDATE: \(update)")
         if update.count == 0 { return false }
         if update.contains("fatal") { return false }
         return true
@@ -124,15 +156,14 @@ public class GitHub {
     public func url() -> String {
         let authenticatedUrl = git.run("ls-remote", arguments: ["--get-url"])
 
-        guard authenticatedUrl.contains("https") else {
-            print("Authenticated url does not contain https: \(authenticatedUrl)")
-            return ""
+        if authenticatedUrl.contains("https") {
+            return authenticatedUrl.replacingOccurrences(
+                of: "https://\(credentials.username):\(credentials.token!)@",
+                with: "https://"
+            )
+        } else {
+            return authenticatedUrl
         }
-        
-        return authenticatedUrl.replacingOccurrences(
-            of: "https://\(credentials.username):\(credentials.token!)@",
-            with: "https://"
-        )
     }
     
     public func setRepositoryLink() -> Bool {
@@ -168,8 +199,12 @@ echo ""
 echo "Recorded: ${DATE}"
 echo ""
 
-(cd "${DIR}" && cd "../.." && git pull origin master)
-(cd "${DIR}" && cd "../.." && git push --set-upstream origin master)
+export AWS_ACCESS_KEY_ID=\(credentials.s3AccessKey ?? "")
+export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
+
+(cd "${DIR}" && cd "../.." && git pull origin master) || true
+(cd "${DIR}" && cd "../.." && git push --set-upstream origin master) || true
+(cd "${DIR}" && cd "../.." && git annex sync --content) || true
 
 echo ""
 echo "</ENDENTRY>"

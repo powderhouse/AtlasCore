@@ -9,12 +9,16 @@ import Foundation
 
 public class Glue {
     
-    public class func runProcess(_ command: String, arguments: [String]?=[], currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
+    public class func runProcess(_ command: String, arguments: [String]?=[], environment_variables: [String: String]?=nil, currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
         var process = atlasProcess
         
         process.launchPath = "/usr/bin/env"
 //        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = [command] + (arguments ?? [])
+        
+        if environment_variables != nil {
+            process.environment = environment_variables
+        }
         
         if currentDirectory != nil {
 //            process.currentDirectoryURL = currentDirectory
