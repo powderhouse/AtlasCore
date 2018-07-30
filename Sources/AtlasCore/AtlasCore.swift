@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.3.3"
+    public static let version = "1.3.4"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
