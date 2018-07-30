@@ -104,7 +104,13 @@ public class GitAnnex {
     }
 
     public func sync() {
-        _ = run("sync")
+        let queue = DispatchQueue.global(qos: .background)
+        let timer = DispatchSource.makeTimerSource(queue: queue)
+        timer.schedule(deadline: .now())
+        timer.setEventHandler(handler: {
+            _ = self.run("sync")
+        })
+        timer.resume()       
     }
     
 }
