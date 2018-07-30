@@ -46,7 +46,7 @@ public class GitAnnex {
         
         if info.contains("remote: \(remoteName)") {
             _ = run("enableremote", arguments: [remoteName])
-            sync()
+            sync(6)
             return
         }
         
@@ -103,9 +103,9 @@ public class GitAnnex {
         return run("status", arguments: ["--short"])
     }
 
-    public func sync() {
+    public func sync(_ delay: Int=1) {
         Timer.scheduledTimer(
-            withTimeInterval: 0.1,
+            withTimeInterval: TimeInterval(delay),
             repeats: false,
             block: { (timer) in
                 _ = self.run("sync")
