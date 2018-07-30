@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.3.0"
+    public static let version = "1.3.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -101,8 +101,12 @@ public class AtlasCore {
 
         credentials.save(baseDirectory!)
 
-        self.git = Git(self.userDirectory!, credentials: credentials)
-        appDirectory = git!.directory
+        if git == nil {
+            git = Git(self.userDirectory!, credentials: credentials)
+        } else {
+            git?.initializeDirectory()
+        }
+        appDirectory = git?.directory
         
         if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
@@ -138,7 +142,7 @@ public class AtlasCore {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
             } catch {
-                print("Unable to write Atlas \(Project.readme)")
+                print("Unable to write Atlas \(Project.readme): \(error)")
                 return false
             }
             

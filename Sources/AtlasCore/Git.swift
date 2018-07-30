@@ -38,17 +38,21 @@ public class Git {
         self.credentials = credentials
         self.atlasProcessFactory = processFactory
         
+        initializeDirectory()
+        
+        if credentials.complete() {
+            gitAnnex = GitAnnex(directory, credentials: credentials)
+        }
+    }
+    
+    func initializeDirectory() {
         if !clone() {
             FileSystem.createDirectory(self.directory)
             _ = runInit()
-
+            
             writeGitIgnore()
             _ = add()
             _ = commit()
-        }
-
-        if credentials.complete() {
-            gitAnnex = GitAnnex(directory, credentials: credentials)
         }
     }
     
