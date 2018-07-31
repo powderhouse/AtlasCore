@@ -105,7 +105,7 @@ public class GitAnnex {
 
     public func sync() {
         DispatchQueue.global(qos: .background).async {
-            self.run("sync")
+            _ = self.run("sync")
         }
     }
     
