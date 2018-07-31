@@ -45,18 +45,18 @@ public class GitAnnex {
         let info = run("info", arguments: [remoteName])
         
         if info.contains("remote: \(remoteName)") {
-            _ = run("enableremote", arguments: [remoteName])
+            _ = run("enableremote", arguments: [remoteName, "publicurl=\(s3Path)"])
             sync()
             return
         }
         
         _ = run("initremote", arguments: [remoteName, "type=S3", "encryption=none",
                                           "bucket=atlas-\(credentials.username)", "exporttree=yes",
-                                          "public=yes", "encryption=none"
+                                          "public=yes", "publicurl=\(s3Path)", "encryption=none"
             ]
         )
         
-        _ = run("enableremote", arguments: [remoteName])
+        _ = run("enableremote", arguments: [remoteName, "publicurl=\(s3Path)"])
         
         _ = run("export", arguments: ["--tracking", "master", "--to", remoteName])
     }
