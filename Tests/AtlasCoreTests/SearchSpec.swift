@@ -30,9 +30,7 @@ class SearchSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("SEARCH")
 
-                FileSystem.deleteDirectory(directory)
-
-                FileSystem.createDirectory(directory)
+                Helper.createBaseDirectory(directory)
                 
                 Helper.addFile(fileName, directory: directory, contents: "some text one can search")
                 file = directory.appendingPathComponent(fileName)
@@ -55,7 +53,7 @@ class SearchSpec: QuickSpec {
                     search!.close()
                     expect(search!.skIndex).toEventually(beNil())
                 }
-                FileSystem.deleteDirectory(directory)
+                Helper.deleteBaseDirectory(directory)
             }
             
             context("add") {

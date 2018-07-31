@@ -15,11 +15,15 @@ class GitHubSpec: QuickSpec {
         describe("GitHub") {
             
             let repositoryName = "testGitHub"
-            let credentials = Credentials(
-                "atlastest",
-                password: "1a2b3c4d",
-                token: nil
-            )
+            var credentials: Credentials!
+            
+            beforeEach {
+                credentials = Credentials(
+                    "atlastest",
+                    password: "1a2b3c4d",
+                    token: nil
+                )
+            }
 
             context("initialized") {
                 var directory: URL!
@@ -35,7 +39,8 @@ class GitHubSpec: QuickSpec {
                 beforeEach {
                     directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName)
                     
-                    FileSystem.createDirectory(directory)
+                    Helper.createBaseDirectory(directory)
+                    
                     let filePath = directory.path
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                     expect(exists).to(beTrue(), description: "No folder found")
@@ -55,7 +60,7 @@ class GitHubSpec: QuickSpec {
                 }
 
                 afterEach {
-                    FileSystem.deleteDirectory(directory)
+                    Helper.deleteBaseDirectory(directory)
                     gitHub?.deleteRepository()
                 }
                 

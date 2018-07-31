@@ -25,13 +25,20 @@ class Helper {
         }
     }
     
+    class func createBaseDirectory(_ url: URL) {
+        deleteBaseDirectory(url)
+        FileSystem.createDirectory(url)
+    }
+    
     class func deleteBaseDirectory(_ url: URL) {
-        _ = Glue.runProcess(
-            "chmod",
-            arguments: ["-R", "u+w", url.path],
-            currentDirectory: url.deletingLastPathComponent()
-        )
-        FileSystem.deleteDirectory(url)
+        if FileSystem.fileExists(url, isDirectory: true) {
+            _ = Glue.runProcess(
+                "chmod",
+                arguments: ["-R", "u+w", url.path],
+                currentDirectory: url.deletingLastPathComponent()
+            )
+            FileSystem.deleteDirectory(url)
+        }
     }
     
 }

@@ -18,7 +18,6 @@ class AtlasCorePurgeSpec: QuickSpec {
             var atlasCore: AtlasCore!
             
             var directory: URL!
-            var remote: URL!
             
             let username = "atlastest"
             let credentials = Credentials(
@@ -33,7 +32,7 @@ class AtlasCorePurgeSpec: QuickSpec {
             
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
-                FileSystem.createDirectory(directory)
+                Helper.createBaseDirectory(directory)
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)

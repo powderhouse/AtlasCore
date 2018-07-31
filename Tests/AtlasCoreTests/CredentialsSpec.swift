@@ -30,7 +30,7 @@ class CredentialsSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testCredentials")
                 
-                FileSystem.createDirectory(directory)
+                Helper.createBaseDirectory(directory)
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
@@ -38,7 +38,7 @@ class CredentialsSpec: QuickSpec {
             }
             
             afterEach {
-                FileSystem.deleteDirectory(directory)
+                Helper.deleteBaseDirectory(directory)
             }
             
             context("with token") {

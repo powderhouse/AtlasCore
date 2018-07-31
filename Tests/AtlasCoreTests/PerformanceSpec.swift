@@ -38,7 +38,7 @@ class PerformanceCoreSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 
-                FileSystem.createDirectory(directory)
+                Helper.createBaseDirectory(directory)
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
@@ -62,7 +62,7 @@ class PerformanceCoreSpec: QuickSpec {
             
             afterEach {
                 atlasCore.deleteGitHubRepository()
-                FileSystem.deleteDirectory(directory)
+                Helper.deleteBaseDirectory(directory)
 
                 print("""
 

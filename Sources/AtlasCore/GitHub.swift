@@ -96,6 +96,7 @@ public class GitHub {
             with: "https://\(credentials.username):\(credentials.token!)@"
         )
         
+        _ = git.run("remote", arguments: ["rm", "origin"])
         _ = git.run("remote", arguments: ["add", "origin", authenticatedPath])
 
         if validRepository() {
@@ -121,6 +122,7 @@ public class GitHub {
                         currentDirectory: remoteUrl
         )
         
+        _ = git.run("remote", arguments: ["rm", "origin"])
         _ = git.run("remote", arguments: ["add", "origin", credentials.remotePath!])
         
         if validRepository() {
