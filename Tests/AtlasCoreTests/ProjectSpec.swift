@@ -36,7 +36,7 @@ class ProjectSpec: QuickSpec {
             
             beforeEach {
                 baseDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
-                Helper.createBaseDirectory(directory)
+                Helper.createBaseDirectory(baseDirectory)
 
                 directory = baseDirectory.appendingPathComponent("Atlas")
 
@@ -48,7 +48,7 @@ class ProjectSpec: QuickSpec {
             
             afterEach {
                 search.close()
-                Helper.deleteBaseDirectory(directory)
+                Helper.deleteBaseDirectory(baseDirectory)
             }
             
             context("initialization") {
