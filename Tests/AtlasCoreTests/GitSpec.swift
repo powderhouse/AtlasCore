@@ -23,9 +23,10 @@ class GitSpec: QuickSpec {
             let credentials = Credentials(
                 "atlastest",
                 password: "1a2b3c4d",
-                token: nil
+                token: nil,
+                s3AccessKey: "test",
+                s3SecretAccessKey: "test"
             )
-
 
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
@@ -49,6 +50,12 @@ class GitSpec: QuickSpec {
                     git = Git(directory, credentials: credentials)
                     appDirectory = git.directory
                 }
+                
+                afterEach {
+                    if let s3Bucket = git.gitAnnex?.s3Bucket {
+                        S3Helper.deleteBucket(s3Bucket)
+                    }
+                }
 
                 it("is not nil") {
                     expect(git).toNot(beNil())
@@ -66,11 +73,23 @@ class GitSpec: QuickSpec {
                     expect(status).to(contain("nothing to commit"))
                 }
 
-//                it("initializes git annex") {
-//                    let annexStatus = git.annexInfo()
-//                    expect(annexStatus).to(contain("local annex keys: 0"))
-//                    expect(annexStatus).to(contain("annexed files in working tree: 0"))
-//                }
+                it("initializes git annex") {
+                    let annexStatus = git.annexInfo()
+                    expect(annexStatus).to(contain("local annex keys: 0"))
+                    expect(annexStatus).to(contain("annexed files in working tree: 0"))
+                    expect(annexStatus).to(contain(GitAnnex.remoteName))
+                    expect(git.remote() ?? "").to(contain(GitAnnex.remoteName))
+                    
+                    if let s3Bucket = git.gitAnnex?.s3Bucket {
+                        expect(S3Helper.listBuckets()).to(contain(s3Bucket))
+                    } else {
+                        expect(false).to(beTrue(), description: "No S3 bucket specified")
+                    }
+                }
+                
+                it("creates an s3 folder") {
+                    
+                }
 
                 context("when reinitialized") {
 
@@ -165,7 +184,7 @@ class GitSpec: QuickSpec {
                         expect(git.add()).toNot(beNil())
 
                         let commit = git.commit()
-                        expect(commit).to(contain("1 file changed, 0 insertions(+), 0 deletions"))
+                        expect(commit).to(contain("1 file changed, 1 insertion(+)"))
                     }
                 }
 

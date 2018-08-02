@@ -24,8 +24,8 @@ public class AtlasCore {
     public var baseDirectory: URL!
     public var userDirectory: URL?
     public var appDirectory: URL?
-    var git: Git?
-    var gitHub: GitHub!
+    public var git: Git?
+    public var gitHub: GitHub!
     public var search: Search!
     
     

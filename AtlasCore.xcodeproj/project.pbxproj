@@ -24,6 +24,7 @@
 		3A3C79352091241000C4D933 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C79342091241000C4D933 /* String.swift */; };
 		3A3C7A25209E189500C4D933 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C7A24209E189500C4D933 /* Search.swift */; };
 		3A3C7A28209E223D00C4D933 /* SearchSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3C7A26209E21B700C4D933 /* SearchSpec.swift */; };
+		3A6AB697211253020080C87D /* S3Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A6AB695211250C30080C87D /* S3Helper.swift */; };
 		3A78CD20207D024200E05444 /* PerformanceSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A78CD1F207D024200E05444 /* PerformanceSpec.swift */; };
 		3A7B4CBD20D831CD000C8266 /* GitAnnex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7B4CBB20D831CD000C8266 /* GitAnnex.swift */; };
 		3A81946420F443BA00308F77 /* AtlasCorePurgeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A81946320F443BA00308F77 /* AtlasCorePurgeSpec.swift */; };
@@ -176,6 +177,7 @@
 		3A3C79342091241000C4D933 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		3A3C7A24209E189500C4D933 /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
 		3A3C7A26209E21B700C4D933 /* SearchSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSpec.swift; sourceTree = "<group>"; };
+		3A6AB695211250C30080C87D /* S3Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = S3Helper.swift; sourceTree = "<group>"; };
 		3A78CD1F207D024200E05444 /* PerformanceSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceSpec.swift; sourceTree = "<group>"; };
 		3A7B4CBB20D831CD000C8266 /* GitAnnex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitAnnex.swift; sourceTree = "<group>"; };
 		3A81946320F443BA00308F77 /* AtlasCorePurgeSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCorePurgeSpec.swift; sourceTree = "<group>"; };
@@ -391,6 +393,7 @@
 				OBJ_28 /* ProjectSpec.swift */,
 				3A78CD1F207D024200E05444 /* PerformanceSpec.swift */,
 				3A3C7A26209E21B700C4D933 /* SearchSpec.swift */,
+				3A6AB695211250C30080C87D /* S3Helper.swift */,
 			);
 			name = AtlasCoreTests;
 			path = Tests/AtlasCoreTests;
@@ -841,6 +844,7 @@
 				OBJ_156 /* Helper.swift in Sources */,
 				3A3C7A28209E223D00C4D933 /* SearchSpec.swift in Sources */,
 				OBJ_157 /* ProjectSpec.swift in Sources */,
+				3A6AB697211253020080C87D /* S3Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

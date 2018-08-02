@@ -9,13 +9,18 @@ import Foundation
 
 public class GitAnnex {
     
-    let remoteName = "atlasS3"
+    public static let remoteName = "atlasS3"
     public let directory: URL!
     var credentials: Credentials!
     
-    var s3Path: String {
+    public var s3Bucket: String {
         get {
-            return "https://s3.amazonaws.com/atlas-\(credentials.username)"
+            return "atlas-\(credentials.username)"
+        }
+    }
+    public var s3Path: String {
+        get {
+            return "https://s3.amazonaws.com/\(s3Bucket)"
         }
     }
 
@@ -42,23 +47,35 @@ public class GitAnnex {
     }
     
     public func initializeS3() {
-        let info = run("info", arguments: [remoteName])
+        let info = run("info", arguments: [GitAnnex.remoteName])
         
-        if info.contains("remote: \(remoteName)") {
-            _ = run("enableremote", arguments: [remoteName, "publicurl=\(s3Path)"])
+        if info.contains("remote: \(GitAnnex.remoteName)") {
+            _ = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
             sync()
             return
         }
         
-        _ = run("initremote", arguments: [remoteName, "type=S3", "encryption=none",
-                                          "bucket=atlas-\(credentials.username)", "exporttree=yes",
-                                          "public=yes", "publicurl=\(s3Path)", "encryption=none"
-            ]
-        )
+        var initArguments = [
+            GitAnnex.remoteName,
+            "type=S3",
+            "encryption=none",
+            "bucket=atlas-\(credentials.username)",
+            "exporttree=yes",
+            "public=yes",
+            "publicurl=\(s3Path)"
+        ]
         
-        _ = run("enableremote", arguments: [remoteName, "publicurl=\(s3Path)"])
+        if credentials.s3AccessKey == "test" {
+            initArguments.append("host=localhost")
+            initArguments.append("port=4572")
+            initArguments.append("requeststyle=path")
+        }
         
-        _ = run("export", arguments: ["--tracking", "master", "--to", remoteName])
+        _ = run("initremote", arguments: initArguments)
+        
+        _ = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
+        
+        _ = run("export", arguments: ["--tracking", "master", "--to", GitAnnex.remoteName])
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {

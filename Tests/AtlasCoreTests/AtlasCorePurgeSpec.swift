@@ -21,7 +21,9 @@ class AtlasCorePurgeSpec: QuickSpec {
             
             let username = "atlastest"
             let credentials = Credentials(
-                username
+                username,
+                s3AccessKey: "test",
+                s3SecretAccessKey: "test"
             )
             
             let fileManager = FileManager.default
@@ -46,6 +48,9 @@ class AtlasCorePurgeSpec: QuickSpec {
                 atlasCore.closeSearch()
                 while FileSystem.fileExists(directory, isDirectory: true) {
                     Helper.deleteBaseDirectory(directory)
+                }
+                if let s3Bucket = atlasCore.git?.gitAnnex?.s3Bucket {
+                    S3Helper.deleteBucket(s3Bucket)
                 }
             }
             
