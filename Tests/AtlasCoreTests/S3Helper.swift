@@ -10,15 +10,27 @@ import AtlasCore
 
 class S3Helper {
     
+    static let host = "http://localhost:4572"
+    
     class func listBuckets() -> String {
-        let a = Glue.runProcessError("aws", arguments: [
-                "--endpoint-url=http://localhost:4572",
+        return Glue.runProcessError("aws", arguments: [
+                "--endpoint-url=\(host)",
                 "--no-sign-request",
                 "s3api",
                 "list-buckets"
             ]
         )
-        return a
+    }
+    
+    class func listObjects(_ bucketName: String) -> String {
+        return Glue.runProcessError("aws", arguments: [
+            "--endpoint-url=\(host)",
+            "--no-sign-request",
+            "s3api",
+            "list-objects",
+            "--bucket=\(bucketName)"
+            ]
+        )
     }
     
     class func deleteBucket(_ bucketName: String) {
@@ -26,7 +38,7 @@ class S3Helper {
                 "s3",
                 "rb",
                 "s3://\(bucketName)",
-                "--endpoint-url=http://localhost:4572",
+                "--endpoint-url=\(host)",
                 "--no-sign-request",
                 "--force"
             ]

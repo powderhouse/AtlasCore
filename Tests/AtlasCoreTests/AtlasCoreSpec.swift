@@ -22,10 +22,7 @@ class AtlasCoreSpec: QuickSpec {
 
             let username = "atlastest"
             let credentials = Credentials(
-                username,
-                s3AccessKey: "test",
-                s3SecretAccessKey: "test"
-            )
+                username            )
             
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
@@ -49,9 +46,6 @@ class AtlasCoreSpec: QuickSpec {
                 atlasCore.closeSearch()
                 while FileSystem.fileExists(directory, isDirectory: true) {
                     Helper.deleteBaseDirectory(directory)
-                }
-                if let s3Bucket = atlasCore.git?.gitAnnex?.s3Bucket {
-                    S3Helper.deleteBucket(s3Bucket)
                 }
             }
 
@@ -337,7 +331,7 @@ Multiline
                                 expect(lastCommit.files.count).to(equal(2))
                                 if let firstFile = lastCommit.files.first {
                                     expect(firstFile.name).to(equal(file2))
-                                    expect(firstFile.url).to(equal("\(atlasCore.s3Repository()!)/\(project2Name)/committed/\(slug2)/\(file2)"))
+                                    expect(firstFile.url).to(equal("/\(project2Name)/committed/\(slug2)/\(file2)"))
                                 }
                             }
                         }
@@ -352,7 +346,7 @@ Multiline
                                 expect(lastCommit.files.count).to(equal(1))
                                 if let firstFile = lastCommit.files.first {
                                     expect(firstFile.name).to(equal(file1))
-                                    expect(firstFile.url).to(equal("\(atlasCore.s3Repository()!)/\(project1Name)/committed/\(slug1)/\(file1)"))
+                                    expect(firstFile.url).to(equal("/\(project1Name)/committed/\(slug1)/\(file1)"))
                                 } else {
                                     expect(false).to(beTrue(), description: "file missing")
                                 }
