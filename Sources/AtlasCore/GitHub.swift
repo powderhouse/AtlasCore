@@ -215,11 +215,12 @@ echo "</ENDENTRY>"
             return false
         }
 
+        let badText = "Bad file descriptor"
         let hook = """
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-(cd "${DIR}" && ./atlas-sync.sh) >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
+(cd "${DIR}" && ./atlas-sync.sh) | grep -v '\(badText)' >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
 """
         return write(hook, to: postCommitURL)
     }
