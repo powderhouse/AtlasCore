@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.4.2"
+    public static let version = "1.4.4"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -118,7 +118,7 @@ public class AtlasCore {
                         return false
                     }
 
-                    atlasCommit()
+                    _ = atlasCommit()
                     return true
                 }
                 return true
@@ -301,7 +301,7 @@ public class AtlasCore {
         return success
     }
         
-    public func commitChanges(_ commitMessage: String?=nil) -> Bool {
+    public func commitChanges(_ commitMessage: String?=nil) -> String {
         let maxTries = 5
         var tries = 0
         if var status = self.git?.status() {
@@ -311,17 +311,13 @@ public class AtlasCore {
                 tries += 1
             }
             _ = self.git?.add()
-            _ = self.git?.commit(commitMessage)
+            return self.git?.commit(commitMessage) ?? "Commit Error"
         }
         
-        if tries >= maxTries {
-            print("No changes to commit.")
-            return false
-        }
-        return true
+        return "No status available"
     }
     
-    public func atlasCommit(_ message: String?=nil) -> Bool {
+    public func atlasCommit(_ message: String?=nil) -> String {
         var submessage = ""
         if message != nil {
             submessage = " (\(message!))"
