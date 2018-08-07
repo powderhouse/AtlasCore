@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.4.1"
+    public static let version = "1.4.2"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -321,12 +321,12 @@ public class AtlasCore {
         return true
     }
     
-    public func atlasCommit(_ message: String?=nil) {
+    public func atlasCommit(_ message: String?=nil) -> Bool {
         var submessage = ""
         if message != nil {
             submessage = " (\(message!))"
         }
-        commitChanges("Atlas Commit\(submessage)")
+        return commitChanges("Atlas Commit\(submessage)")
     }
     
     public func status() -> String? {
