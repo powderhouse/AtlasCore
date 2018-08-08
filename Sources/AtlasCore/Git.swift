@@ -67,7 +67,7 @@ public class Git {
             additionalArguments: arguments
         )
         
-        return Glue.runProcess("git",
+        return Glue.runProcessError("git",
                                arguments: fullArguments,
                                currentDirectory: inDirectory ?? directory,
                                atlasProcess: atlasProcessFactory.build()
