@@ -139,15 +139,13 @@ public class Git {
         }
     }
     
-    public func add(_ filter: String=".") -> Bool {
+    public func add(_ filter: String=".") -> String {
         
         if gitAnnex != nil {
             return gitAnnex!.add(filter)
         }
         
-        _ = run("add", arguments: [filter])
-        
-        return true
+        return run("add", arguments: [filter])
     }
     
     public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {

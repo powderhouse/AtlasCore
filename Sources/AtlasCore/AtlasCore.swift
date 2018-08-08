@@ -15,7 +15,7 @@ public struct Commit {
 
 public class AtlasCore {
     
-    public static let version = "1.4.5"
+    public static let version = "1.4.6"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -310,8 +310,9 @@ public class AtlasCore {
                 status = self.git?.status() ?? ""
                 tries += 1
             }
-            _ = self.git?.add()
-            return self.git?.commit(commitMessage) ?? "Commit Error"
+            let addResult = self.git?.add() ?? "Add Error"
+            let commitResult = self.git?.commit(commitMessage) ?? "Commit Error"
+            return "Adding Changes:\n\(addResult)\n\nCommiting Changes:\n\(commitResult)"
         }
         
         return "No status available"
