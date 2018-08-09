@@ -91,7 +91,7 @@ public class GitAnnex {
         credentialed_environment_variables["AWS_ACCESS_KEY_ID"] = credentials.s3AccessKey ?? ""
         credentialed_environment_variables["AWS_SECRET_ACCESS_KEY"] = credentials.s3SecretAccessKey ?? ""
         
-        return Glue.runProcess("git",
+        return Glue.runProcessError("git",
                                arguments: ["annex"] + fullArguments,
                                environment_variables: credentialed_environment_variables,
                                currentDirectory: directory
