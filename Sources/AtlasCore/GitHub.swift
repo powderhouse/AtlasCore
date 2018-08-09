@@ -117,7 +117,7 @@ public class GitHub {
         
         FileSystem.createDirectory(remoteUrl)
         
-        _ = Glue.runProcess("git",
+        _ = Glue.runProcessError("git",
                         arguments: ["init", "--bare"],
                         currentDirectory: remoteUrl
         )
@@ -137,7 +137,7 @@ public class GitHub {
     public func validRepository() -> Bool {
         let update = git.run("remote", arguments: ["update"])
         if update.count == 0 { return false }
-        if update.contains("fatal") { return false }
+        if update.contains("error: Could not fetch origin") { return false }
         return true
     }
     
@@ -170,7 +170,7 @@ public class GitHub {
     
     public func setRepositoryLink() -> Bool {
         let fullUrl = url()
-        if fullUrl.isEmpty {
+        if fullUrl.isEmpty || fullUrl.contains("fatal") {
             print("No repository URL found.")
             return false
         }

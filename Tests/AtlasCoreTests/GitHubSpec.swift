@@ -102,12 +102,21 @@ class GitHubSpec: QuickSpec {
                     }
                     
                     context("with remotePath") {
-                        let path = "a path"
+                        let remoteName = "remote"
+                        var url: URL!
                         
                         beforeEach {
+                            url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(remoteName)
+                            
+                            Helper.createBaseDirectory(url)
+                            
                             credentials.setAuthenticationToken(nil)
-                            credentials.setRemotePath(path)
+                            credentials.setRemotePath(url.path)
                             result = gitHub?.createRepository()
+                        }
+                        
+                        afterEach {
+                            Helper.deleteBaseDirectory(url)
                         }
                         
                         it("should provide results") {
@@ -115,7 +124,7 @@ class GitHubSpec: QuickSpec {
                         }
                         
                         it("should set the repository link") {
-                            expect(gitHub?.repositoryLink).to(contain(path))
+                            expect(gitHub?.repositoryLink).to(contain(remoteName))
                         }
                     }
                     

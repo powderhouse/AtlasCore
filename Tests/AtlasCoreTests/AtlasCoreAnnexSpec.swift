@@ -88,7 +88,7 @@ Multiline
                 
                 let filePath1 = fileDirectory.appendingPathComponent(file1).path
                 expect(project1?.copyInto([filePath1])).to(beTrue())
-                atlasCore.atlasCommit()
+                _ = atlasCore.atlasCommit()
                 
                 logEntries += 1
                 expect(

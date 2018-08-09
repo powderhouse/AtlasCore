@@ -382,7 +382,7 @@ Multiline
 
 
                         it("should create syncLogEntries") {
-                            expect(atlasCore.syncLogEntries().count).to(equal(5))
+                            expect(atlasCore.syncLogEntries().count).to(equal(6))
                             expect(atlasCore.syncLog()).toNot(contain("Bad file descriptor"))
                         }
 

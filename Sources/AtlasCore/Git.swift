@@ -189,7 +189,7 @@ public class Git {
     public func removeFile(_ filePath: String) -> Bool {
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         
-        if history.count == 0 {
+        if history.count == 0 || history.contains("unknown revision or path") {
             return false
         }
         

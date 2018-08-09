@@ -79,7 +79,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         
                         project = atlasCore.project(projectName)
                         
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
                         
                         logEntries += 1
                         expect(
@@ -89,7 +89,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         let stagedDirectory = project.directory("staged")
                         Helper.addFile(fileName, directory: stagedDirectory)
 
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
                         
                         logEntries += 1
                         expect(
@@ -123,7 +123,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                             expect(project.commitMessage(commitMessage)).to(beTrue())
                             expect(project.commitStaged()).to(beTrue())
 
-                            atlasCore.atlasCommit()
+                            _ = atlasCore.atlasCommit()
 
                             logEntries += 1
                             expect(
@@ -173,7 +173,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                             expect(project.commitMessage(commitMessage)).to(beTrue())
                             expect(project.commitStaged()).to(beTrue())
 
-                            atlasCore.atlasCommit()
+                            _ = atlasCore.atlasCommit()
 
                             logEntries += 1
                             expect(
@@ -220,7 +220,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         Helper.addFile(fileName2, directory: stagedDirectory)
                         Helper.addFile(fileName3, directory: stagedDirectory)
 
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
 
                         logEntries += 1
                         expect(
@@ -232,7 +232,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         expect(project.commitMessage(commitMessage)).to(beTrue())
                         expect(project.commitStaged()).to(beTrue())
 
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
                         logEntries += 1
                         expect(
                             atlasCore.completedLogEntries().count
