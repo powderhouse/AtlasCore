@@ -21,9 +21,9 @@ public class FileSystem {
         }
     }
     
-    public class func createDirectory(_ url: URL) {
+    public class func createDirectory(_ url: URL) -> Result {
         if fileExists(url) {
-            return
+            return Result(success: true, messages: [])
         }
         
         let fileManager = FileManager.default
@@ -35,8 +35,9 @@ public class FileSystem {
                 attributes: nil
             )
         } catch {
-            print("Unable to create directory: \(url)")
+            return Result(success: false, messages: ["Unable to create directory: \(url)"])
         }
+        return Result(success: true, messages: ["\(url.lastPathComponent) directory created."])
     }
     
     public class func deleteDirectory(_ url: URL) {

@@ -12,6 +12,19 @@ public struct Commit {
     public var projects: [Project] = []
 }
 
+public struct Result {
+    public var success: Bool = false
+    public var messages: [String] = []
+    
+    mutating func append(_ result: Result) {
+        if !result.success {
+            success = false
+        }
+        
+        messages.append(contentsOf: result.messages)
+    }
+}
+
 
 public class AtlasCore {
     
