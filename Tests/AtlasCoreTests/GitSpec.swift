@@ -149,11 +149,11 @@ class GitSpec: QuickSpec {
                     }
                     
                     it("returns false if file is not under version control") {
-                        expect(git.move(filePath, into: appDirectory, renamedTo: newFileName)).to(beFalse())
+                        expect(git.move(filePath, into: appDirectory, renamedTo: newFileName).success).to(beFalse())
                     }
                     
                     context("under version control") {
-                        var result: Bool!
+                        var result: Result!
                         
                         beforeEach {
                             _ = git.add()
@@ -161,7 +161,7 @@ class GitSpec: QuickSpec {
                         }
                         
                         it("returns true") {
-                            expect(result).to(beTrue())
+                            expect(result.success).to(beTrue())
                         }
                         
                         it("moves the file") {
@@ -182,7 +182,8 @@ class GitSpec: QuickSpec {
                         expect(git.add()).toNot(beNil())
 
                         let commit = git.commit()
-                        expect(commit).to(contain("1 file changed, 1 insertion(+)"))
+                        expect(commit.success).to(beTrue())
+                        expect(commit.allMessages).to(contain("1 file changed, 1 insertion(+)"))
                     }
                 }
 
@@ -228,7 +229,7 @@ class GitSpec: QuickSpec {
 
                     beforeEach {
                         gitIgnoreUrl = appDirectory.appendingPathComponent(".gitignore")
-                        git.writeGitIgnore()
+                        _ = git.writeGitIgnore()
                     }
 
                     it("should write a gitignore file to the directory") {

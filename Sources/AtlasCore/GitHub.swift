@@ -53,7 +53,7 @@ public class GitHub {
         return GitHub.api(arguments)
     }
 
-    public func createRepository() -> Bool {
+    public func createRepository() -> Result {
         if credentials.token != nil {
             return createGitHubRepository()
         } else {
@@ -61,9 +61,13 @@ public class GitHub {
         }
     }
     
-    public func createGitHubRepository() -> Bool {
+    public func createGitHubRepository() -> Result {
+        var result = Result()
+        
         guard credentials.token != nil else {
-            return false
+            result.success = false
+            result.messages.append("No token found in credentials when creating GitHub repository.")
+            return result
         }
         
         let repoArguments = [
@@ -88,7 +92,9 @@ public class GitHub {
         }
         
         guard repoPath != nil else {
-            return false
+            result.success = false
+            result.messages.append("Repo creation for GitHub failed.")
+            return result
         }
         
         let authenticatedPath = repoPath!.replacingOccurrences(
@@ -100,22 +106,26 @@ public class GitHub {
         _ = git.run("remote", arguments: ["add", "origin", authenticatedPath])
 
         if validRepository() {
-            if setRepositoryLink() {
-                return true
-            }
+            return setRepositoryLink()
+        } else {
+            result.success = false
+            result.messages.append("Valid repository not created successfully.")
         }
-        
-        return false
+        return result
     }
     
-    public func createLocalRepository() -> Bool {
+    public func createLocalRepository() -> Result {
+        var result = Result()
+        
         guard credentials.remotePath != nil else {
-            return false
+            result.success = false
+            result.messages.append("Remote path for local GitHub repository not found.")
+            return result
         }
         
         let remoteUrl = URL(fileURLWithPath: credentials.remotePath!, isDirectory: true)
         
-        FileSystem.createDirectory(remoteUrl)
+        result.mergeIn(FileSystem.createDirectory(remoteUrl))
         
         _ = Glue.runProcessError("git",
                         arguments: ["init", "--bare"],
@@ -126,12 +136,12 @@ public class GitHub {
         _ = git.run("remote", arguments: ["add", "origin", credentials.remotePath!])
         
         if validRepository() {
-            if setRepositoryLink() {
-                return true
-            }
+            return setRepositoryLink()
+        } else {
+            result.success = false
+            result.messages.append("Valid local repository not created successfully.")
         }
-        
-        return false
+        return result
     }
     
     public func validRepository() -> Bool {
@@ -168,14 +178,16 @@ public class GitHub {
         }
     }
     
-    public func setRepositoryLink() -> Bool {
+    public func setRepositoryLink() -> Result {
         let fullUrl = url()
         if fullUrl.isEmpty || fullUrl.contains("fatal") {
-            print("No repository URL found.")
-            return false
+            return Result(
+                success: false,
+                messages: ["No repository URL found.", fullUrl]
+            )
         }
         repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
-        return true
+        return Result()
     }
     
     public func hooks() -> URL {
@@ -183,7 +195,9 @@ public class GitHub {
         return gitURL.appendingPathComponent("hooks")
     }
     
-    public func setPostCommitHook() -> Bool {
+    public func setPostCommitHook() -> Result {
+        var result = Result()
+        
         let hooksURL = hooks()
         let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)
         let atlasScriptURL = hooksURL.appendingPathComponent(GitHub.syncScriptName)
@@ -211,8 +225,11 @@ export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
 echo ""
 echo "</ENDENTRY>"
 """
-        guard write(script, to: atlasScriptURL) else {
-            return false
+        let atlasScriptResult = write(script, to: atlasScriptURL)
+        guard atlasScriptResult.success else {
+            result.messages.append("Unable to write atlas script.")
+            result.mergeIn(atlasScriptResult)
+            return result
         }
 
         let badText = "Bad file descriptor"
@@ -222,14 +239,22 @@ echo "</ENDENTRY>"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 (cd "${DIR}" && ./atlas-sync.sh) | grep -v '\(badText)' >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
 """
-        return write(hook, to: postCommitURL)
+        let postCommitResult = write(hook, to: postCommitURL)
+        if !postCommitResult.success {
+            result.messages.append("Unable to write post commit hook")
+        }
+        result.mergeIn(postCommitResult)
+        return result
     }
     
-    public func write(_ script: String, to url: URL) -> Bool {
+    public func write(_ script: String, to url: URL) -> Result {
+        var result = Result()
         do {
             try script.write(to: url, atomically: true, encoding: .utf8)
         } catch {
-            return false
+            result.success = false
+            result.messages.append("Unable to write script to \(url): \(error)")
+            return result
         }
         
         _ = Glue.runProcess(
@@ -237,7 +262,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
             arguments: ["777", url.path],
             currentDirectory: url.deletingLastPathComponent()
         )
-        return true
+        return result
     }
     
     public class func getAuthenticationToken(_ credentials: Credentials) -> String? {

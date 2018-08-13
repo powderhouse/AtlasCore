@@ -27,7 +27,7 @@ class Helper {
     
     class func createBaseDirectory(_ url: URL) {
         deleteBaseDirectory(url)
-        FileSystem.createDirectory(url)
+        _ = FileSystem.createDirectory(url)
     }
     
     class func deleteBaseDirectory(_ url: URL) {
@@ -37,7 +37,7 @@ class Helper {
                 arguments: ["-R", "u+w", url.path],
                 currentDirectory: url.deletingLastPathComponent()
             )
-            FileSystem.deleteDirectory(url)
+            _ = FileSystem.deleteDirectory(url)
         }
     }
     

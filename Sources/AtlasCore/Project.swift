@@ -61,7 +61,7 @@ public class Project {
         
         let folderURL = dir!.appendingPathComponent(name)
         if !FileSystem.fileExists(folderURL, isDirectory: true) {
-            FileSystem.createDirectory(folderURL)
+            _ = FileSystem.createDirectory(folderURL)
         }
         return folderURL
     }
@@ -141,29 +141,48 @@ public class Project {
         return CommitMessage(url: commitMessageUrl, text: commitMessage)
     }
     
-    public func commitStaged() -> Bool {
+    public func commitStaged() -> Result {
+        var result = Result()
         let commitMessage = currentCommitMessage()
         
         guard commitMessage != nil else {
-            return false
+            result.success = false
+            result.messages.append("Unable to commit. No commit message provided.")
+            return result
         }
         
         let commitedUrl = directory("committed")
         let slug = commitSlug(commitMessage!.text)
         let commitUrl = commitedUrl.appendingPathComponent(slug)
-        FileSystem.createDirectory(commitUrl)
+        let directoryResult = FileSystem.createDirectory(commitUrl)
+        result.mergeIn(directoryResult)
         
-        if !git.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
-            if !FileSystem.move(commitMessage!.url.path, into: commitUrl, renamedTo: Project.readme) {
-                return false
+        let gitMoveResult = git.move(
+            commitMessage!.url.path,
+            into: commitUrl,
+            renamedTo: Project.readme
+        )
+        if !gitMoveResult.success {
+            let fileSystemMoveResult = FileSystem.move(
+                commitMessage!.url.path,
+                into: commitUrl,
+                renamedTo: Project.readme
+            )
+            if !fileSystemMoveResult.success {
+                result.mergeIn(fileSystemMoveResult)
+                return result
             }
         }
         
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
-        if !git.move(filePaths, into: commitUrl) {
-            if !FileSystem.move(filePaths, into: commitUrl) {
-                return false
+        
+        
+        if !git.move(filePaths, into: commitUrl).success {
+            let fileSystemMoveResult = FileSystem.move(filePaths, into: commitUrl)
+            if !fileSystemMoveResult.success {
+                result.mergeIn(fileSystemMoveResult)
+                return result
             }
         }
         
@@ -187,7 +206,7 @@ public class Project {
             _ = search?.add(commitUrl.appendingPathComponent(file))
         }
         
-        return true
+        return result
     }
     
     public func commitSlug(_ message: String) -> String {
@@ -223,20 +242,26 @@ public class Project {
         return FileSystem.fileExists(projectDirectory, isDirectory: true)
     }
     
-    public func changeState(_ fileNames: [String], to state: String) -> Bool {
+    public func changeState(_ fileNames: [String], to state: String) -> Result {
+        var result = Result()
         var filePaths: [String] = []
         for fileName in fileNames {
             let fromState = state == "staged" ? "unstaged" : "staged"
             let file = directory(fromState).appendingPathComponent(fileName)
             filePaths.append(file.path)
         }
-        if !git.move(filePaths, into: directory(state)) {
-            return FileSystem.move(filePaths, into: directory(state)) 
+        if !git.move(filePaths, into: directory(state)).success {
+            let fileSystemMove = FileSystem.move(filePaths, into: directory(state))
+            if !fileSystemMove.success {
+                result.messages.append("Unable to change state of files.")
+                result.mergeIn(fileSystemMove)
+                return result
+            }
         }
-        return true
+        return result
     }
     
-    public func copyInto(_ filePaths: [String]) -> Bool {
+    public func copyInto(_ filePaths: [String]) -> Result {
         return FileSystem.copy(filePaths, into: directory("staged"))
     }
 }

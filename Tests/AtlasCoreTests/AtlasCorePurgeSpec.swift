@@ -60,7 +60,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                     
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: TimeInterval(30))
                     
-                    expect(atlasCore.initSearch()).to(beTrue())
+                    expect(atlasCore.initSearch().success).to(beTrue())
                 }
                 
                 context("purge") {
@@ -102,7 +102,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                     it("should remove the staged file and atlasCore commit") {
                         let stagedFilePath = project.directory("staged").appendingPathComponent(fileName).path
                         let stagedFileRelativePath = "\(projectName)/staged/\(fileName)"
-                        expect(atlasCore.purge([stagedFileRelativePath])).to(beTrue())
+                        expect(atlasCore.purge([stagedFileRelativePath]).success).to(beTrue())
                         
                         logEntries += 1
                         expect(
@@ -121,7 +121,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                             let slug = project.commitSlug(commitMessage)
 
                             expect(project.commitMessage(commitMessage)).to(beTrue())
-                            expect(project.commitStaged()).to(beTrue())
+                            expect(project.commitStaged().success).to(beTrue())
 
                             _ = atlasCore.atlasCommit()
 
@@ -139,7 +139,7 @@ class AtlasCorePurgeSpec: QuickSpec {
 
                             gitCommittedFilePath = committedFilePath.replacingOccurrences(of: project.directory().path, with: projectName)
 
-                            expect(atlasCore.purge([gitCommittedFilePath])).to(beTrue())
+                            expect(atlasCore.purge([gitCommittedFilePath]).success).to(beTrue())
 
                             logEntries += 1
                             expect(
@@ -163,7 +163,7 @@ class AtlasCorePurgeSpec: QuickSpec {
 
                         it("fails if the file can not be found") {
                             let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
-                            expect(atlasCore.purge([nonexistentFilePath])).to(beFalse())
+                            expect(atlasCore.purge([nonexistentFilePath]).success).to(beFalse())
                         }
                     }
 
@@ -171,7 +171,7 @@ class AtlasCorePurgeSpec: QuickSpec {
 
                         beforeEach {
                             expect(project.commitMessage(commitMessage)).to(beTrue())
-                            expect(project.commitStaged()).to(beTrue())
+                            expect(project.commitStaged().success).to(beTrue())
 
                             _ = atlasCore.atlasCommit()
 
@@ -180,7 +180,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                                 atlasCore.completedLogEntries().count
                                 ).toEventually(equal(logEntries), timeout: 30)
 
-                            expect(atlasCore.purge([project.directory().path])).to(beTrue())
+                            expect(atlasCore.purge([project.directory().path]).success).to(beTrue())
 
                             logEntries += 1
                             expect(
@@ -230,7 +230,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         let slug = project.commitSlug(commitMessage)
 
                         expect(project.commitMessage(commitMessage)).to(beTrue())
-                        expect(project.commitStaged()).to(beTrue())
+                        expect(project.commitStaged().success).to(beTrue())
 
                         _ = atlasCore.atlasCommit()
                         logEntries += 1
@@ -247,7 +247,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                         let gitCommittedFilePath1 = committedFilePath1.replacingOccurrences(of: project.directory().path, with: projectName)
                         let gitCommittedFilePath2 = committedFilePath2.replacingOccurrences(of: project.directory().path, with: projectName)
 
-                        expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2])).to(beTrue())
+                        expect(atlasCore.purge([gitCommittedFilePath1, gitCommittedFilePath2]).success).to(beTrue())
 
                         logEntries += 1
                         expect(

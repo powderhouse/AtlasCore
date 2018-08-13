@@ -90,8 +90,8 @@ class SearchSpec: QuickSpec {
                         let newDir = newFile2.appendingPathComponent("NEWDIR")
                         newFile2 = newDir.appendingPathComponent(fileName2)
 
-                        FileSystem.createDirectory(newDir)
-                        expect(FileSystem.move(file2.path, into: newDir)).to(beTrue())
+                        _ = FileSystem.createDirectory(newDir)
+                        expect(FileSystem.move(file2.path, into: newDir).success).to(beTrue())
 
                         if search != nil {
                             expect(search!.move(from: file2, to: newFile2)).to(beTrue())

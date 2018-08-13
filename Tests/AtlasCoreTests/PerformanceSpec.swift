@@ -101,14 +101,14 @@ TIMES:
                 let filePath = fileDirectory.appendingPathComponent("index.html").path
                 
                 time = Date().timeIntervalSince1970
-                expect(project?.copyInto([filePath])).to(beTrue())
+                expect(project?.copyInto([filePath]).success).to(beTrue())
                 performance.append(PerformanceCapture(
                     name: "Import Into Project",
                     duration: Date().timeIntervalSince1970 - time
                 ))
 
                 time = Date().timeIntervalSince1970
-                atlasCore.atlasCommit()
+                _ = atlasCore.atlasCommit()
                 performance.append(PerformanceCapture(
                     name: "Atlas Commit",
                     duration: Date().timeIntervalSince1970 - time
@@ -122,14 +122,14 @@ TIMES:
                 ))
 
                 time = Date().timeIntervalSince1970
-                expect(project!.commitStaged()).to(beTrue())
+                expect(project!.commitStaged().success).to(beTrue())
                 performance.append(PerformanceCapture(
                     name: "Commit Staged",
                     duration: Date().timeIntervalSince1970 - time
                 ))
                 
                 time = Date().timeIntervalSince1970
-                atlasCore.commitChanges("A commit message")
+                _ = atlasCore.commitChanges("A commit message")
                 performance.append(PerformanceCapture(
                     name: "Push To GitHub",
                     duration: Date().timeIntervalSince1970 - time

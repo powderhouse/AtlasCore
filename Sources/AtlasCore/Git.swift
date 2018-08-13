@@ -37,23 +37,37 @@ public class Git {
         self.directory = userDirectory.appendingPathComponent(AtlasCore.appName)
         self.credentials = credentials
         self.atlasProcessFactory = processFactory
-        
-        initializeDirectory()
-        
-        if credentials.complete() {
-            gitAnnex = GitAnnex(directory, credentials: credentials)
-        }
     }
     
-    func initializeDirectory() {
-        if !clone() {
-            FileSystem.createDirectory(self.directory)
-            _ = runInit()
+    func initialize() -> Result {
+        var result = Result()
+        
+        if !clone().success {
+            let gitDirectoryResult = FileSystem.createDirectory(self.directory)
+            result.mergeIn(gitDirectoryResult)
             
-            writeGitIgnore()
-            _ = add()
-            _ = commit()
+            let gitInitResult = runInit()
+            result.mergeIn(gitInitResult)
+            
+            let gitIgnoreResult = writeGitIgnore()
+            result.mergeIn(gitIgnoreResult)
+            
+            let addResult = add()
+            result.mergeIn(addResult)
+            
+            let commitResult = commit()
+            result.mergeIn(commitResult)
         }
+        
+        if gitAnnex == nil && credentials.complete() {
+            gitAnnex = GitAnnex(directory, credentials: credentials)
+            
+            if let gitAnnexResult = gitAnnex?.initialize() {
+                result.mergeIn(gitAnnexResult)
+            }
+        }
+        
+        return result
     }
     
     func buildArguments(_ command: String, additionalArguments:[String]=[]) -> [String] {
@@ -74,8 +88,14 @@ public class Git {
         )        
     }
     
-    public func runInit() -> String {
-        return run("init")
+    public func runInit() -> Result {
+        var result = Result()
+        let output = run("init")
+        if !output.contains("Initialized empty Git repository") {
+            result.success = false
+            result.messages.append("Failed to initialize Git.")
+        }
+        return result
     }
 
     public func status() -> String? {
@@ -86,19 +106,26 @@ public class Git {
         return result
     }
 
-    public func clone() -> Bool {
+    public func clone() -> Result {
+        var result = Result()
         guard credentials != nil else {
-            return false
+            result.success = false
+            result.messages.append("Unable to clone. No Credentials found.")
+            return result
         }
         
         let path = credentials!.remotePath ??
                    "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
 
-        _ = run("clone",
+        let output = run("clone",
                          arguments: [path],
-                         inDirectory: userDirectory
-        )
-        return FileSystem.fileExists(directory, isDirectory: true)
+                         inDirectory: userDirectory)
+        
+        if output.contains("fatal") || !FileSystem.fileExists(directory, isDirectory: true) {
+            result.success = false
+            result.messages += ["Unable to clone Atlas.", output]
+        }
+        return result
     }
     
     public func annexInfo() -> String {
@@ -120,7 +147,8 @@ public class Git {
         return cleanNames.map { $0.unescaped }
     }
     
-    public func writeGitIgnore() {
+    public func writeGitIgnore() -> Result {
+        var result = Result()
         do {
             let filename = directory.appendingPathComponent(".gitignore")
             
@@ -135,31 +163,40 @@ public class Git {
             
             try Git.gitIgnore.joined(separator: "\n").write(to: filename, atomically: true, encoding: .utf8)
         } catch {
-            printGit("Failed to save .gitignore: \(error)")
+            result.success = false
+            result.messages.append("Failed to save .gitignore: \(error)")
         }
+        return result
     }
     
-    public func add(_ filter: String=".") -> String {
+    public func add(_ filter: String=".") -> Result {
         
         if gitAnnex != nil {
             return gitAnnex!.add(filter)
         }
         
-        return run("add", arguments: [filter])
+        let output = run("add", arguments: [filter])
+        if output.contains("fatal") {
+            return Result(
+                success: false,
+                messages: ["Unable to add files to git.", output]
+            )
+        }
+        return Result()
     }
     
-    public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+    public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Result {
         return move([filePath], into: directory, renamedTo: newName)
     }
     
-    public func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
-
+    public func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Result {
+        var result = Result()
         for filePath in filePaths {
             if let fileName = filePath.split(separator: "/").last {
                 let destinationName = newName == nil ? String(fileName) : newName!
                 let destination = directory.appendingPathComponent(destinationName)
                 
-                _ = run("mv", arguments: [filePath, destination.path])
+                let output = run("mv", arguments: [filePath, destination.path])
                 
                 let directoryComponents = directory.path.components(separatedBy: "/")
                 let destinationComponents = destination.path.components(separatedBy: "/")
@@ -169,28 +206,39 @@ public class Git {
                 
                 if let currentStatus = status() {
                     if !currentStatus.contains(relativeComponents.joined(separator: "/")) {
-                        return false
+                        result.success = false
+                        result.messages += ["Git was unable to move files.", output]
+                        return result
                     }
                 } else {
-                    return false
+                    result.success = false
+                    result.messages += ["No status available in Git move", output]
+                    return result
                 }
                 
                 if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
-                    return false
+                    result.success = false
+                    result.messages += ["File still exists in original location after git move", output]
+                    return result
                 }
             } else {
-                return false
+                result.success = false
+                result.messages += ["Unable to process filename in Git move."]
+                return result
             }
         }
         
-        return true
+        return Result()
     }
     
-    public func removeFile(_ filePath: String) -> Bool {
+    public func removeFile(_ filePath: String) -> Result {
+        var result = Result()
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         
         if history.count == 0 || history.contains("unknown revision or path") {
-            return false
+            result.success = false
+            result.messages += ["\(filePath) does not exist in log.", history]
+            return result
         }
         
         let files = history.components(separatedBy: "\n").filter { return $0.count > 0 }
@@ -198,7 +246,10 @@ public class Git {
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
 
-        _ = gitAnnex?.deleteFile(filePath)
+        if let gitAnnex = gitAnnex {
+            result.mergeIn(gitAnnex.deleteFile(filePath))
+        }
+        
         _ = run("filter-branch", arguments: filterBranchArguments)
         _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
         _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
@@ -209,11 +260,18 @@ public class Git {
 //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
 
-        return true
+        return result
     }
         
-    public func commit(_ message: String?=nil) -> String {
-        return run("commit", arguments: ["-am", message ?? "Atlas commit"])
+    public func commit(_ message: String?=nil) -> Result {
+        let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
+        if !output.contains("changed") {
+            return Result(
+                success: false,
+                messages: ["Unable to commit", output]
+            )
+        }
+        return Result()
     }
     
     public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {
