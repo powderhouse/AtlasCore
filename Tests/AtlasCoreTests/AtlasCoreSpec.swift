@@ -148,14 +148,15 @@ class AtlasCoreSpec: QuickSpec {
                         expect(exists).to(beTrue(), description: "No search index found")
 
                         atlasCore2 = AtlasCore(directory)
-                        atlasCore2.initialize()
+                        let initializationResult = atlasCore2.initialize()
+                        expect(initializationResult.success).to(beTrue(), description: "\(initializationResult) was not successful")
                     }
 
                     afterEach {
                         atlasCore2.closeSearch()
                     }
 
-                    it("automatically inits git") {
+                    it("initializes GitHub") {
                         expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
                     }
 
@@ -418,7 +419,7 @@ Multiline
                         _ = atlasCore.initProject("Project 1")
                         _ = atlasCore.initProject("\\\"Project a\\\"")
                         _ = atlasCore.initProject("\"A Project\"")
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
 
                         logEntries += 1
                         expect(
@@ -439,7 +440,7 @@ Multiline
                     }
 
                     it("should ignore folders in the atlas directory that do not have a readme.md") {
-                        FileSystem.createDirectory((atlasCore.appDirectory!.appendingPathComponent("misc")))
+                        _ = FileSystem.createDirectory((atlasCore.appDirectory!.appendingPathComponent("misc")))
 
                         let projects = atlasCore.projects().map { $0.name }.sorted()
                         expect(projects).to(equal(["\"A Project\"", "Project 1", "\\\"Project a\\\""]))

@@ -42,6 +42,7 @@ class ProjectSpec: QuickSpec {
 
                 search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
                 git = Git(baseDirectory, credentials: credentials)
+                _ = git.initialize()
 
                 project = Project(projectName, baseDirectory: directory, git: git, search: search)
             }

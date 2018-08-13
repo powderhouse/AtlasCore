@@ -30,7 +30,7 @@ class PerformanceCoreSpec: QuickSpec {
             )
             
             let fileManager = FileManager.default
-            var isFile : ObjCBool = false
+//            var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
             var performance: [PerformanceCapture] = []
@@ -81,7 +81,7 @@ TIMES:
             
             it("should execute and record times") {
                 let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
-                FileSystem.createDirectory(fileDirectory)
+                _ = FileSystem.createDirectory(fileDirectory)
                 Helper.addFile("index.html", directory: fileDirectory)
                 
                 var time = Date().timeIntervalSince1970

@@ -177,7 +177,7 @@ public class Project {
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
         
-        
+
         if !git.move(filePaths, into: commitUrl).success {
             let fileSystemMoveResult = FileSystem.move(filePaths, into: commitUrl)
             if !fileSystemMoveResult.success {
@@ -189,6 +189,12 @@ public class Project {
         var statusComplete = false
         while !statusComplete {
             if let status = git.status() {
+                if status.contains("fatal") {
+                    result.success = false
+                    result.messages.append("Unable to commit staged files: \(status)")
+                    return result
+                }
+                
                 statusComplete = status.contains(slug)
                 for filePath in filePaths {
                     let fileName = URL(fileURLWithPath: filePath).lastPathComponent

@@ -52,7 +52,8 @@ class GitHubSpec: QuickSpec {
                     }
 
                     git = Git(directory, credentials: credentials)
-                    _  = git.runInit()
+                    _ = git.initialize()
+                    _ = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                     

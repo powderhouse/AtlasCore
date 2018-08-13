@@ -28,7 +28,7 @@ class AtlasCoreAnnexSpec: QuickSpec {
             )
             
             let fileManager = FileManager.default
-            var isFile : ObjCBool = false
+//            var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
             var logEntries = 0

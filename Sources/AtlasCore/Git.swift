@@ -39,7 +39,7 @@ public class Git {
         self.atlasProcessFactory = processFactory
     }
     
-    func initialize() -> Result {
+    public func initialize() -> Result {
         var result = Result()
         
         if !clone().success {
@@ -59,13 +59,13 @@ public class Git {
             result.mergeIn(commitResult)
         }
         
-        if gitAnnex == nil && credentials.complete() {
-            gitAnnex = GitAnnex(directory, credentials: credentials)
-            
-            if let gitAnnexResult = gitAnnex?.initialize() {
-                result.mergeIn(gitAnnexResult)
-            }
-        }
+//        if gitAnnex == nil && credentials.complete() {
+//            gitAnnex = GitAnnex(directory, credentials: credentials)
+//            
+//            if let gitAnnexResult = gitAnnex?.initialize() {
+//                result.mergeIn(gitAnnexResult)
+//            }
+//        }
         
         return result
     }
@@ -91,7 +91,7 @@ public class Git {
     public func runInit() -> Result {
         var result = Result()
         let output = run("init")
-        if !output.contains("Initialized empty Git repository") {
+        if !(output.contains("Initialized empty Git repository") || output.contains("Reinitialized existing Git repository")) {
             result.success = false
             result.messages.append("Failed to initialize Git.")
         }
@@ -264,14 +264,15 @@ public class Git {
     }
         
     public func commit(_ message: String?=nil) -> Result {
+        var result = Result()
         let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
-        if !output.contains("changed") {
-            return Result(
-                success: false,
-                messages: ["Unable to commit", output]
-            )
+        if !output.contains("changed") &&
+           !output.contains("nothing to commit, working tree clean") {
+            result.success = false
+            result.messages.append("Unable to commit")
         }
-        return Result()
+        result.messages.append(output)
+        return result
     }
     
     public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {

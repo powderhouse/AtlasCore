@@ -23,7 +23,7 @@ public class FileSystem {
     
     public class func createDirectory(_ url: URL) -> Result {
         if fileExists(url) {
-            return Result(success: true, messages: [])
+            return Result()
         }
         
         let fileManager = FileManager.default
