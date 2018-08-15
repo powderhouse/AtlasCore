@@ -137,47 +137,47 @@ Multiline
                 }
             }
             
-//            it("should sync with s3, reflecting files and directory structures") {
-//                let objects = S3Helper.listObjects(s3Bucket)
-//
-//                for identifier in [slug1, slug2, file1, file2, file3] {
-//                    expect(objects).toEventually(contain(identifier), timeout: 10, description: "\(identifier) not found")
-//                }
-//            }
-//
-//            context("purging files and projects") {
-//
-//                it("should remove the file from S3 when purged") {
-//
-//                    let relativePath = "\(project2.name!)/committed/\(slug2)/\(file2)"
-//
-//                    expect(atlasCore.purge([relativePath])).to(beTrue())
-//
-//                    expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(file2), timeout: 10)
-//
-//                    let objects = S3Helper.listObjects(s3Bucket)
-//
-//                    for identifier in [slug1, slug2, file1, file3] {
-//                        expect(objects).to(contain(identifier), description: "\(identifier) not found")
-//                    }
-//                }
-//
-//                it("should remove project and all files from S3 when the project is deleted") {
-//                    let path = project2.directory().path
-//                    expect(atlasCore.purge([path])).to(beTrue())
-//
-//                    for identifier in [slug2, file2, file3] {
-//                        expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(identifier), timeout: 10, description: "\(identifier) still found")
-//
-//                    }
-//
-//                    let objects = S3Helper.listObjects(s3Bucket)
-//
-//                    for identifier in [slug1, file1] {
-//                        expect(objects).to(contain(identifier), description: "\(identifier) not found")
-//                    }
-//                }
-//            }
+            it("should sync with s3, reflecting files and directory structures") {
+                let objects = S3Helper.listObjects(s3Bucket)
+
+                for identifier in [slug1, slug2, file1, file2, file3] {
+                    expect(objects).toEventually(contain(identifier), timeout: 10, description: "\(identifier) not found")
+                }
+            }
+
+            context("purging files and projects") {
+
+                it("should remove the file from S3 when purged") {
+
+                    let relativePath = "\(project2.name!)/committed/\(slug2)/\(file2)"
+
+                    expect(atlasCore.purge([relativePath]).success).to(beTrue())
+
+                    expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(file2), timeout: 10)
+
+                    let objects = S3Helper.listObjects(s3Bucket)
+
+                    for identifier in [slug1, slug2, file1, file3] {
+                        expect(objects).to(contain(identifier), description: "\(identifier) not found")
+                    }
+                }
+
+                it("should remove project and all files from S3 when the project is deleted") {
+                    let path = project2.directory().path
+                    expect(atlasCore.purge([path]).success).to(beTrue())
+
+                    for identifier in [slug2, file2, file3] {
+                        expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(identifier), timeout: 10, description: "\(identifier) still found")
+
+                    }
+
+                    let objects = S3Helper.listObjects(s3Bucket)
+
+                    for identifier in [slug1, file1] {
+                        expect(objects).to(contain(identifier), description: "\(identifier) not found")
+                    }
+                }
+            }
         }
     }
 }

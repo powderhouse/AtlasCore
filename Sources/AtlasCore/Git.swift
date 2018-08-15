@@ -59,13 +59,13 @@ public class Git {
             result.mergeIn(commitResult)
         }
         
-//        if gitAnnex == nil && credentials.complete() {
-//            gitAnnex = GitAnnex(directory, credentials: credentials)
-//            
-//            if let gitAnnexResult = gitAnnex?.initialize() {
-//                result.mergeIn(gitAnnexResult)
-//            }
-//        }
+        if gitAnnex == nil && credentials.complete() {
+            gitAnnex = GitAnnex(directory, credentials: credentials)
+            
+            if let gitAnnexResult = gitAnnex?.initialize() {
+                result.mergeIn(gitAnnexResult)
+            }
+        }
         
         return result
     }

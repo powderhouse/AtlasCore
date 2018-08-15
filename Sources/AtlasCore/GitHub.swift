@@ -220,7 +220,7 @@ export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
 
 (cd "${DIR}" && cd "../.." && git pull origin master) || true
 (cd "${DIR}" && cd "../.." && git push --set-upstream origin master) || true
-# (cd "${DIR}" && cd "../.." && git annex sync --content) || true
+(cd "${DIR}" && cd "../.." && git annex sync --content) || true
 
 echo ""
 echo "</ENDENTRY>"
