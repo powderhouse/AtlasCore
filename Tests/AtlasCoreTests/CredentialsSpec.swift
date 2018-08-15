@@ -145,7 +145,7 @@ class CredentialsSpec: QuickSpec {
                 }
                 
                 it("should delete the credentials file") {
-                    Credentials.delete(directory)
+                    _ = Credentials.delete(directory)
                     
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
                     expect(exists).to(beFalse(), description: "credentials json still exists")

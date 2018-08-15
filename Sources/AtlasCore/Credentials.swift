@@ -152,9 +152,9 @@ public class Credentials {
         return []
     }
     
-    public class func delete(_ directory: URL) {
+    public class func delete(_ directory: URL) -> Result {
         let url = directory.appendingPathComponent(filename)
-        FileSystem.deleteDirectory(url)
+        return FileSystem.deleteDirectory(url)
     }
     
     class func printCredentials(_ message: String) {

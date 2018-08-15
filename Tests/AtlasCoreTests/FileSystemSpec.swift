@@ -35,7 +35,7 @@ class FileSystemSpec: QuickSpec {
                     )
                     expect(alreadyExists).to(beFalse())
                     
-                    FileSystem.createDirectory(url)
+                    _ = FileSystem.createDirectory(url)
                     
                     let exists = fileManager.fileExists(
                         atPath: path,
@@ -45,7 +45,7 @@ class FileSystemSpec: QuickSpec {
                 }
                 
                 it("doesn't fail if a directory already exists") {
-                    FileSystem.createDirectory(url)
+                    _ = FileSystem.createDirectory(url)
                     
                     let exists = fileManager.fileExists(
                         atPath: path,
@@ -53,7 +53,7 @@ class FileSystemSpec: QuickSpec {
                     )
                     expect(exists).to(beTrue())
                     
-                    FileSystem.createDirectory(url)
+                    _ = FileSystem.createDirectory(url)
                 }
             }
             
@@ -63,14 +63,14 @@ class FileSystemSpec: QuickSpec {
                 var isDir : ObjCBool = true
                 
                 beforeEach {
-                    FileSystem.createDirectory(deletingDirectory)
+                    _ = FileSystem.createDirectory(deletingDirectory)
                     let exists = fileManager.fileExists(
                         atPath: deletingDirectory.path,
                         isDirectory: &isDir
                     )
                     expect(exists).to(beTrue())
                     
-                    FileSystem.deleteDirectory(deletingDirectory)
+                    _ = FileSystem.deleteDirectory(deletingDirectory)
                 }
                 
                 it("should remove the directory from the filesystem") {
@@ -88,7 +88,7 @@ class FileSystemSpec: QuickSpec {
                 let files = ["index1.html", "index2.html", "index3.html"]
                 
                 beforeEach {
-                    FileSystem.createDirectory(url)
+                    _ = FileSystem.createDirectory(url)
                     for file in files {
                         let filePath = "\(url.path)/\(file)"
                         _ = Glue.runProcess("touch", arguments: [filePath])
@@ -115,19 +115,19 @@ class FileSystemSpec: QuickSpec {
                 beforeEach {
                     startDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("START")
                     endDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("END")
-                    FileSystem.createDirectory(startDirectory)
-                    FileSystem.createDirectory(endDirectory)
+                    _ = FileSystem.createDirectory(startDirectory)
+                    _ = FileSystem.createDirectory(endDirectory)
                     Helper.addFile(fileName1, directory: startDirectory)
                     Helper.addFile(fileName2, directory: startDirectory)
                     
                     let filePath1 = startDirectory.appendingPathComponent(fileName1).path
                     let filePath2 = startDirectory.appendingPathComponent(fileName2).path
-                    expect(FileSystem.copy([filePath1, filePath2], into: endDirectory)).to(beTrue())
+                    expect(FileSystem.copy([filePath1, filePath2], into: endDirectory).success).to(beTrue())
                 }
                 
                 afterEach {
-                    FileSystem.deleteDirectory(startDirectory)
-                    FileSystem.deleteDirectory(endDirectory)
+                    _ = FileSystem.deleteDirectory(startDirectory)
+                    _ = FileSystem.deleteDirectory(endDirectory)
                 }
                 
                 it("adds both files to the end directory") {
@@ -156,8 +156,8 @@ class FileSystemSpec: QuickSpec {
                 beforeEach {
                     startDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("START")
                     endDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("END")
-                    FileSystem.createDirectory(startDirectory)
-                    FileSystem.createDirectory(endDirectory)
+                    _ = FileSystem.createDirectory(startDirectory)
+                    _ = FileSystem.createDirectory(endDirectory)
                     Helper.addFile(fileName1, directory: startDirectory)
                     Helper.addFile(fileName2, directory: startDirectory)
 
@@ -169,12 +169,12 @@ class FileSystemSpec: QuickSpec {
 
                     let filePath1 = startDirectory.appendingPathComponent(fileName1).path
                     let filePath2 = startDirectory.appendingPathComponent(fileName2).path
-                    expect(FileSystem.move([filePath1, filePath2], into: endDirectory)).to(beTrue())
+                    expect(FileSystem.move([filePath1, filePath2], into: endDirectory).success).to(beTrue())
                 }
                 
                 afterEach {
-                    FileSystem.deleteDirectory(startDirectory)
-                    FileSystem.deleteDirectory(endDirectory)
+                    _ = FileSystem.deleteDirectory(startDirectory)
+                    _ = FileSystem.deleteDirectory(endDirectory)
                 }
                 
                 it("adds both files to the end directory") {

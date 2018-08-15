@@ -12,6 +12,24 @@ public struct Commit {
     public var projects: [Project] = []
 }
 
+public struct Result {
+    public var success: Bool = true
+    public var messages: [String] = []
+    public var allMessages: String {
+        get {
+            return messages.joined(separator: "\n")
+        }
+    }
+    
+    mutating func mergeIn(_ result: Result) {
+        if !result.success {
+            success = false
+        }
+        
+        messages.append(contentsOf: result.messages)
+    }
+}
+
 
 public class AtlasCore {
     
@@ -34,15 +52,24 @@ public class AtlasCore {
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
         }
-        FileSystem.createDirectory(self.baseDirectory)
+    }
+    
+    public func initialize() -> Result {
+        var result = Result()
+        
+        let directoryResult = FileSystem.createDirectory(self.baseDirectory)
+        result.mergeIn(directoryResult)
         
         if let credentials = getCredentials() {
-            _ = initGitAndGitHub(credentials)
+            let initializationResult = initGitAndGitHub(credentials)
+            result.mergeIn(initializationResult)
             if userDirectory != nil && Search.exists(userDirectory!) {
-                _ = initSearch()
+                let searchResult = initSearch()
+                result.mergeIn(searchResult)
             }
         }
         
+        return result
     }
     
     public func getDefaultBaseDirectory() -> URL {
@@ -50,36 +77,44 @@ public class AtlasCore {
         return URL(fileURLWithPath: paths[0]).appendingPathComponent(AtlasCore.appName)
     }
     
-    public func setUserDirectory(_ credentials: Credentials?=nil) {
+    public func setUserDirectory(_ credentials: Credentials?=nil) -> Result {
+        var result = Result()
         var activeCredentials = credentials
         if activeCredentials == nil {
             activeCredentials = getCredentials()
         }
         
         guard activeCredentials != nil else {
-            return
+            result.success = false
+            result.messages.append("No credentials found or provided.")
+            return result
         }
         
         if let username = activeCredentials?.username {
             self.userDirectory = baseDirectory.appendingPathComponent(username)
-            FileSystem.createDirectory(self.userDirectory!)
+            let directoryResult = FileSystem.createDirectory(self.userDirectory!)
+            result.mergeIn(directoryResult)
         }
+        return result
     }
 
     public func getCredentials() -> Credentials? {
         return Credentials.retrieve(baseDirectory).first
     }
     
-    public func deleteCredentials() {
-        Credentials.delete(baseDirectory)
+    public func deleteCredentials() -> Result {
+        return Credentials.delete(baseDirectory)
     }
     
-    public func initGitAndGitHub(_ credentials: Credentials) -> Bool {
+    public func initGitAndGitHub(_ credentials: Credentials) -> Result {
+        var result = Result()
+        
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)
         }
 
-        setUserDirectory(credentials)
+        let userDirectoryResult = setUserDirectory(credentials)
+        result.mergeIn(userDirectoryResult)
 
         if credentials.token == nil && credentials.remotePath == nil {
             if credentials.password != nil {
@@ -88,47 +123,56 @@ public class AtlasCore {
                 }
             } else {
                 if let repository = userDirectory?.appendingPathComponent(AtlasCore.originName) {
-                    FileSystem.createDirectory(repository)
+                    let localRepositoryResult = FileSystem.createDirectory(repository)
+                    result.mergeIn(localRepositoryResult)
                     credentials.setRemotePath(repository.path)
                 }
             }
         }
         
         guard credentials.token != nil || credentials.remotePath != nil else {
-            print("No valid token or remote path found.")
-            return false
+            result.success = false
+            result.messages.append("No valid token or remote path found.")
+            return result
         }
 
         credentials.save(baseDirectory!)
 
         if git == nil {
             git = Git(self.userDirectory!, credentials: credentials)
-        } else {
-            git?.initializeDirectory()
         }
+        if let gitResult = git?.initialize() {
+            result.mergeIn(gitResult)
+        }
+        
         appDirectory = git?.directory
         
         if initGitRepository(credentials) {
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
-            if gitHub.setPostCommitHook() {
-                if !gitHub.setRepositoryLink() {
-                    _ = gitHub.createRepository()
-                    if !gitHub.setRepositoryLink() {
-                        print("Failed to set repository link.")
-                        return false
+            result.mergeIn(gitHub.setPostCommitHook())
+            if result.success {
+                result.mergeIn(gitHub.setRepositoryLink())
+                if !result.success {
+                    result.success = true
+                    result.mergeIn(gitHub.createRepository())
+                    result.mergeIn(gitHub.setRepositoryLink())
+                    if !result.success {
+                        result.messages.append("Failed to set repository link.")
+                        return result
                     }
 
-                    _ = atlasCommit()
-                    return true
+                    result.mergeIn(atlasCommit())
                 }
-                return true
+                return result
             } else {
-                print("Failed to create post commit hooks")
-                return false
+                result.success = false
+                result.messages.append("Failed to create post commit hooks")
+                return result
             }
         }
-        print("Failed to create Git repository.")
-        return false
+        result.success = false
+        result.messages.append("Failed to create Git repository.")
+        return result
     }
     
     public func initGitRepository(_ credentials: Credentials) -> Bool {
@@ -151,25 +195,34 @@ public class AtlasCore {
         return true
     }
     
-    public func initSearch() -> Bool {
-        guard search == nil else { return true }
+    public func initSearch() -> Result {
+        var result = Result()
+        guard search == nil else { return result }
         
-        guard userDirectory != nil else { return false }
+        guard userDirectory != nil else {
+            result.success = false
+            result.messages.append("User directory not found for search")
+            return result
+        }
         
         search = Search(userDirectory!)
         
-        guard search != nil else { return false }
+        guard search != nil else {
+            result.success = false
+            result.messages.append("Search is still nil after initialization")
+            return result
+        }
         
-        if true || search.documentCount() == 0 {
-            for project in projects() {
-                for file in project.allFileUrls() {
-                    if !search.add(file) {
-                        return false
-                    }
+        for project in projects() {
+            for file in project.allFileUrls() {
+                if !search.add(file) {
+                    result.success = false
+                    result.messages.append("Unable to add \(file) to search")
+                    return result
                 }
             }
         }
-        return true
+        return result
     }
     
     public func closeSearch() {
@@ -192,12 +245,12 @@ public class AtlasCore {
         return git?.annexRoot.count == 0 ? nil : git?.annexRoot
     }
 
-    public func createBaseDirectory() {
-        FileSystem.createDirectory(baseDirectory)
+    public func createBaseDirectory() -> Result {
+        return FileSystem.createDirectory(baseDirectory)
     }
     
-    public func deleteBaseDirectory() {
-        FileSystem.deleteDirectory(baseDirectory)
+    public func deleteBaseDirectory() -> Result {
+        return FileSystem.deleteDirectory(baseDirectory)
     }
 
     public func initProject(_ name: String) -> Bool {
@@ -265,18 +318,19 @@ public class AtlasCore {
         return commits
     }
     
-    public func purge(_ filePaths: [String]) -> Bool {
-        guard git?.directory != nil else {
-            return false
-        }
+    public func purge(_ filePaths: [String]) -> Result {
+        var result = Result()
         
-        var success = true
+        guard git?.directory != nil else {
+            result.success = false
+            result.messages.append("No git directory found for purge")
+            return result
+        }
         
         var directories: [String] = []
         for filePath in filePaths {
-            if !git!.removeFile(filePath) {
-                success = false
-            } else {
+            result.mergeIn(git!.removeFile(filePath))
+            if result.success {
                 let directory = URL(fileURLWithPath: filePath).deletingLastPathComponent().relativePath
                 if !directories.contains(directory) {
                     directories.append(directory)
@@ -289,36 +343,43 @@ public class AtlasCore {
                 let fullDirectory = git!.directory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.readme) {
-                    if !git!.removeFile("\(directory)/\(Project.readme)") {
-                        success = false
-                    }
+                    result.mergeIn(git!.removeFile("\(directory)/\(Project.readme)"))
                 }
             }
         }
 
         _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
         
-        return success
+        return result
     }
         
-    public func commitChanges(_ commitMessage: String?=nil) -> String {
+    public func commitChanges(_ commitMessage: String?=nil) -> Result {
+        var result = Result()
         let maxTries = 5
         var tries = 0
-        if var status = self.git?.status() {
-            while tries < maxTries && !(status.contains("Untracked files") || status.contains("Changes to be committed")) {
-                sleep(1)
-                status = self.git?.status() ?? ""
-                tries += 1
+        if let git = git {
+            if var status = git.status() {
+                while tries < maxTries && !(status.contains("Untracked files") || status.contains("Changes to be committed")) {
+                    sleep(1)
+                    status = git.status() ?? ""
+                    tries += 1
+                }
+                
+                result.mergeIn(git.add())
+                result.mergeIn(git.commit(commitMessage))
+            } else {
+                result.success = false
+                result.messages.append("No status provided by git for committing.")
             }
-            let addResult = self.git?.add() ?? "Add Error"
-            let commitResult = self.git?.commit(commitMessage) ?? "Commit Error"
-            return "Adding Changes:\n\(addResult)\nCommiting Changes:\n\(commitResult)"
+        } else {
+            result.success = false
+            result.messages.append("Git not found for committing.")
         }
         
-        return "No status available"
+        return result
     }
     
-    public func atlasCommit(_ message: String?=nil) -> String {
+    public func atlasCommit(_ message: String?=nil) -> Result {
         var submessage = ""
         if message != nil {
             submessage = " (\(message!))"

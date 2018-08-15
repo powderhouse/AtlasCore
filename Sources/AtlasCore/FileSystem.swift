@@ -21,9 +21,9 @@ public class FileSystem {
         }
     }
     
-    public class func createDirectory(_ url: URL) {
+    public class func createDirectory(_ url: URL) -> Result {
         if fileExists(url) {
-            return
+            return Result()
         }
         
         let fileManager = FileManager.default
@@ -35,11 +35,13 @@ public class FileSystem {
                 attributes: nil
             )
         } catch {
-            print("Unable to create directory: \(url)")
+            return Result(success: false, messages: ["Unable to create directory: \(url)"])
         }
+        return Result(success: true, messages: ["\(url.lastPathComponent) directory created."])
     }
     
-    public class func deleteDirectory(_ url: URL) {
+    public class func deleteDirectory(_ url: URL) -> Result {
+        var result = Result()
         let fileManager = FileManager.default
         do {
             _ = Glue.runProcess(
@@ -50,8 +52,10 @@ public class FileSystem {
             
             try fileManager.removeItem(at: url)
         } catch {
-            print("UNABLE TO DELETE DIRECTORY: \(url) - \(error)")
+            result.success = false
+            result.messages.append("Unable to delete directrory: \(url) - \(error)")
         }
+        return result
     }
     
     public class func filesInDirectory(_ url: URL, excluding: [String]=[], directoriesOnly: Bool=false) -> [String] {
@@ -76,52 +80,68 @@ public class FileSystem {
         return contents!
     }
     
-    public class func copy(_ filePath: String, into directory: URL) -> Bool {
+    public class func copy(_ filePath: String, into directory: URL) -> Result {
         return copy([filePath], into: directory)
     }
     
-    public class func copy(_ filePaths: [String], into directory: URL) -> Bool {
+    public class func copy(_ filePaths: [String], into directory: URL) -> Result {
+        var result = Result()
+        
         for filePath in filePaths {
-            _ = Glue.runProcess("cp", arguments: [filePath, directory.path])
+            let output = Glue.runProcess("cp", arguments: [filePath, directory.path])
             if let fileName = filePath.split(separator: "/").last {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
-                    return false
+                    result.success = false
+                    result.messages += ["Unable to copy \(filePath) to \(directory.path)", output]
+                    return result
                 }
                 if !FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
-                    return false
+                    result.success = false
+                    result.messages += ["\(filePath) no longer exists at \(directory.path)", output]
+                    return result
                 }
             } else {
-                return false
+                result.success = false
+                result.messages.append("Unable to process filename from \(filePath)")
+                return result
             }
         }
         
-        return true
+        return result
     }
 
-    public class func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Bool {
+    public class func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Result {
         return move([filePath], into: directory, renamedTo: newName)
     }
     
-    public class func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Bool {
+    public class func move(_ filePaths: [String], into directory: URL, renamedTo newName: String?=nil) -> Result {
+        var result = Result()
         for filePath in filePaths {
             if let fileName = filePath.split(separator: "/").last {
                 let destinationName = newName == nil ? String(fileName) : newName!
                 let destination = directory.appendingPathComponent(destinationName)
 
-                _ = Glue.runProcess("mv", arguments: [filePath, destination.path])
+                let output = Glue.runProcess("mv", arguments: [filePath, destination.path])
 
                 if !FileSystem.fileExists(destination) {
-                    return false
+                    result.success = false
+                    result.messages += ["Unable to move \(filePath)", output]
+                    return result
                 }
+                
                 if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
-                    return false
+                    result.success = false
+                    result.messages += ["\(filePath) still exists (was not moved).", output]
+                    return result
                 }
             } else {
-                return false
+                result.success = false
+                result.messages.append("Unable to process filename from \(filePath)")
+                return result
             }
         }
         
-        return true
+        return result
     }
 
 }

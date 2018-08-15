@@ -52,7 +52,8 @@ class GitHubSpec: QuickSpec {
                     }
 
                     git = Git(directory, credentials: credentials)
-                    _  = git.runInit()
+                    _ = git.initialize()
+                    _ = git.runInit()
 
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                     
@@ -73,7 +74,7 @@ class GitHubSpec: QuickSpec {
                 
                 context("createRepository") {
                     
-                    var result: Bool?
+                    var result: Result?
                     
                     context("without token") {
                         beforeEach {
@@ -82,7 +83,7 @@ class GitHubSpec: QuickSpec {
                         }
                         
                         it("should fail without token") {
-                            expect(result).to(beFalse())
+                            expect(result?.success).to(beFalse())
                         }
                     }
 
@@ -92,7 +93,7 @@ class GitHubSpec: QuickSpec {
                         }
 
                         it("should provide results") {
-                            expect(result).to(beTrue())
+                            expect(result?.success).to(beTrue())
                         }
                         
                         it("should set the repository link") {
@@ -120,7 +121,7 @@ class GitHubSpec: QuickSpec {
                         }
                         
                         it("should provide results") {
-                            expect(result).to(beTrue())
+                            expect(result?.success).to(beTrue())
                         }
                         
                         it("should set the repository link") {
@@ -130,9 +131,7 @@ class GitHubSpec: QuickSpec {
                     
                     context("setPostCommitHook") {
                         beforeEach {
-                            if !gitHub!.setPostCommitHook() {
-                                expect(false).to(beTrue(), description: "Failed to set post-commit hook")
-                            }
+                            expect(gitHub!.setPostCommitHook().success).to(beTrue(), description: "Failed to set post-commit hook")
                         }
                         
                         it("should create a post-commit hook") {
@@ -174,13 +173,13 @@ class GitHubSpec: QuickSpec {
                     }
                     
                     it("should return false if the repository does not yet exist") {
-                        expect(gitHub?.setRepositoryLink()).to(beFalse())
+                        expect(gitHub?.setRepositoryLink().success).to(beFalse())
                         expect(gitHub?.repositoryLink).to(beNil())
                     }
 
                     it("should return true if the repository already exists") {
-                        expect(gitHub?.createRepository()).to(beTrue())
-                        expect(gitHub?.setRepositoryLink()).to(beTrue())
+                        expect(gitHub?.createRepository().success).to(beTrue())
+                        expect(gitHub?.setRepositoryLink().success).to(beTrue())
                         expect(gitHub?.repositoryLink).to(equal("https://github.com/atlastest/testGitHub"))
                     }
                 }

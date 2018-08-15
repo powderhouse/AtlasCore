@@ -42,6 +42,7 @@ class ProjectSpec: QuickSpec {
 
                 search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
                 git = Git(baseDirectory, credentials: credentials)
+                _ = git.initialize()
 
                 project = Project(projectName, baseDirectory: directory, git: git, search: search)
             }
@@ -126,7 +127,7 @@ class ProjectSpec: QuickSpec {
                     let slug = project.commitSlug(commitMessage)
 
                     expect(project.commitMessage(commitMessage)).to(beTrue())
-                    expect(project.commitStaged()).to(beTrue())
+                    expect(project.commitStaged().success).to(beTrue())
                     
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
                 }
@@ -171,7 +172,7 @@ class ProjectSpec: QuickSpec {
                     let slug = project.commitSlug(commitMessage)
 
                     expect(project.commitMessage(commitMessage)).to(beTrue())
-                    expect(project.commitStaged()).to(beTrue())
+                    expect(project.commitStaged().success).to(beTrue())
                     
                     expect(slug).to(contain("-2"))
                     commitFolder = project.directory("committed").appendingPathComponent(slug)
@@ -184,7 +185,7 @@ class ProjectSpec: QuickSpec {
                     let duplicateSlug = project.commitSlug(commitMessage.appending("-2"))
                     
                     expect(project.commitMessage(commitMessage)).to(beTrue())
-                    expect(project.commitStaged()).to(beTrue())
+                    expect(project.commitStaged().success).to(beTrue())
                     
                     expect(duplicateSlug).to(contain("-2-2"))
                     commitFolder = project.directory("committed").appendingPathComponent(duplicateSlug)
@@ -212,11 +213,11 @@ class ProjectSpec: QuickSpec {
                 
                 beforeEach {
                     fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
-                    FileSystem.createDirectory(fileDirectory)
+                    _ = FileSystem.createDirectory(fileDirectory)
                     Helper.addFile(fileName, directory: fileDirectory)
                     
                     let filePath = fileDirectory.appendingPathComponent(fileName).path
-                    expect(project.copyInto([filePath])).to(beTrue())
+                    expect(project.copyInto([filePath]).success).to(beTrue())
                 }
                 
                 it("adds the file to the project") {
@@ -240,14 +241,14 @@ class ProjectSpec: QuickSpec {
                 beforeEach {
                     let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
                     let fileDirectory = tempDirectory.appendingPathComponent("FILE_DIR")
-                    FileSystem.createDirectory(fileDirectory)
+                    _ = FileSystem.createDirectory(fileDirectory)
                     Helper.addFile(fileName, directory: fileDirectory)
                     
                     let filePath = fileDirectory.appendingPathComponent(fileName).path
-                    expect(project.copyInto([filePath])).to(beTrue())
+                    expect(project.copyInto([filePath]).success).to(beTrue())
                     
                     let result = project.changeState([fileName], to: "unstaged")
-                    expect(result).to(beTrue())
+                    expect(result.success).to(beTrue())
                 }
                 
                 it("adds the file to the unstaged subfolder within the project") {
@@ -282,7 +283,7 @@ class ProjectSpec: QuickSpec {
                     _ = project.commitSlug(commitMessage)
                     
                     expect(project.commitMessage(commitMessage)).to(beTrue())
-                    expect(project.commitStaged()).to(beTrue())
+                    expect(project.commitStaged().success).to(beTrue())
                     
                     Helper.addFile(stagedName, directory: stagedDirectory)
                     Helper.addFile(unstagedName, directory: stagedDirectory)

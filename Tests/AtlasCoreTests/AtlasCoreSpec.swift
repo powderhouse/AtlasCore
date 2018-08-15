@@ -67,7 +67,7 @@ class AtlasCoreSpec: QuickSpec {
                     
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: 10)
 
-                    expect(atlasCore.initSearch()).to(beTrue())
+                    expect(atlasCore.initSearch().success).to(beTrue())
                 }
 
                 it("saves the credentials to the filesystem") {
@@ -96,15 +96,15 @@ class AtlasCoreSpec: QuickSpec {
                     let file = "index1.html"
 
                     let fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
-                    FileSystem.createDirectory(fileDirectory)
+                    _ = FileSystem.createDirectory(fileDirectory)
                     Helper.addFile(file, directory: fileDirectory)
 
                     expect(atlasCore.initProject(projectName)).to(beTrue())
                     let project = atlasCore.project(projectName)
 
                     let filePath = fileDirectory.appendingPathComponent(file).path
-                    expect(project?.copyInto([filePath])).to(beTrue())
-                    atlasCore.atlasCommit()
+                    expect(project?.copyInto([filePath]).success).to(beTrue())
+                    _ = atlasCore.atlasCommit()
 
                     logEntries += 1
                     expect(
@@ -118,8 +118,8 @@ class AtlasCoreSpec: QuickSpec {
                     expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("</ENDENTRY>"), timeout: 10)
 
                     expect(project?.commitMessage("Commit Message")).to(beTrue())
-                    expect(project?.commitStaged()).to(beTrue())
-                    atlasCore.commitChanges()
+                    expect(project?.commitStaged().success).to(beTrue())
+                    _ = atlasCore.commitChanges()
 
                     logEntries += 1
                     expect(
@@ -148,13 +148,15 @@ class AtlasCoreSpec: QuickSpec {
                         expect(exists).to(beTrue(), description: "No search index found")
 
                         atlasCore2 = AtlasCore(directory)
+                        let initializationResult = atlasCore2.initialize()
+                        expect(initializationResult.success).to(beTrue(), description: "\(initializationResult) was not successful")
                     }
 
                     afterEach {
                         atlasCore2.closeSearch()
                     }
 
-                    it("automatically inits git") {
+                    it("initializes GitHub") {
                         expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
                     }
 
@@ -167,7 +169,7 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                     context("initialized again") {
-                        var result: Bool!
+                        var result: Result!
                         let newCredentials = Credentials(
                             "atlastest",
                             password: "1a2b3c4d",
@@ -179,7 +181,7 @@ class AtlasCoreSpec: QuickSpec {
                         }
 
                         it("allows you to initialize again") {
-                            expect(result).to(beTrue())
+                            expect(result.success).to(beTrue())
                         }
 
                         it("sets the github repository link properly") {
@@ -188,7 +190,7 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                     context("initialized again after local directory deleted") {
-                        var result: Bool!
+                        var result: Result!
                         let newCredentials = Credentials(
                             "atlastest",
                             password: "1a2b3c4d",
@@ -203,7 +205,7 @@ class AtlasCoreSpec: QuickSpec {
                         }
 
                         it("allows you to initialize again") {
-                            expect(result).to(beTrue())
+                            expect(result.success).to(beTrue())
                         }
 
                         it("sets the github repository link properly") {
@@ -270,7 +272,7 @@ Multiline
 
                     beforeEach {
                         fileDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("FILE_DIR")
-                        FileSystem.createDirectory(fileDirectory)
+                        _ = FileSystem.createDirectory(fileDirectory)
                         Helper.addFile(file1, directory: fileDirectory)
                         Helper.addFile(file2, directory: fileDirectory)
                         Helper.addFile(file3, directory: fileDirectory)
@@ -281,8 +283,8 @@ Multiline
                         project2 = atlasCore.project(project2Name)
 
                         let filePath1 = fileDirectory.appendingPathComponent(file1).path
-                        expect(project1?.copyInto([filePath1])).to(beTrue())
-                        atlasCore.atlasCommit()
+                        expect(project1?.copyInto([filePath1]).success).to(beTrue())
+                        _ = atlasCore.atlasCommit()
 
                         logEntries += 1
                         expect(
@@ -293,8 +295,8 @@ Multiline
                         slug2 = project2!.commitSlug(message2)
 
                         expect(project1?.commitMessage(message1)).to(beTrue())
-                        expect(project1?.commitStaged()).to(beTrue())
-                        atlasCore.commitChanges(message1)
+                        expect(project1?.commitStaged().success).to(beTrue())
+                        _ = atlasCore.commitChanges(message1)
 
                         logEntries += 1
                         expect(
@@ -302,12 +304,12 @@ Multiline
                         ).toEventually(equal(logEntries), timeout: 10)
 
                         let filePath2 = fileDirectory.appendingPathComponent(file2).path
-                        expect(project2?.copyInto([filePath2])).to(beTrue())
+                        expect(project2?.copyInto([filePath2]).success).to(beTrue())
 
                         let filePath3 = fileDirectory.appendingPathComponent(file3).path
-                        expect(project2?.copyInto([filePath3])).to(beTrue())
+                        expect(project2?.copyInto([filePath3]).success).to(beTrue())
 
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
 
                         logEntries += 1
                         expect(
@@ -315,8 +317,8 @@ Multiline
                         ).toEventually(equal(logEntries), timeout: 10)
 
                         expect(project2?.commitMessage(message2)).to(beTrue())
-                        expect(project2?.commitStaged()).to(beTrue())
-                        atlasCore.commitChanges(message2)
+                        expect(project2?.commitStaged().success).to(beTrue())
+                        _ = atlasCore.commitChanges(message2)
 
                         expect(atlasCore.log().count).toEventually(equal(2), timeout: 10)
                     }
@@ -398,7 +400,7 @@ Multiline
 
                     context("search") {
                         beforeEach {
-                            expect(atlasCore.initSearch()).to(beTrue())
+                            expect(atlasCore.initSearch().success).to(beTrue())
                         }
 
                         it("initializes correctly, consuming existing files") {
@@ -417,7 +419,7 @@ Multiline
                         _ = atlasCore.initProject("Project 1")
                         _ = atlasCore.initProject("\\\"Project a\\\"")
                         _ = atlasCore.initProject("\"A Project\"")
-                        atlasCore.atlasCommit()
+                        _ = atlasCore.atlasCommit()
 
                         logEntries += 1
                         expect(
@@ -438,7 +440,7 @@ Multiline
                     }
 
                     it("should ignore folders in the atlas directory that do not have a readme.md") {
-                        FileSystem.createDirectory((atlasCore.appDirectory!.appendingPathComponent("misc")))
+                        _ = FileSystem.createDirectory((atlasCore.appDirectory!.appendingPathComponent("misc")))
 
                         let projects = atlasCore.projects().map { $0.name }.sorted()
                         expect(projects).to(equal(["\"A Project\"", "Project 1", "\\\"Project a\\\""]))
