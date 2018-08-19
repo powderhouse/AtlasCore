@@ -50,12 +50,20 @@ public class GitAnnex {
     }
     
     public func installed() -> Bool {
-        let info = Glue.runProcess("brew", arguments: ["info", "git-annex"])
+        let info = Glue.runProcess(
+            "brew",
+            arguments: ["info", "git-annex"],
+            currentDirectory: directory
+        )
         return !info.contains("Not installed")
     }
     
     public func install() -> Result {
-        let output = Glue.runProcess("brew", arguments: ["install", "git-annex"])
+        let output = Glue.runProcess(
+            "brew",
+            arguments: ["install", "git-annex"],
+            currentDirectory: directory
+        )
         if !output.contains("start git-annex") {
             return Result(
                 success: false,

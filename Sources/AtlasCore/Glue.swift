@@ -20,12 +20,14 @@ public class Glue {
         
         var environment = (environment_variables ?? [:])
         environment["PATH"] = path
-        process.environment = environment
-        
+
         if currentDirectory != nil {
-//            process.currentDirectoryURL = currentDirectory
+            //            process.currentDirectoryURL = currentDirectory
             process.currentDirectoryPath = currentDirectory!.path
+            environment["HOME"] = currentDirectory!.path
         }
+        
+        process.environment = environment
         
         return process.runAndWait()
     }
