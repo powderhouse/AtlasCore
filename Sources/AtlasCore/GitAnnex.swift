@@ -31,6 +31,7 @@ public class GitAnnex {
     
     public func initialize() -> Result {
         var result = Result()
+        
         if !installed() {
             let installResult = install()
             if !installResult.success {
@@ -89,9 +90,16 @@ public class GitAnnex {
         ]
         
         if credentials.s3AccessKey == "test" {
+            let httpOutput = run("config", arguments: [
+                "--set",
+                "annex.security.allowed-http-addresses",
+                "all"
+            ])
+            result.messages.append(httpOutput)
             initArguments.append("host=localhost")
             initArguments.append("port=4572")
             initArguments.append("requeststyle=path")
+//            initArguments.append("--debug")
         }
         
         let successText = "recording state"
@@ -131,8 +139,8 @@ public class GitAnnex {
         credentialed_environment_variables["AWS_ACCESS_KEY_ID"] = credentials.s3AccessKey ?? ""
         credentialed_environment_variables["AWS_SECRET_ACCESS_KEY"] = credentials.s3SecretAccessKey ?? ""
         
-        return Glue.runProcessError("git",
-                               arguments: ["annex"] + fullArguments,
+        return Glue.runProcessError("git-annex",
+                               arguments: fullArguments,
                                environment_variables: credentialed_environment_variables,
                                currentDirectory: directory
         )

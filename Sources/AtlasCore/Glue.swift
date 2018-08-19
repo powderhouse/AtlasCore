@@ -9,6 +9,8 @@ import Foundation
 
 public class Glue {
     
+    public static let path: String = "$PATH:/bin:/usr/bin:/usr/local/bin:/anaconda/bin"
+    
     public class func runProcess(_ command: String, arguments: [String]?=[], environment_variables: [String: String]?=nil, currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process()) -> String {
         var process = atlasProcess
         
@@ -16,9 +18,9 @@ public class Glue {
 //        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = [command] + (arguments ?? [])
         
-        if environment_variables != nil {
-            process.environment = environment_variables
-        }
+        var environment = (environment_variables ?? [:])
+        environment["PATH"] = path
+        process.environment = environment
         
         if currentDirectory != nil {
 //            process.currentDirectoryURL = currentDirectory
@@ -40,9 +42,9 @@ public class Glue {
             process.currentDirectoryPath = currentDirectory!.path
         }
         
-        if environment_variables != nil {
-            process.environment = environment_variables
-        }
+        var environment = (environment_variables ?? [:])
+        environment["PATH"] = path
+        process.environment = environment
         
         return process.runAndWaitError()
     }
