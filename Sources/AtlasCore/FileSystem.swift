@@ -22,7 +22,7 @@ public class FileSystem {
     }
     
     public class func createDirectory(_ url: URL) -> Result {
-        if fileExists(url) {
+        if fileExists(url, isDirectory: true) {
             return Result()
         }
         

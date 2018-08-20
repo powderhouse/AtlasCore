@@ -33,7 +33,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.5.0"
+    public static let version = "1.5.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
