@@ -20,18 +20,21 @@ class GitSpec: QuickSpec {
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
-            let credentials = Credentials(
-                "atlastest",
-                password: "1a2b3c4d",
-                token: nil,
-                s3AccessKey: "test",
-                s3SecretAccessKey: "test"
-            )
+            var credentials: Credentials!
 
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("testGit")
 
                 Helper.createBaseDirectory(directory)
+                
+                credentials = Credentials(
+                    "atlastest",
+                    password: "1a2b3c4d",
+                    token: nil,
+                    s3AccessKey: "test",
+                    s3SecretAccessKey: "test",
+                    directory: directory
+                )
 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
@@ -191,14 +194,17 @@ class GitSpec: QuickSpec {
                 context("pushToGitHub") {
 
                     let repositoryName = "testGitHub"
-                    let credentials = Credentials(
-                        "atlastest",
-                        password: "1a2b3c4d",
-                        token: nil
-                    )
+                    var credentials: Credentials!
                     var gitHub: GitHub!
 
                     beforeEach {
+                        credentials = Credentials(
+                            "atlastest",
+                            password: "1a2b3c4d",
+                            token: nil,
+                            directory: directory
+                        )
+                        
                         if let token = GitHub.getAuthenticationToken(credentials) {
                             credentials.setAuthenticationToken(token)
                         }

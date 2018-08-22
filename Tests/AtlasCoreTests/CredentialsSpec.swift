@@ -44,7 +44,12 @@ class CredentialsSpec: QuickSpec {
             context("with token") {
                 
                 beforeEach {
-                    credentials = Credentials(username, password: password, token: token)
+                    credentials = Credentials(
+                        username,
+                        password: password,
+                        token: token,
+                        directory: directory
+                    )
                 }
                 
                 it("should initialize properly") {
@@ -55,7 +60,7 @@ class CredentialsSpec: QuickSpec {
                 
                 context("save") {
                     beforeEach {
-                        credentials.save(directory)
+                        credentials.save()
                     }
                     
                     it("should write the credentials to a file in the specified directory") {
@@ -69,7 +74,11 @@ class CredentialsSpec: QuickSpec {
             
             context("without token") {
                 beforeEach {
-                    credentials = Credentials(username, password: password)
+                    credentials = Credentials(
+                        username,
+                        password: password,
+                        directory: directory
+                    )
                 }
 
                 it("should initialize properly") {
@@ -80,7 +89,7 @@ class CredentialsSpec: QuickSpec {
                 
                 context("save") {
                     beforeEach {
-                        credentials.save(directory)
+                        credentials.save()
                     }
                     
                     it("should not write the credentials to a file in the specified directory because the token is missing") {
@@ -92,7 +101,11 @@ class CredentialsSpec: QuickSpec {
                 
                 context("with remote path") {
                     beforeEach {
-                        credentials = Credentials(username, remotePath: remotePath)
+                        credentials = Credentials(
+                            username,
+                            remotePath: remotePath,
+                            directory: directory
+                        )
                     }
                     
                     it("should initialize properly") {
@@ -104,7 +117,7 @@ class CredentialsSpec: QuickSpec {
                     
                     context("save") {
                         beforeEach {
-                            credentials.save(directory)
+                            credentials.save()
                         }
                         
                         it("should not write the credentials to a file in the specified directory because the token is missing") {
@@ -122,7 +135,7 @@ class CredentialsSpec: QuickSpec {
                 var credentials: Credentials?
                 
                 beforeEach {
-                    Credentials(username, token: token).save(directory)
+                    Credentials(username, token: token, directory: directory).save()
                     credentials = Credentials.retrieve(directory).first
                 }
                 
@@ -137,7 +150,7 @@ class CredentialsSpec: QuickSpec {
                 var filePath: String!
 
                 beforeEach {
-                    Credentials(username, token: token).save(directory)
+                    Credentials(username, token: token, directory: directory).save()
 
                     filePath = "\(directory.path)/credentials.json"
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
@@ -161,7 +174,8 @@ class CredentialsSpec: QuickSpec {
                         username,
                         token: token,
                         s3AccessKey: s3AccessKey,
-                        s3SecretAccessKey: s3SecretAccessKey
+                        s3SecretAccessKey: s3SecretAccessKey,
+                        directory: directory
                     )
                     expect(credentials.complete()).to(beTrue())
                 }
@@ -171,7 +185,8 @@ class CredentialsSpec: QuickSpec {
                         username,
                         password: password,
                         s3AccessKey: s3AccessKey,
-                        s3SecretAccessKey: s3SecretAccessKey
+                        s3SecretAccessKey: s3SecretAccessKey,
+                        directory: directory
                     )
                     expect(credentials.complete()).to(beTrue())
                 }
@@ -179,7 +194,8 @@ class CredentialsSpec: QuickSpec {
                 it("should not be complete if s3 access keys are missing") {
                     credentials = Credentials(
                         username,
-                        password: password
+                        password: password,
+                        directory: directory
                     )
                     expect(credentials.complete()).to(beFalse())
 

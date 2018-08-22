@@ -16,17 +16,26 @@ class GitHubSpec: QuickSpec {
             
             let repositoryName = "testGitHub"
             var credentials: Credentials!
-            
+            var directory: URL!
+
             beforeEach {
+                directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName)
+                
+                Helper.createBaseDirectory(directory)
+
                 credentials = Credentials(
                     "atlastest",
                     password: "1a2b3c4d",
-                    token: nil
+                    token: nil,
+                    directory: directory
                 )
+            }
+            
+            afterEach {
+                Helper.deleteBaseDirectory(directory)
             }
 
             context("initialized") {
-                var directory: URL!
                 var appDirectory: URL!
                 let fileManager = FileManager.default
                 var isFile : ObjCBool = false
@@ -37,10 +46,6 @@ class GitHubSpec: QuickSpec {
                 var gitHub: GitHub?
                 
                 beforeEach {
-                    directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(repositoryName)
-                    
-                    Helper.createBaseDirectory(directory)
-                    
                     let filePath = directory.path
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                     expect(exists).to(beTrue(), description: "No folder found")
@@ -61,7 +66,6 @@ class GitHubSpec: QuickSpec {
                 }
 
                 afterEach {
-                    Helper.deleteBaseDirectory(directory)
                     gitHub?.deleteRepository()
                 }
                 
@@ -194,13 +198,13 @@ class GitHubSpec: QuickSpec {
                 }
                 
                 it("should be nil if credentials are invalid") {
-                    let badCredentials = Credentials("BAD", password: "BAD")
+                    let badCredentials = Credentials("BAD", password: "BAD", directory: directory)
                     let token = GitHub.getAuthenticationToken(badCredentials)
                     expect(token).to(beNil())
                 }
                 
                 it("should be nil if credentials are missing a password") {
-                    let badCredentials = Credentials(credentials.username)
+                    let badCredentials = Credentials(credentials.username, directory: directory)
                     let token = GitHub.getAuthenticationToken(badCredentials)
                     expect(token).to(beNil())
                 }

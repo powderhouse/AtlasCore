@@ -43,6 +43,11 @@ public class GitAnnex {
         let directoryResult = initDirectory()
         result.mergeIn(directoryResult)
         
+        if credentials.s3AccessKey != "test" {
+            let awsResult = initializeAWS()
+            result.mergeIn(awsResult)
+        }
+        
         let s3Result = initializeS3()
         result.mergeIn(s3Result)
         
@@ -71,6 +76,63 @@ public class GitAnnex {
             )
         }
         return Result()
+    }
+    
+    public func initializeAWS() -> Result {
+        guard credentials.complete() else {
+            return Result(
+                success: false,
+                messages: ["Improper credentials for initializing AWS"]
+            )
+        }
+        
+        var result = Result()
+        
+        let awsCredentials = [
+            "AWS_ACCESS_KEY_ID": credentials.s3AccessKey!,
+            "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
+        ]
+        
+        let userOutput = Glue.runProcessError(
+            "aws",
+            arguments: [
+                "iam",
+                "create-user",
+                "--path", "/\(AtlasCore.repositoryName)/",
+                "--user-name", credentials.username
+            ],
+            environment_variables: awsCredentials
+        )
+        result.messages.append(userOutput)
+        
+        let credentialsOutput = Glue.runProcessError(
+            "aws",
+            arguments: [
+                "iam",
+                "create-access-key",
+                "--user-name", credentials.username
+            ],
+            environment_variables: awsCredentials
+        )
+        
+        if let credentialsData = credentialsOutput.data(using: .utf8) {
+            do {
+                if let credentialsDict = try JSONSerialization.jsonObject(with: credentialsData, options: []) as? [String: [String: String]] {
+                    if let accessKey = credentialsDict["AccessKey"] {
+                        credentials.setS3AccessKey(accessKey["AccessKeyId"])
+                        credentials.setS3SecretAccessKey(accessKey["SecretAccessKey"])
+                        credentials.save()
+                    }
+                }
+            } catch {
+                result.success = false
+                result.messages.append("Failed to capture AWS credentials: \(error)")
+            }
+        }
+        
+        result.messages.append(credentialsOutput)
+
+        return result
     }
     
     public func initializeS3() -> Result {

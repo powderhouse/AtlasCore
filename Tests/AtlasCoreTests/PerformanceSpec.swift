@@ -23,11 +23,7 @@ class PerformanceCoreSpec: QuickSpec {
             var atlasCore: AtlasCore!
             
             var directory: URL!
-            let credentials = Credentials(
-                "atlastest",
-                password: "1a2b3c4d",
-                token: nil
-            )
+            var credentials: Credentials!
             
             let fileManager = FileManager.default
 //            var isFile : ObjCBool = false
@@ -39,6 +35,13 @@ class PerformanceCoreSpec: QuickSpec {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 
                 Helper.createBaseDirectory(directory)
+                
+                credentials = Credentials(
+                    "atlastest",
+                    password: "1a2b3c4d",
+                    token: nil,
+                    directory: directory
+                )
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)

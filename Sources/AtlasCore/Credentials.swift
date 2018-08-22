@@ -17,18 +17,22 @@ public class Credentials {
     
     public var s3AccessKey: String?
     public var s3SecretAccessKey: String?
+    
+    public var directory: URL
 
     public init(_ username: String,
         password: String?=nil,
         token: String?=nil,
         remotePath: String?=nil,
         s3AccessKey: String?=nil,
-        s3SecretAccessKey: String?=nil
+        s3SecretAccessKey: String?=nil,
+        directory: URL
     ) {
         self.username = username
         self.password = password
         self.token = token
         self.remotePath = remotePath
+        self.directory = directory
 
         if s3AccessKey?.count ?? 0 > 0 {
             self.s3AccessKey = s3AccessKey
@@ -59,7 +63,7 @@ public class Credentials {
         return true
     }
 
-    public func save(_ directory: URL) {
+    public func save() {
         guard token != nil || remotePath != nil else {
             printCredentials("No token or remote path provided: \(username)")
             return
@@ -120,6 +124,14 @@ public class Credentials {
         self.remotePath = path
     }
 
+    public func setS3AccessKey(_ s3AccessKey: String?) {
+        self.s3AccessKey = s3AccessKey
+    }
+
+    public func setS3SecretAccessKey(_ s3SecretAccessKey: String?) {
+        self.s3SecretAccessKey = s3SecretAccessKey
+    }
+
     public class func retrieve(_ baseDirectory: URL) -> [Credentials] {
         let path = baseDirectory.appendingPathComponent(filename)
         var json: String
@@ -140,7 +152,8 @@ public class Credentials {
                             token: credentialsDict["token"],
                             remotePath: credentialsDict["remotePath"],
                             s3AccessKey: credentialsDict["s3AccessKey"],
-                            s3SecretAccessKey: credentialsDict["s3SecretAccessKey"]
+                            s3SecretAccessKey: credentialsDict["s3SecretAccessKey"],
+                            directory: baseDirectory
                         )]
                     }
                 }

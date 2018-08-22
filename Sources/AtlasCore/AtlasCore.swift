@@ -33,7 +33,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.5.1"
+    public static let version = "1.5.2"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -136,7 +136,7 @@ public class AtlasCore {
             return result
         }
 
-        credentials.save(baseDirectory!)
+        credentials.save()
 
         if git == nil {
             git = Git(self.userDirectory!, credentials: credentials)

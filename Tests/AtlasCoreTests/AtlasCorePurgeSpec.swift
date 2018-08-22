@@ -20,9 +20,7 @@ class AtlasCorePurgeSpec: QuickSpec {
             var directory: URL!
             
             let username = "atlastest"
-            let credentials = Credentials(
-                username
-            )
+            var credentials: Credentials!
             
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
@@ -33,6 +31,11 @@ class AtlasCorePurgeSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 Helper.createBaseDirectory(directory)
+                
+                credentials = Credentials(
+                    username,
+                    directory: directory
+                )
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)

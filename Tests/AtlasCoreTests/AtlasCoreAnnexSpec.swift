@@ -21,11 +21,7 @@ class AtlasCoreAnnexSpec: QuickSpec {
             var directory: URL!
             
             let username = "atlastest"
-            let credentials = Credentials(
-                username,
-                s3AccessKey: "test",
-                s3SecretAccessKey: "test"
-            )
+            var credentials: Credentials!
             
             let fileManager = FileManager.default
 //            var isFile : ObjCBool = false
@@ -57,6 +53,13 @@ Multiline
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 Helper.createBaseDirectory(directory)
+                
+                credentials = Credentials(
+                    username,
+                    s3AccessKey: "test",
+                    s3SecretAccessKey: "test",
+                    directory: directory
+                )
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)

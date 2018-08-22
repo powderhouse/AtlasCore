@@ -25,11 +25,7 @@ class ProjectSpec: QuickSpec {
             var isFile : ObjCBool = false
             var isDirectory : ObjCBool = true
             
-            let credentials = Credentials(
-                "atlastest",
-                password: "1a2b3c4d",
-                token: nil
-            )
+            var credentials: Credentials!
             
             var search: Search!
             var git: Git!
@@ -39,6 +35,13 @@ class ProjectSpec: QuickSpec {
                 Helper.createBaseDirectory(baseDirectory)
 
                 directory = baseDirectory.appendingPathComponent("Atlas")
+                
+                credentials = Credentials(
+                    "atlastest",
+                    password: "1a2b3c4d",
+                    token: nil,
+                    directory: directory
+                )
 
                 search = Search(baseDirectory, indexFileName: "PROJECT\(NSDate().timeIntervalSince1970)")
                 git = Git(baseDirectory, credentials: credentials)

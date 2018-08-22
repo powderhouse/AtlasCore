@@ -21,8 +21,7 @@ class AtlasCoreSpec: QuickSpec {
             var directory: URL!
 
             let username = "atlastest"
-            let credentials = Credentials(
-                username            )
+            var credentials: Credentials!
             
             let fileManager = FileManager.default
             var isFile : ObjCBool = false
@@ -33,6 +32,11 @@ class AtlasCoreSpec: QuickSpec {
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
                 Helper.createBaseDirectory(directory)
+                
+                credentials = Credentials(
+                    username,
+                    directory: directory
+                )
                 
                 let filePath = directory.path
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
@@ -170,13 +174,15 @@ class AtlasCoreSpec: QuickSpec {
 
                     context("initialized again") {
                         var result: Result!
-                        let newCredentials = Credentials(
-                            "atlastest",
-                            password: "1a2b3c4d",
-                            token: nil
-                        )
+                        var newCredentials: Credentials!
 
                         beforeEach {
+                            newCredentials = Credentials(
+                                "atlastest",
+                                password: "1a2b3c4d",
+                                token: nil,
+                                directory: directory
+                            )
                             result = atlasCore.initGitAndGitHub(newCredentials)
                         }
 
@@ -191,16 +197,20 @@ class AtlasCoreSpec: QuickSpec {
 
                     context("initialized again after local directory deleted") {
                         var result: Result!
-                        let newCredentials = Credentials(
-                            "atlastest",
-                            password: "1a2b3c4d",
-                            token: nil
-                        )
+                        var newCredentials: Credentials!
 
                         beforeEach {
                             let userDirectory = directory.appendingPathComponent(credentials.username)
                             let appDirectory = userDirectory.appendingPathComponent(AtlasCore.appName)
                             Helper.deleteBaseDirectory(appDirectory)
+                            
+                            newCredentials = Credentials(
+                                    "atlastest",
+                                    password: "1a2b3c4d",
+                                    token: nil,
+                                    directory: userDirectory
+                            )
+                            
                             result = atlasCore.initGitAndGitHub(newCredentials)
                         }
 
