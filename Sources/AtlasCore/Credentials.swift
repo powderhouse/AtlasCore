@@ -18,7 +18,7 @@ public class Credentials {
     public var s3AccessKey: String?
     public var s3SecretAccessKey: String?
     
-    public var directory: URL
+    public var directory: URL?
 
     public init(_ username: String,
         password: String?=nil,
@@ -26,7 +26,7 @@ public class Credentials {
         remotePath: String?=nil,
         s3AccessKey: String?=nil,
         s3SecretAccessKey: String?=nil,
-        directory: URL
+        directory: URL?=nil
     ) {
         self.username = username
         self.password = password
@@ -96,24 +96,32 @@ public class Credentials {
             )
             
             do {
-                let filename = directory.appendingPathComponent(Credentials.filename)
-                
-                let fileManager = FileManager.default
-                if fileManager.fileExists(atPath: filename.path) {
-                    do {
-                        try fileManager.removeItem(at: filename)
-                    } catch {
-                        printCredentials("Failed to delete credentials.json: \(error)")
+                if let directory = directory {
+                    let filename = directory.appendingPathComponent(Credentials.filename)
+                    
+                    let fileManager = FileManager.default
+                    if fileManager.fileExists(atPath: filename.path) {
+                        do {
+                            try fileManager.removeItem(at: filename)
+                        } catch {
+                            printCredentials("Failed to delete credentials.json: \(error)")
+                        }
                     }
+                    
+                    try jsonCredentials.write(to: filename)
+                } else {
+                    printCredentials("Failed to save credentials.json: No user directory provided")
                 }
-                
-                try jsonCredentials.write(to: filename)
             } catch {
                 printCredentials("Failed to save credentials.json: \(error)")
             }
         } catch {
             printCredentials("Failed to convert credentials to json")
         }
+    }
+    
+    public func setDirectory(_ directory: URL) {
+        self.directory = directory
     }
     
     public func setAuthenticationToken(_ token: String?) {
