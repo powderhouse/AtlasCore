@@ -16,7 +16,7 @@ public class GitAnnex {
     
     public var s3Bucket: String {
         get {
-            return "atlas-\(credentials.username)"
+            return "\(GitAnnex.groupName)-\(credentials.username)"
         }
     }
     public var s3Path: String {
@@ -200,7 +200,7 @@ public class GitAnnex {
             GitAnnex.remoteName,
             "type=S3",
             "encryption=none",
-            "bucket=\(GitAnnex.groupName)-\(credentials.username)",
+            "bucket=\(s3Bucket)",
             "exporttree=yes",
             "public=yes",
             "publicurl=\(s3Path)"
