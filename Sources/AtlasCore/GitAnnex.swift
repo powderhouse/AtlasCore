@@ -24,7 +24,7 @@ public class GitAnnex {
             return "https://s3.amazonaws.com/\(s3Bucket)"
         }
     }
-
+    
     public init(_ directory: URL, credentials: Credentials) {
         self.directory = directory
         self.credentials = credentials
@@ -41,18 +41,18 @@ public class GitAnnex {
             result.mergeIn(installResult)
         }
         
-        let x = status()
-        
-        let directoryResult = initDirectory()
-        result.mergeIn(directoryResult)
-        
-        if credentials.s3AccessKey != "test" {
-            let awsResult = initializeAWS()
-            result.mergeIn(awsResult)
+        if !info().contains(GitAnnex.remoteName) {
+            let directoryResult = initDirectory()
+            result.mergeIn(directoryResult)
+            
+            if credentials.s3AccessKey != "test" {
+                let awsResult = initializeAWS()
+                result.mergeIn(awsResult)
+            }
+            
+            let s3Result = initializeS3()
+            result.mergeIn(s3Result)
         }
-        
-        let s3Result = initializeS3()
-        result.mergeIn(s3Result)
         
         return result
     }
@@ -117,9 +117,9 @@ public class GitAnnex {
             ],
             environment_variables: awsCredentials
         )
-
+        
         result.messages.append(credentialsOutput)
-
+        
         if let credentialsData = credentialsOutput.data(using: .utf8) {
             do {
                 if let credentialsDict = try JSONSerialization.jsonObject(with: credentialsData, options: []) as? [String: [String: String]] {
@@ -135,20 +135,50 @@ public class GitAnnex {
             }
         }
         
+        let iamUserCredentials = [
+            "AWS_ACCESS_KEY_ID": credentials.s3AccessKey!,
+            "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
+        ]
         
         let groupOutput = Glue.runProcessError(
             "aws",
             arguments: [
                 "iam",
                 "add-user-to-group",
-                "--group-name",
-                GitAnnex.groupName,
-                "--user-name",
-                credentials.username
-            ]
+                "--group-name", GitAnnex.groupName,
+                "--user-name", credentials.username
+            ],
+            environment_variables: awsCredentials
         )
         result.messages.append(groupOutput)
-
+        
+        var awsReady = false
+        repeat {
+            sleep(1)
+            let keysOutput = Glue.runProcessError(
+                "aws",
+                arguments: [
+                    "iam",
+                    "list-access-keys"
+                ],
+                environment_variables: iamUserCredentials
+            )
+            let groupsOutput = Glue.runProcessError(
+                "aws",
+                arguments: [
+                    "iam",
+                    "list-groups-for-user",
+                    "--user-name", credentials.username
+                ],
+                environment_variables: awsCredentials
+            )
+            
+            awsReady = (
+                !keysOutput.contains("InvalidClientTokenId") &&
+                    groupsOutput.contains(GitAnnex.groupName)
+            )
+        } while !awsReady
+        
         return result
     }
     
@@ -170,7 +200,7 @@ public class GitAnnex {
             GitAnnex.remoteName,
             "type=S3",
             "encryption=none",
-            "bucket=atlas-\(credentials.username)",
+            "bucket=\(GitAnnex.groupName)-\(credentials.username)",
             "exporttree=yes",
             "public=yes",
             "publicurl=\(s3Path)"
@@ -181,12 +211,12 @@ public class GitAnnex {
                 "--set",
                 "annex.security.allowed-http-addresses",
                 "all"
-            ])
+                ])
             result.messages.append(httpOutput)
             initArguments.append("host=localhost")
             initArguments.append("port=4572")
             initArguments.append("requeststyle=path")
-//            initArguments.append("--debug")
+            //            initArguments.append("--debug")
         }
         
         let successText = "recording state"
@@ -209,7 +239,7 @@ public class GitAnnex {
             result.success = false
             result.messages += ["Git Annex is unable to track master.", exportOutput]
         }
-
+        
         return result
     }
     
@@ -227,9 +257,9 @@ public class GitAnnex {
         credentialed_environment_variables["AWS_SECRET_ACCESS_KEY"] = credentials.s3SecretAccessKey ?? ""
         
         return Glue.runProcessError("git-annex",
-                               arguments: fullArguments,
-                               environment_variables: credentialed_environment_variables,
-                               currentDirectory: directory
+                                    arguments: fullArguments,
+                                    environment_variables: credentialed_environment_variables,
+                                    currentDirectory: directory
         )
     }
     
@@ -243,7 +273,7 @@ public class GitAnnex {
         result.messages.append(output)
         return result
     }
-
+    
     public func add(_ filter: String=".") -> Result {
         var result = Result()
         let output = run("add", arguments: [filter])
@@ -258,7 +288,7 @@ public class GitAnnex {
     public func info() -> String {
         return run("info")
     }
-
+    
     public func deleteFile(_ filePath: String) -> Result {
         let output = run("drop", arguments: ["--force", filePath])
         if output.contains("failed") {
@@ -269,11 +299,7 @@ public class GitAnnex {
         }
         return Result()
     }
-
-    public func status() -> String {
-        return run("status", arguments: ["--short"])
-    }
-
+    
     public func sync() {
         DispatchQueue.global(qos: .background).async {
             _ = self.run("sync")
