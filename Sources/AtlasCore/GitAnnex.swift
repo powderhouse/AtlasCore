@@ -10,6 +10,7 @@ import Foundation
 public class GitAnnex {
     
     public static let remoteName = "atlasS3"
+    public static let groupName = "powderhouse-atlas"
     public let directory: URL!
     var credentials: Credentials!
     
@@ -39,6 +40,8 @@ public class GitAnnex {
             }
             result.mergeIn(installResult)
         }
+        
+        let x = status()
         
         let directoryResult = initDirectory()
         result.mergeIn(directoryResult)
@@ -114,7 +117,9 @@ public class GitAnnex {
             ],
             environment_variables: awsCredentials
         )
-        
+
+        result.messages.append(credentialsOutput)
+
         if let credentialsData = credentialsOutput.data(using: .utf8) {
             do {
                 if let credentialsDict = try JSONSerialization.jsonObject(with: credentialsData, options: []) as? [String: [String: String]] {
@@ -130,7 +135,19 @@ public class GitAnnex {
             }
         }
         
-        result.messages.append(credentialsOutput)
+        
+        let groupOutput = Glue.runProcessError(
+            "aws",
+            arguments: [
+                "iam",
+                "add-user-to-group",
+                "--group-name",
+                GitAnnex.groupName,
+                "--user-name",
+                credentials.username
+            ]
+        )
+        result.messages.append(groupOutput)
 
         return result
     }
