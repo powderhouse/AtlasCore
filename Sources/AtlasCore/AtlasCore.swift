@@ -108,14 +108,16 @@ public class AtlasCore {
     
     public func initGitAndGitHub(_ credentials: Credentials) -> Result {
         var result = Result()
-        
+
+        credentials.setDirectory(baseDirectory)
+
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)
         }
 
         let userDirectoryResult = setUserDirectory(credentials)
         result.mergeIn(userDirectoryResult)
-
+        
         if credentials.token == nil && credentials.remotePath == nil {
             if credentials.password != nil {
                 if let token = GitHub.getAuthenticationToken(credentials) {

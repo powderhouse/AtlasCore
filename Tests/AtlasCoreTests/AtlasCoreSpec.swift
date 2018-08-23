@@ -161,7 +161,8 @@ class AtlasCoreSpec: QuickSpec {
                     }
 
                     it("initializes GitHub") {
-                        expect(atlasCore2.gitHubRepository()).to(contain(AtlasCore.originName))
+                        let repository = atlasCore2.gitHubRepository()
+                        expect(repository).to(contain(AtlasCore.originName))
                     }
 
                     it("automatically inits search") {
