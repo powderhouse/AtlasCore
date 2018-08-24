@@ -13,12 +13,36 @@ public struct Commit {
 }
 
 public struct Result {
-    public var success: Bool = true
-    public var messages: [String] = []
+    public var success: Bool!
+    public var log: ((_ message: String) -> Void)?
+    var silenceLog: Bool = false
+    
+    public var messages: [String]! {
+        didSet(modified) {
+            guard !silenceLog else {
+                return
+            }
+            
+            if let log = log {
+                for message in messages {
+                    if !modified.contains(message) {
+                        log(message)
+                    }
+                }
+            }
+        }
+    }
+    
     public var allMessages: String {
         get {
             return messages.joined(separator: "\n")
         }
+    }
+    
+    init(success: Bool=true, messages:[String]=[], log: ((_ message: String) -> Void)?=nil) {
+        self.success = success
+        self.messages = messages
+        self.log = log
     }
     
     mutating func mergeIn(_ result: Result) {
@@ -26,14 +50,19 @@ public struct Result {
             success = false
         }
         
-        messages.append(contentsOf: result.messages)
+        if result.log != nil {
+            silenceLog = true
+        }
+        
+        messages.append(contentsOf: result.messages)        
+        silenceLog = false
     }
 }
 
 
 public class AtlasCore {
     
-    public static let version = "1.5.7"
+    public static let version = "1.5.8"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -46,16 +75,18 @@ public class AtlasCore {
     public var gitHub: GitHub!
     public var search: Search!
     
+    public let log: ((_ message: String) -> Void)?
     
-    public init(_ baseDirectory: URL?=nil) {
+    public init(_ baseDirectory: URL?=nil, log: ((_ message: String) -> Void)?=nil) {
         self.baseDirectory = baseDirectory
+        self.log = log
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
         }
     }
     
     public func initialize() -> Result {
-        var result = Result()
+        var result = Result(log: log)
         
         let directoryResult = FileSystem.createDirectory(self.baseDirectory)
         result.mergeIn(directoryResult)
@@ -78,7 +109,7 @@ public class AtlasCore {
     }
     
     public func setUserDirectory(_ credentials: Credentials?=nil) -> Result {
-        var result = Result()
+        var result = Result(log: log)
         var activeCredentials = credentials
         if activeCredentials == nil {
             activeCredentials = getCredentials()
@@ -107,7 +138,7 @@ public class AtlasCore {
     }
     
     public func initGitAndGitHub(_ credentials: Credentials) -> Result {
-        var result = Result()
+        var result = Result(log: log)
 
         credentials.setDirectory(baseDirectory)
 
@@ -198,7 +229,7 @@ public class AtlasCore {
     }
     
     public func initSearch() -> Result {
-        var result = Result()
+        var result = Result(log: log)
         guard search == nil else { return result }
         
         guard userDirectory != nil else {
