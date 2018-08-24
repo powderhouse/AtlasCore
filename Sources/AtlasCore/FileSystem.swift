@@ -53,7 +53,7 @@ public class FileSystem {
             try fileManager.removeItem(at: url)
         } catch {
             result.success = false
-            result.messages.append("Unable to delete directrory: \(url) - \(error)")
+            result.add("Unable to delete directrory: \(url) - \(error)")
         }
         return result
     }
@@ -92,17 +92,17 @@ public class FileSystem {
             if let fileName = filePath.split(separator: "/").last {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
                     result.success = false
-                    result.messages += ["Unable to copy \(filePath) to \(directory.path)", output]
+                    result.add(["Unable to copy \(filePath) to \(directory.path)", output])
                     return result
                 }
                 if !FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
                     result.success = false
-                    result.messages += ["\(filePath) no longer exists at \(directory.path)", output]
+                    result.add(["\(filePath) no longer exists at \(directory.path)", output])
                     return result
                 }
             } else {
                 result.success = false
-                result.messages.append("Unable to process filename from \(filePath)")
+                result.add("Unable to process filename from \(filePath)")
                 return result
             }
         }
@@ -125,18 +125,18 @@ public class FileSystem {
 
                 if !FileSystem.fileExists(destination) {
                     result.success = false
-                    result.messages += ["Unable to move \(filePath)", output]
+                    result.add(["Unable to move \(filePath)", output])
                     return result
                 }
                 
                 if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
                     result.success = false
-                    result.messages += ["\(filePath) still exists (was not moved).", output]
+                    result.add(["\(filePath) still exists (was not moved).", output])
                     return result
                 }
             } else {
                 result.success = false
-                result.messages.append("Unable to process filename from \(filePath)")
+                result.add("Unable to process filename from \(filePath)")
                 return result
             }
         }

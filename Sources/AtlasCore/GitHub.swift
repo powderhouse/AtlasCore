@@ -66,7 +66,7 @@ public class GitHub {
         
         guard credentials.token != nil else {
             result.success = false
-            result.messages.append("No token found in credentials when creating GitHub repository.")
+            result.add("No token found in credentials when creating GitHub repository.")
             return result
         }
         
@@ -93,7 +93,7 @@ public class GitHub {
         
         guard repoPath != nil else {
             result.success = false
-            result.messages.append("Repo creation for GitHub failed.")
+            result.add("Repo creation for GitHub failed.")
             return result
         }
         
@@ -109,7 +109,7 @@ public class GitHub {
             return setRepositoryLink()
         } else {
             result.success = false
-            result.messages.append("Valid repository not created successfully.")
+            result.add("Valid repository not created successfully.")
         }
         return result
     }
@@ -119,7 +119,7 @@ public class GitHub {
         
         guard credentials.remotePath != nil else {
             result.success = false
-            result.messages.append("Remote path for local GitHub repository not found.")
+            result.add("Remote path for local GitHub repository not found.")
             return result
         }
         
@@ -139,7 +139,7 @@ public class GitHub {
             return setRepositoryLink()
         } else {
             result.success = false
-            result.messages.append("Valid local repository not created successfully.")
+            result.add("Valid local repository not created successfully.")
         }
         return result
     }
@@ -227,7 +227,7 @@ echo "</ENDENTRY>"
 """
         let atlasScriptResult = write(script, to: atlasScriptURL)
         guard atlasScriptResult.success else {
-            result.messages.append("Unable to write atlas script.")
+            result.add("Unable to write atlas script.")
             result.mergeIn(atlasScriptResult)
             return result
         }
@@ -241,7 +241,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 """
         let postCommitResult = write(hook, to: postCommitURL)
         if !postCommitResult.success {
-            result.messages.append("Unable to write post commit hook")
+            result.add("Unable to write post commit hook")
         }
         result.mergeIn(postCommitResult)
         return result
@@ -253,7 +253,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
             try script.write(to: url, atomically: true, encoding: .utf8)
         } catch {
             result.success = false
-            result.messages.append("Unable to write script to \(url): \(error)")
+            result.add("Unable to write script to \(url): \(error)")
             return result
         }
         

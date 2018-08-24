@@ -93,7 +93,7 @@ public class Git {
         let output = run("init")
         if !(output.contains("Initialized empty Git repository") || output.contains("Reinitialized existing Git repository")) {
             result.success = false
-            result.messages.append("Failed to initialize Git.")
+            result.add("Failed to initialize Git.")
         }
         return result
     }
@@ -110,7 +110,7 @@ public class Git {
         var result = Result()
         guard credentials != nil else {
             result.success = false
-            result.messages.append("Unable to clone. No Credentials found.")
+            result.add("Unable to clone. No Credentials found.")
             return result
         }
         
@@ -123,7 +123,7 @@ public class Git {
         
         if output.contains("fatal") || !FileSystem.fileExists(directory, isDirectory: true) {
             result.success = false
-            result.messages += ["Unable to clone Atlas.", output]
+            result.add(["Unable to clone Atlas.", output])
         }
         return result
     }
@@ -164,7 +164,7 @@ public class Git {
             try Git.gitIgnore.joined(separator: "\n").write(to: filename, atomically: true, encoding: .utf8)
         } catch {
             result.success = false
-            result.messages.append("Failed to save .gitignore: \(error)")
+            result.add("Failed to save .gitignore: \(error)")
         }
         return result
     }
@@ -207,23 +207,23 @@ public class Git {
                 if let currentStatus = status() {
                     if !currentStatus.contains(relativeComponents.joined(separator: "/")) {
                         result.success = false
-                        result.messages += ["Git was unable to move files.", output]
+                        result.add(["Git was unable to move files.", output])
                         return result
                     }
                 } else {
                     result.success = false
-                    result.messages += ["No status available in Git move", output]
+                    result.add(["No status available in Git move", output])
                     return result
                 }
                 
                 if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
                     result.success = false
-                    result.messages += ["File still exists in original location after git move", output]
+                    result.add(["File still exists in original location after git move", output])
                     return result
                 }
             } else {
                 result.success = false
-                result.messages += ["Unable to process filename in Git move."]
+                result.add(["Unable to process filename in Git move."])
                 return result
             }
         }
@@ -237,7 +237,7 @@ public class Git {
         
         if history.count == 0 || history.contains("unknown revision or path") {
             result.success = false
-            result.messages += ["\(filePath) does not exist in log.", history]
+            result.add(["\(filePath) does not exist in log.", history])
             return result
         }
         
@@ -269,9 +269,9 @@ public class Git {
         if !output.contains("changed") &&
            !output.contains("nothing to commit, working tree clean") {
             result.success = false
-            result.messages.append("Unable to commit")
+            result.add("Unable to commit")
         }
-        result.messages.append(output)
+        result.add(output)
         return result
     }
     

@@ -13,11 +13,11 @@ public struct Commit {
 }
 
 public struct Result {
-    public var success: Bool!
-    public var log: ((_ message: String) -> Void)?
+    public var success: Bool! = true
+    public var log: ((_ message: String) -> Void)? = nil
     var silenceLog: Bool = false
     
-    public var messages: [String]! {
+    public var messages: [String]! = [] {
         didSet(modified) {
             guard !silenceLog else {
                 return
@@ -56,6 +56,16 @@ public struct Result {
         
         messages.append(contentsOf: result.messages)        
         silenceLog = false
+    }
+    
+    mutating func add(_ message: String) {
+        add([message])
+    }
+    
+    mutating func add(_ messages: [String]) {
+        for message in messages {
+            self.messages.append(message)
+        }
     }
 }
 
@@ -117,7 +127,7 @@ public class AtlasCore {
         
         guard activeCredentials != nil else {
             result.success = false
-            result.messages.append("No credentials found or provided.")
+            result.add("No credentials found or provided.")
             return result
         }
         
@@ -165,7 +175,7 @@ public class AtlasCore {
         
         guard credentials.token != nil || credentials.remotePath != nil else {
             result.success = false
-            result.messages.append("No valid token or remote path found.")
+            result.add("No valid token or remote path found.")
             return result
         }
 
@@ -190,7 +200,7 @@ public class AtlasCore {
                     result.mergeIn(gitHub.createRepository())
                     result.mergeIn(gitHub.setRepositoryLink())
                     if !result.success {
-                        result.messages.append("Failed to set repository link.")
+                        result.add("Failed to set repository link.")
                         return result
                     }
 
@@ -199,12 +209,12 @@ public class AtlasCore {
                 return result
             } else {
                 result.success = false
-                result.messages.append("Failed to create post commit hooks")
+                result.add("Failed to create post commit hooks")
                 return result
             }
         }
         result.success = false
-        result.messages.append("Failed to create Git repository.")
+        result.add("Failed to create Git repository.")
         return result
     }
     
@@ -234,7 +244,7 @@ public class AtlasCore {
         
         guard userDirectory != nil else {
             result.success = false
-            result.messages.append("User directory not found for search")
+            result.add("User directory not found for search")
             return result
         }
         
@@ -242,7 +252,7 @@ public class AtlasCore {
         
         guard search != nil else {
             result.success = false
-            result.messages.append("Search is still nil after initialization")
+            result.add("Search is still nil after initialization")
             return result
         }
         
@@ -250,7 +260,7 @@ public class AtlasCore {
             for file in project.allFileUrls() {
                 if !search.add(file) {
                     result.success = false
-                    result.messages.append("Unable to add \(file) to search")
+                    result.add("Unable to add \(file) to search")
                     return result
                 }
             }
@@ -356,7 +366,7 @@ public class AtlasCore {
         
         guard git?.directory != nil else {
             result.success = false
-            result.messages.append("No git directory found for purge")
+            result.add("No git directory found for purge")
             return result
         }
         
@@ -402,11 +412,11 @@ public class AtlasCore {
                 result.mergeIn(git.commit(commitMessage))
             } else {
                 result.success = false
-                result.messages.append("No status provided by git for committing.")
+                result.add("No status provided by git for committing.")
             }
         } else {
             result.success = false
-            result.messages.append("Git not found for committing.")
+            result.add("Git not found for committing.")
         }
         
         return result

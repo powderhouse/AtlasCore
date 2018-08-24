@@ -147,7 +147,7 @@ public class Project {
         
         guard commitMessage != nil else {
             result.success = false
-            result.messages.append("Unable to commit. No commit message provided.")
+            result.add("Unable to commit. No commit message provided.")
             return result
         }
         
@@ -191,7 +191,7 @@ public class Project {
             if let status = git.status() {
                 if status.contains("fatal") {
                     result.success = false
-                    result.messages.append("Unable to commit staged files: \(status)")
+                    result.add("Unable to commit staged files: \(status)")
                     return result
                 }
                 
@@ -259,7 +259,7 @@ public class Project {
         if !git.move(filePaths, into: directory(state)).success {
             let fileSystemMove = FileSystem.move(filePaths, into: directory(state))
             if !fileSystemMove.success {
-                result.messages.append("Unable to change state of files.")
+                result.add("Unable to change state of files.")
                 result.mergeIn(fileSystemMove)
                 return result
             }

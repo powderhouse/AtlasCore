@@ -106,7 +106,7 @@ public class GitAnnex {
             ],
             environment_variables: awsCredentials
         )
-        result.messages.append(userOutput)
+        result.add(userOutput)
         
         let credentialsOutput = Glue.runProcessError(
             "aws",
@@ -118,7 +118,7 @@ public class GitAnnex {
             environment_variables: awsCredentials
         )
         
-        result.messages.append(credentialsOutput)
+        result.add(credentialsOutput)
         
         if let credentialsData = credentialsOutput.data(using: .utf8) {
             do {
@@ -131,7 +131,7 @@ public class GitAnnex {
                 }
             } catch {
                 result.success = false
-                result.messages.append("Failed to capture AWS credentials: \(error)")
+                result.add("Failed to capture AWS credentials: \(error)")
             }
         }
         
@@ -150,7 +150,7 @@ public class GitAnnex {
             ],
             environment_variables: awsCredentials
         )
-        result.messages.append(groupOutput)
+        result.add(groupOutput)
         
         var awsReady = false
         repeat {
@@ -190,7 +190,7 @@ public class GitAnnex {
             let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
             if !output.contains("recording state") {
                 result.success = false
-                result.messages += ["Unable to enable Git Annex remote.", output]
+                result.add(["Unable to enable Git Annex remote.", output])
             }
             sync()
             return result
@@ -212,7 +212,7 @@ public class GitAnnex {
                 "annex.security.allowed-http-addresses",
                 "all"
                 ])
-            result.messages.append(httpOutput)
+            result.add(httpOutput)
             initArguments.append("host=localhost")
             initArguments.append("port=4572")
             initArguments.append("requeststyle=path")
@@ -223,21 +223,21 @@ public class GitAnnex {
         let initOutput = run("initremote", arguments: initArguments)
         if !initOutput.contains(successText) {
             result.success = false
-            result.messages += ["Unable to initialize Git Annex remote.", initOutput]
+            result.add(["Unable to initialize Git Annex remote.", initOutput])
             return result
         }
         
         let enableOutput = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
         if !enableOutput.contains(successText) {
             result.success = false
-            result.messages += ["Unable to enable Git Annex remote.", enableOutput]
+            result.add(["Unable to enable Git Annex remote.", enableOutput])
             return result
         }
         
         let exportOutput = run("export", arguments: ["--tracking", "master", "--to", GitAnnex.remoteName])
         if !exportOutput.contains(successText) {
             result.success = false
-            result.messages += ["Git Annex is unable to track master.", exportOutput]
+            result.add(["Git Annex is unable to track master.", exportOutput])
         }
         
         return result
@@ -268,9 +268,9 @@ public class GitAnnex {
         let output = run("init")
         if !output.contains("recording state") {
             result.success = false
-            result.messages.append("Failed to initialize Git Annex")
+            result.add("Failed to initialize Git Annex")
         }
-        result.messages.append(output)
+        result.add(output)
         return result
     }
     
@@ -279,9 +279,9 @@ public class GitAnnex {
         let output = run("add", arguments: [filter])
         if !output.contains("ok") {
             result.success = false
-            result.messages.append("Failed to add files")
+            result.add("Failed to add files")
         }
-        result.messages.append(output)
+        result.add(output)
         return result
     }
     
