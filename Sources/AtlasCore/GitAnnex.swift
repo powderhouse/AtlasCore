@@ -30,10 +30,13 @@ public class GitAnnex {
         self.credentials = credentials
     }
     
-    public func initialize() -> Result {
-        var result = Result()
-        
+    public func initialize(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
+
+        result.add("Checking Git Annex installation.")
+
         if !installed() {
+            result.add("Installing Git Annex")
             let installResult = install()
             if !installResult.success {
                 return installResult
@@ -46,10 +49,11 @@ public class GitAnnex {
             result.mergeIn(directoryResult)
             
             if credentials.s3AccessKey != "test" {
-                let awsResult = initializeAWS()
+                let awsResult = initializeAWS(result)
                 result.mergeIn(awsResult)
             }
             
+            result.add("Initializing S3")
             let s3Result = initializeS3()
             result.mergeIn(s3Result)
         }
@@ -81,21 +85,21 @@ public class GitAnnex {
         return Result()
     }
     
-    public func initializeAWS() -> Result {
-        guard credentials.complete() else {
-            return Result(
-                success: false,
-                messages: ["Improper credentials for initializing AWS"]
-            )
-        }
+    public func initializeAWS(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
         
-        var result = Result()
+        guard credentials.complete() else {
+            result.success = false
+            result.add("Improper credentials for initializing AWS")
+            return result
+        }
         
         let awsCredentials = [
             "AWS_ACCESS_KEY_ID": credentials.s3AccessKey!,
             "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
         ]
         
+        result.add("Create AWS IAM user.")
         let userOutput = Glue.runProcessError(
             "aws",
             arguments: [
@@ -108,6 +112,7 @@ public class GitAnnex {
         )
         result.add(userOutput)
         
+        result.add("Create AWS Iam user access key.")
         let credentialsOutput = Glue.runProcessError(
             "aws",
             arguments: [
@@ -140,6 +145,7 @@ public class GitAnnex {
             "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
         ]
         
+        result.add("Adding AWS IAM user to group.")
         let groupOutput = Glue.runProcessError(
             "aws",
             arguments: [
@@ -152,6 +158,7 @@ public class GitAnnex {
         )
         result.add(groupOutput)
         
+        result.add("Verifying AWS")
         var awsReady = false
         repeat {
             sleep(1)

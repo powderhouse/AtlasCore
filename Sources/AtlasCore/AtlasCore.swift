@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.5.8"
+    public static let version = "1.5.9"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -152,15 +152,20 @@ public class AtlasCore {
 
         credentials.setDirectory(baseDirectory)
 
+        result.add("Syncing credentials.")
+        
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)
         }
+
+        result.add("Establishing user directory.")
 
         let userDirectoryResult = setUserDirectory(credentials)
         result.mergeIn(userDirectoryResult)
         
         if credentials.token == nil && credentials.remotePath == nil {
             if credentials.password != nil {
+                result.add("Retrieving GitHub token.")
                 if let token = GitHub.getAuthenticationToken(credentials) {
                     credentials.setAuthenticationToken(token)
                 }
@@ -184,13 +189,15 @@ public class AtlasCore {
         if git == nil {
             git = Git(self.userDirectory!, credentials: credentials)
         }
-        if let gitResult = git?.initialize() {
+
+        if let gitResult = git?.initialize(result) {
             result.mergeIn(gitResult)
         }
         
         appDirectory = git?.directory
         
         if initGitRepository(credentials) {
+            result.add("Initializing GitHub")
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
             result.mergeIn(gitHub.setPostCommitHook())
             if result.success {

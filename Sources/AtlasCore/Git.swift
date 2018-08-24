@@ -39,19 +39,25 @@ public class Git {
         self.atlasProcessFactory = processFactory
     }
     
-    public func initialize() -> Result {
-        var result = Result()
+    public func initialize(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
+        result.add("Initializing Git")
         
         if !clone().success {
+            result.add("Creating Git repository.")
+
             let gitDirectoryResult = FileSystem.createDirectory(self.directory)
             result.mergeIn(gitDirectoryResult)
             
+            result.add("Initializing Git repository")
             let gitInitResult = runInit()
             result.mergeIn(gitInitResult)
             
+            result.add("Writing .gitignore")
             let gitIgnoreResult = writeGitIgnore()
             result.mergeIn(gitIgnoreResult)
             
+            result.add("Committing .gitignore")
             let addResult = add()
             result.mergeIn(addResult)
             
@@ -62,7 +68,7 @@ public class Git {
         if gitAnnex == nil && credentials.complete() {
             gitAnnex = GitAnnex(directory, credentials: credentials)
             
-            if let gitAnnexResult = gitAnnex?.initialize() {
+            if let gitAnnexResult = gitAnnex?.initialize(result) {
                 result.mergeIn(gitAnnexResult)
             }
         }
