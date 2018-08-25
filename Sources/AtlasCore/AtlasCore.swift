@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.5.9"
+    public static let version = "1.6.0"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -85,18 +85,18 @@ public class AtlasCore {
     public var gitHub: GitHub!
     public var search: Search!
     
-    public let log: ((_ message: String) -> Void)?
+    let externalLog: ((_ message: String) -> Void)?
     
-    public init(_ baseDirectory: URL?=nil, log: ((_ message: String) -> Void)?=nil) {
+    public init(_ baseDirectory: URL?=nil, externalLog: ((_ message: String) -> Void)?=nil) {
         self.baseDirectory = baseDirectory
-        self.log = log
+        self.externalLog = externalLog
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
         }
     }
     
     public func initialize() -> Result {
-        var result = Result(log: log)
+        var result = Result(log: externalLog)
         
         let directoryResult = FileSystem.createDirectory(self.baseDirectory)
         result.mergeIn(directoryResult)
@@ -119,7 +119,7 @@ public class AtlasCore {
     }
     
     public func setUserDirectory(_ credentials: Credentials?=nil) -> Result {
-        var result = Result(log: log)
+        var result = Result(log: externalLog)
         var activeCredentials = credentials
         if activeCredentials == nil {
             activeCredentials = getCredentials()
@@ -148,7 +148,7 @@ public class AtlasCore {
     }
     
     public func initGitAndGitHub(_ credentials: Credentials) -> Result {
-        var result = Result(log: log)
+        var result = Result(log: externalLog)
 
         credentials.setDirectory(baseDirectory)
 
@@ -199,7 +199,8 @@ public class AtlasCore {
         if initGitRepository(credentials) {
             result.add("Initializing GitHub")
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
-            result.mergeIn(gitHub.setPostCommitHook())
+
+            result.mergeIn(gitHub.setPostCommitHook(result))
             if result.success {
                 result.mergeIn(gitHub.setRepositoryLink())
                 if !result.success {
@@ -246,7 +247,7 @@ public class AtlasCore {
     }
     
     public func initSearch() -> Result {
-        var result = Result(log: log)
+        var result = Result()
         guard search == nil else { return result }
         
         guard userDirectory != nil else {
@@ -404,7 +405,9 @@ public class AtlasCore {
     }
         
     public func commitChanges(_ commitMessage: String?=nil) -> Result {
-        var result = Result()
+        var result = Result(log: externalLog)
+        
+        result.add("Checking git status")
         let maxTries = 5
         var tries = 0
         if let git = git {
@@ -415,6 +418,7 @@ public class AtlasCore {
                     tries += 1
                 }
                 
+                result.add("Committing files")
                 result.mergeIn(git.add())
                 result.mergeIn(git.commit(commitMessage))
             } else {

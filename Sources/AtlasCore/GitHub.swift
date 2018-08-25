@@ -53,16 +53,16 @@ public class GitHub {
         return GitHub.api(arguments)
     }
 
-    public func createRepository() -> Result {
+    public func createRepository(_ existingResult: Result?=nil) -> Result {
         if credentials.token != nil {
-            return createGitHubRepository()
+            return createGitHubRepository(existingResult)
         } else {
-            return createLocalRepository()
+            return createLocalRepository(existingResult)
         }
     }
     
-    public func createGitHubRepository() -> Result {
-        var result = Result()
+    public func createGitHubRepository(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
         
         guard credentials.token != nil else {
             result.success = false
@@ -75,6 +75,8 @@ public class GitHub {
             "https://api.github.com/repos/\(credentials.username)/\(repositoryName)"
         ]
         
+        result.add("Checking existing GitHub repository")
+        
         var repoResult = api(repoArguments)
         
         var repoPath = repoResult?[0]["clone_url"] as? String
@@ -85,6 +87,8 @@ public class GitHub {
                 "https://api.github.com/user/repos",
                 "-d", "{\"name\":\"\(repositoryName)\"}"
             ]
+            
+            result.add("Creating GitHub repository")
             
             repoResult = api(createRepoArguments)
 
@@ -97,25 +101,33 @@ public class GitHub {
             return result
         }
         
+        result.add("GitHub repository: \(repoPath!)")
+        
         let authenticatedPath = repoPath!.replacingOccurrences(
             of: "https://",
             with: "https://\(credentials.username):\(credentials.token!)@"
         )
         
-        _ = git.run("remote", arguments: ["rm", "origin"])
-        _ = git.run("remote", arguments: ["add", "origin", authenticatedPath])
+        result.add("Setting git origin remote to GitHub")
+        
+        let rmOriginOutput = git.run("remote", arguments: ["rm", "origin"])
+        let addOriginOutput = git.run("remote", arguments: ["add", "origin", authenticatedPath])
 
         if validRepository() {
             return setRepositoryLink()
         } else {
             result.success = false
-            result.add("Valid repository not created successfully.")
+            result.add([
+                "Valid repository not created successfully.",
+                rmOriginOutput,
+                addOriginOutput
+            ])
         }
         return result
     }
     
-    public func createLocalRepository() -> Result {
-        var result = Result()
+    public func createLocalRepository(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
         
         guard credentials.remotePath != nil else {
             result.success = false
@@ -195,8 +207,10 @@ public class GitHub {
         return gitURL.appendingPathComponent("hooks")
     }
     
-    public func setPostCommitHook() -> Result {
-        var result = Result()
+    public func setPostCommitHook(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
+        
+        result.add("Writing post-commit hook")
         
         let hooksURL = hooks()
         let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)

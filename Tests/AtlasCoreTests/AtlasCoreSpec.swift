@@ -28,7 +28,7 @@ class AtlasCoreSpec: QuickSpec {
             var isDirectory : ObjCBool = true
             
             var logEntries = 0
-            var providedLogMessages: [String] = []
+            var externalLogMessages: [String] = []
             
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
@@ -43,16 +43,16 @@ class AtlasCoreSpec: QuickSpec {
                 let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                 expect(exists).to(beTrue(), description: "No folder found")
 
-                let providedLog: (_ message: String) -> Void = { (message) in
-                    providedLogMessages.append(message)
+                let externalLog: (_ message: String) -> Void = { (message) in
+                    externalLogMessages.append(message)
                 }
                 
-                atlasCore = AtlasCore(directory, log: providedLog)
+                atlasCore = AtlasCore(directory, externalLog: externalLog)
             }
             
             afterEach {
                 logEntries = 0
-                providedLogMessages = []
+                externalLogMessages = []
                 atlasCore.closeSearch()
                 while FileSystem.fileExists(directory, isDirectory: true) {
                     Helper.deleteBaseDirectory(directory)
@@ -81,7 +81,7 @@ class AtlasCoreSpec: QuickSpec {
                 }
                 
                 it("logs progress to the provided log") {
-                    expect(providedLogMessages.count).to(beGreaterThan(0))
+                    expect(externalLogMessages.count).to(beGreaterThan(0))
                 }
 
                 it("saves the credentials to the filesystem") {

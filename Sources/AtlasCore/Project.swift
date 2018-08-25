@@ -25,16 +25,23 @@ public class Project {
     var search: Search?
     var git: Git!
 
-    public init(_ name: String, baseDirectory: URL, git: Git, search: Search?=nil) {
+    let externalLog: ((_ message: String) -> Void)?
+    
+    public init(_ name: String, baseDirectory: URL, git: Git, search: Search?=nil, externalLog: ((_ message: String) -> Void)?=nil) {
         self.name = name
-        self.projectDirectory = createFolder(name, in: baseDirectory)
         self.search = search
         self.git = git
+        self.externalLog = externalLog
+        self.projectDirectory = createFolder(name, in: baseDirectory)
 
         initFoldersAndReadmes()
     }
     
     public func initFoldersAndReadmes() {
+        if let externalLog = externalLog {
+            externalLog("Initializing project readme's")
+        }
+        
         if let projectName = name {
             let projectReadmeMessage = """
             This is your \(projectName) project
@@ -142,7 +149,7 @@ public class Project {
     }
     
     public func commitStaged() -> Result {
-        var result = Result()
+        var result = Result(log: externalLog)
         let commitMessage = currentCommitMessage()
         
         guard commitMessage != nil else {
@@ -151,12 +158,14 @@ public class Project {
             return result
         }
         
+        result.add("Creating commit directory")
         let commitedUrl = directory("committed")
         let slug = commitSlug(commitMessage!.text)
         let commitUrl = commitedUrl.appendingPathComponent(slug)
         let directoryResult = FileSystem.createDirectory(commitUrl)
         result.mergeIn(directoryResult)
         
+        result.add("Moving files to commit directory")
         let gitMoveResult = git.move(
             commitMessage!.url.path,
             into: commitUrl,
@@ -176,7 +185,6 @@ public class Project {
         
         let stagedFolder = directory("staged")
         let filePaths = files("staged").map { stagedFolder.appendingPathComponent($0).path }
-        
 
         if !git.move(filePaths, into: commitUrl).success {
             let fileSystemMoveResult = FileSystem.move(filePaths, into: commitUrl)
@@ -208,6 +216,7 @@ public class Project {
             }
         }
         
+        result.add("Indexing files for search")
         for file in FileSystem.filesInDirectory(commitUrl) {
             _ = search?.add(commitUrl.appendingPathComponent(file))
         }
@@ -249,13 +258,15 @@ public class Project {
     }
     
     public func changeState(_ fileNames: [String], to state: String) -> Result {
-        var result = Result()
+        var result = Result(log: externalLog)
         var filePaths: [String] = []
         for fileName in fileNames {
             let fromState = state == "staged" ? "unstaged" : "staged"
             let file = directory(fromState).appendingPathComponent(fileName)
             filePaths.append(file.path)
         }
+        
+        result.add("Moving files to \(state) directory")
         if !git.move(filePaths, into: directory(state)).success {
             let fileSystemMove = FileSystem.move(filePaths, into: directory(state))
             if !fileSystemMove.success {
@@ -268,6 +279,9 @@ public class Project {
     }
     
     public func copyInto(_ filePaths: [String]) -> Result {
-        return FileSystem.copy(filePaths, into: directory("staged"))
+        var result = Result(log: externalLog)
+        result.add("Copying files into staged directory")
+        result.mergeIn(FileSystem.copy(filePaths, into: directory("staged")))
+        return result
     }
 }
