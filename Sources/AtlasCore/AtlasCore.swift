@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.6.0"
+    public static let version = "1.6.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -310,7 +310,13 @@ public class AtlasCore {
         }
         
         if !Project.exists(name, in: git!.directory!) {
-            _ = Project(name, baseDirectory: git!.directory!, git: git!, search: search)
+            _ = Project(
+                name,
+                baseDirectory: git!.directory!,
+                git: git!,
+                search: search,
+                externalLog: externalLog
+            )
         }
         
         return true
@@ -329,7 +335,13 @@ public class AtlasCore {
             return nil
         }
 
-        return Project(name, baseDirectory: git!.directory!, git: git!, search: search)
+        return Project(
+            name,
+            baseDirectory: git!.directory!,
+            git: git!,
+            search: search,
+            externalLog: externalLog
+        )
     }
     
     public func log(projectName: String?=nil, full: Bool=false, commitSlugFilter: [String]?=nil) -> [Commit] {
@@ -356,7 +368,13 @@ public class AtlasCore {
                     
                     if let projectName = fileComponents.first {
                         if Project.exists(projectName, in: git!.directory!) {
-                            projects.append(Project(projectName, baseDirectory: git!.directory!, git: git!))
+                            let p = Project(
+                                projectName,
+                                baseDirectory: git!.directory!,
+                                git: git!,
+                                externalLog: externalLog
+                            )
+                            projects.append(p)
                         }
                     }
                 }
