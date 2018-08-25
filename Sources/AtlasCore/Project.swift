@@ -32,16 +32,19 @@ public class Project {
         self.search = search
         self.git = git
         self.externalLog = externalLog
-        self.projectDirectory = createFolder(name, in: baseDirectory)
+        
+        self.projectDirectory = baseDirectory.appendingPathComponent(name)
+        if !FileSystem.fileExists(self.projectDirectory, isDirectory: true) {
+            if let externalLog = externalLog {
+                externalLog("Initializing project: \(name)")
+            }
+            self.projectDirectory = createFolder(name, in: baseDirectory)
+        }
 
         initFoldersAndReadmes()
     }
     
     public func initFoldersAndReadmes() {
-        if let externalLog = externalLog {
-            externalLog("Initializing project readme's")
-        }
-        
         if let projectName = name {
             let projectReadmeMessage = """
             This is your \(projectName) project

@@ -44,16 +44,21 @@ public class Git {
         result.add("Initializing Git")
         
         if !clone().success {
-            result.add("Creating Git repository.")
-
-            let gitDirectoryResult = FileSystem.createDirectory(self.directory)
-            result.mergeIn(gitDirectoryResult)
+            if !FileSystem.fileExists(self.directory, isDirectory: true) {
+                result.add("Creating Git repository.")
+                let gitDirectoryResult = FileSystem.createDirectory(self.directory)
+                result.mergeIn(gitDirectoryResult)
+            }
             
-            result.add("Initializing Git repository")
-            let gitInitResult = runInit()
-            result.mergeIn(gitInitResult)
+            if let status = status() {
+                if status.contains("Not a git repository") {
+                    result.add("Initializing Git repository")
+                    let gitInitResult = runInit()
+                    result.mergeIn(gitInitResult)
+                }
+            }
             
-            result.add("Writing .gitignore")
+            result.add("Updating .gitignore")
             let gitIgnoreResult = writeGitIgnore()
             result.mergeIn(gitIgnoreResult)
             

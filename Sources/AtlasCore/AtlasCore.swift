@@ -133,8 +133,13 @@ public class AtlasCore {
         
         if let username = activeCredentials?.username {
             self.userDirectory = baseDirectory.appendingPathComponent(username)
-            let directoryResult = FileSystem.createDirectory(self.userDirectory!)
-            result.mergeIn(directoryResult)
+            if let userDirectory = self.userDirectory {
+                if !FileSystem.fileExists(userDirectory, isDirectory: true) {
+                    result.add("Creating user directory.")
+                    let directoryResult = FileSystem.createDirectory(userDirectory)
+                    result.mergeIn(directoryResult)
+                }
+            }
         }
         return result
     }
@@ -157,8 +162,6 @@ public class AtlasCore {
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)
         }
-
-        result.add("Establishing user directory.")
 
         let userDirectoryResult = setUserDirectory(credentials)
         result.mergeIn(userDirectoryResult)
