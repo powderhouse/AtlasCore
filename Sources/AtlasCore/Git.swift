@@ -276,7 +276,11 @@ public class Git {
         
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
-        let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
+        let output = run("commit", arguments: [
+                "-am", message ?? "Atlas commit",
+                "--author=\"Atlas <atlas@powderhouse.org>"
+            ]
+        )
         if !output.contains("changed") &&
            !output.contains("nothing to commit, working tree clean") {
             result.success = false
@@ -310,6 +314,10 @@ public class Git {
         }
         
         let log = run("log", arguments: arguments)
+        
+        if log.contains("fatal: your current branch \'master\' does not have any commits yet\n") {
+            return []
+        }
 
         var data: [[String:Any]] = []
         let commits = log.components(separatedBy: "<START COMMIT>").filter { $0.count > 0 }

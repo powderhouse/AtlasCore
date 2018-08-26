@@ -158,10 +158,10 @@ public class GitAnnex {
         )
         result.add(groupOutput)
         
-        result.add("Verifying AWS")
         var awsReady = false
         repeat {
             sleep(1)
+            result.add("Verifying AWS")
             let keysOutput = Glue.runProcessError(
                 "aws",
                 arguments: [
