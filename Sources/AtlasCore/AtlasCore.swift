@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.6.4"
+    public static let version = "1.6.5"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -402,7 +402,7 @@ public class AtlasCore {
         result.add("Removing all files.")
         var directories: [String] = []
         for filePath in filePaths {
-            result.mergeIn(git!.removeFile(filePath))
+            result.mergeIn(git!.removeFile(filePath, existingResult: result))
             if result.success {
                 let directory = URL(fileURLWithPath: filePath).deletingLastPathComponent().relativePath
                 if !directories.contains(directory) {
@@ -417,7 +417,7 @@ public class AtlasCore {
                 let fullDirectory = git!.directory!.appendingPathComponent(directory)
                 let files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.readme) {
-                    result.mergeIn(git!.removeFile("\(directory)/\(Project.readme)"))
+                    result.mergeIn(git!.removeFile("\(directory)/\(Project.readme)", existingResult: result))
                 }
             }
         }
