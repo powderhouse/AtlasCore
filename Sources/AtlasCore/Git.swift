@@ -106,6 +106,10 @@ public class Git {
             result.success = false
             result.add("Failed to initialize Git.")
         }
+        
+//        let x = run("config", arguments: ["user.name", "Jared Cosulich"])
+//        let y = run("config", arguments: ["user.email", "jared.cosulich@gmail.com"])
+
         return result
     }
 
@@ -242,8 +246,8 @@ public class Git {
         return Result()
     }
     
-    public func removeFile(_ filePath: String) -> Result {
-        var result = Result()
+    public func removeFile(_ filePath: String, existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         
         if history.count == 0 || history.contains("unknown revision or path") {
@@ -252,6 +256,7 @@ public class Git {
             return result
         }
         
+        result.add("Removing \(filePath)")
         let files = history.components(separatedBy: "\n").filter { return $0.count > 0 }
         let escapedFiles = files.map { return "\"\($0)\"" }
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
@@ -261,12 +266,12 @@ public class Git {
             result.mergeIn(gitAnnex.deleteFile(filePath))
         }
         
-        _ = run("filter-branch", arguments: filterBranchArguments)
-        _ = run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"])
-        _ = run("reflog", arguments: ["expire", "--expire=now", "--all"])
-        _ = run("gc", arguments: ["--prune=now"])
-        _ = run("push", arguments: ["origin", "--force", "--all"])
-        _ = run("push", arguments: ["origin", "--force", "--tags"])
+        result.add(run("filter-branch", arguments: filterBranchArguments))
+        result.add(run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"]))
+        result.add(run("reflog", arguments: ["expire", "--expire=now", "--all"]))
+        result.add(run("gc", arguments: ["--prune=now"]))
+        result.add(run("push", arguments: ["origin", "--force", "--all"]))
+        result.add(run("push", arguments: ["origin", "--force", "--tags"]))
                 
 //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
 //        git push origin --force --tags
@@ -277,8 +282,8 @@ public class Git {
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
         let output = run("commit", arguments: [
-                "-am", message ?? "Atlas commit",
-                "--author=\"Atlas <atlas@powderhouse.org>"
+                "--author=\"Jared Cosulich <jared.cosulich@gmail.com>",
+                "-am", message ?? "Atlas commit"
             ]
         )
         if !output.contains("changed") &&

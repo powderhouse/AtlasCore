@@ -210,7 +210,7 @@ public class GitHub {
     public func setPostCommitHook(_ existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
         
-        result.add("Writing post-commit hook")
+        result.add("Updating post-commit hook")
         
         let hooksURL = hooks()
         let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)
