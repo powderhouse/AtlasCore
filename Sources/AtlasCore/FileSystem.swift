@@ -44,7 +44,7 @@ public class FileSystem {
         var result = Result()
         let fileManager = FileManager.default
         do {
-            _ = Glue.runProcess(
+            _ = Glue.runProcessError(
                 "chmod",
                 arguments: ["-R", "u+w", url.path],
                 currentDirectory: url.deletingLastPathComponent()
@@ -88,7 +88,7 @@ public class FileSystem {
         var result = Result()
         
         for filePath in filePaths {
-            let output = Glue.runProcess("cp", arguments: [filePath, directory.path])
+            let output = Glue.runProcessError("cp", arguments: [filePath, directory.path])
             if let fileName = filePath.split(separator: "/").last {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
                     result.success = false
@@ -121,7 +121,7 @@ public class FileSystem {
                 let destinationName = newName == nil ? String(fileName) : newName!
                 let destination = directory.appendingPathComponent(destinationName)
 
-                let output = Glue.runProcess("mv", arguments: [filePath, destination.path])
+                let output = Glue.runProcessError("mv", arguments: [filePath, destination.path])
 
                 if !FileSystem.fileExists(destination) {
                     result.success = false
