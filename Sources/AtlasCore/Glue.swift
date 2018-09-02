@@ -24,9 +24,10 @@ public class Glue {
             true
             )[0]
         
-        env["PATH"] = path
         if let gitDir = gitDir() {
-            env["PATH"]?.append(":\(gitDir)")
+            env["PATH"] = "\(gitDir):\(path)"
+        } else {
+            env["PATH"] = path
         }
 
         env["GIT_CONFIG_NOSYSTEM"] = "1"
