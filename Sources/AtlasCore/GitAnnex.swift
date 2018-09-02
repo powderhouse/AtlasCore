@@ -275,7 +275,7 @@ public class GitAnnex {
         let output = run("init")
         if !output.contains("recording state") {
             result.success = false
-            result.add("Failed to initialize Git Annex")
+            result.add("Failed to initialize Git Annex: \(output)")
         }
         result.add(output)
         return result

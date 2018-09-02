@@ -51,7 +51,7 @@ public class Git {
             }
             
             if let status = status() {
-                if status.contains("Not a git repository") {
+                if status.contains("not a git repository") {
                     result.add("Initializing Git repository")
                     let gitInitResult = runInit()
                     result.mergeIn(gitInitResult)
@@ -289,7 +289,7 @@ public class Git {
         if !output.contains("changed") &&
            !output.contains("nothing to commit, working tree clean") {
             result.success = false
-            result.add("Unable to commit")
+            result.add("Unable to commit: \(output)")
         }
         result.add(output)
         return result
