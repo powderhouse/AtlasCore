@@ -1,0 +1,4 @@
+module CHTTPParser {
+    umbrella "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/CHTTPParser.git-5348291456210268902/Sources/include"
+    export *
+}

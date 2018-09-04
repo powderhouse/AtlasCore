@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftAWSIam
 
 public class GitAnnex {
     
@@ -32,9 +33,9 @@ public class GitAnnex {
     
     public func initialize(_ existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
-
+        
         result.add("Checking Git Annex installation.")
-
+        
         if !installed() {
             result.add("Installing Git Annex")
             let installResult = install()
@@ -94,98 +95,69 @@ public class GitAnnex {
             return result
         }
         
-        let awsCredentials = [
-            "AWS_ACCESS_KEY_ID": credentials.s3AccessKey!,
-            "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
-        ]
+        result.add("Creating AWS IAM user.")
+
         
-        result.add("Create AWS IAM user.")
-        let userOutput = Glue.runProcessError(
-            "aws",
-            arguments: [
-                "iam",
-                "create-user",
-                "--path", "/\(AtlasCore.repositoryName)/",
-                "--user-name", credentials.username
-            ],
-            environment_variables: awsCredentials
-        )
-        result.add(userOutput)
-        
-        result.add("Create AWS Iam user access key.")
-        let credentialsOutput = Glue.runProcessError(
-            "aws",
-            arguments: [
-                "iam",
-                "create-access-key",
-                "--user-name", credentials.username
-            ],
-            environment_variables: awsCredentials
-        )
-        
-        result.add(credentialsOutput)
-        
-        if let credentialsData = credentialsOutput.data(using: .utf8) {
-            do {
-                if let credentialsDict = try JSONSerialization.jsonObject(with: credentialsData, options: []) as? [String: [String: String]] {
-                    if let accessKey = credentialsDict["AccessKey"] {
-                        credentials.setS3AccessKey(accessKey["AccessKeyId"])
-                        credentials.setS3SecretAccessKey(accessKey["SecretAccessKey"])
-                        credentials.save()
-                    }
-                }
-            } catch {
-                result.success = false
-                result.add("Failed to capture AWS credentials: \(error)")
-            }
+        let iam = Iam(accessKeyId: credentials.s3AccessKey, secretAccessKey: credentials.s3SecretAccessKey)
+        do {
+            _ = try iam.createUser(Iam.CreateUserRequest(
+                userName: credentials.username,
+                path: "/\(AtlasCore.repositoryName)/"
+            ))
+        } catch {
+            result.success = false
+            result.add("Failed to create IAM user: \(error)")
         }
         
-        let iamUserCredentials = [
-            "AWS_ACCESS_KEY_ID": credentials.s3AccessKey!,
-            "AWS_SECRET_ACCESS_KEY": credentials.s3SecretAccessKey!
-        ]
-        
-        result.add("Adding AWS IAM user to group.")
-        let groupOutput = Glue.runProcessError(
-            "aws",
-            arguments: [
-                "iam",
-                "add-user-to-group",
-                "--group-name", GitAnnex.groupName,
-                "--user-name", credentials.username
-            ],
-            environment_variables: awsCredentials
-        )
-        result.add(groupOutput)
-        
-        var awsReady = false
-        repeat {
-            sleep(1)
-            result.add("Verifying AWS")
-            let keysOutput = Glue.runProcessError(
-                "aws",
-                arguments: [
-                    "iam",
-                    "list-access-keys"
-                ],
-                environment_variables: iamUserCredentials
-            )
-            let groupsOutput = Glue.runProcessError(
-                "aws",
-                arguments: [
-                    "iam",
-                    "list-groups-for-user",
-                    "--user-name", credentials.username
-                ],
-                environment_variables: awsCredentials
-            )
+        do {
+            let accessKey = try iam.createAccessKey(Iam.CreateAccessKeyRequest(
+                userName: credentials.username
+            )).accessKey
             
-            awsReady = (
-                !keysOutput.contains("InvalidClientTokenId") &&
-                    groupsOutput.contains(GitAnnex.groupName)
-            )
-        } while !awsReady
+            credentials.setS3AccessKey(accessKey.accessKeyId)
+            credentials.setS3SecretAccessKey(accessKey.secretAccessKey)
+            credentials.save()
+        } catch {
+            result.success = false
+            result.add("Failed to create IAM user access key: \(error)")
+        }
         
+        do {
+            try iam.addUserToGroup(Iam.AddUserToGroupRequest(
+                userName: credentials.username,
+                groupName: GitAnnex.groupName
+            ))
+        } catch {
+            result.success = false
+            result.add("Failed to add IAM user to group: \(error)")
+        }
+        
+//        var awsReady = false
+//        repeat {
+//            sleep(1)
+//            result.add("Verifying AWS")
+//
+//            do {
+//                let accessKeyList = try iam.listAccessKeys(Iam.ListAccessKeysRequest())
+//                print(accessKeyList)
+//
+//                do {
+//                    let groupList = try iam.listGroupsForUser(Iam.ListGroupsForUserRequest(
+//                        userName: credentials.username
+//                    ))
+//
+//                    let groupNames = groupList.groups.map { $0.groupName }
+//                    awsReady = groupNames.contains(GitAnnex.groupName)
+//                } catch {
+//                    result.success = false
+//                    result.add("Failed to list groups for IAM user: \(error)")
+//                }
+//            } catch {
+//                result.success = false
+//                result.add("Failed to list IAM access keys: \(error)")
+//            }
+//        } while !awsReady
+
         return result
     }
     

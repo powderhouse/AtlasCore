@@ -51,7 +51,7 @@ public class Git {
             }
             
             if let status = status() {
-                if status.contains("not a git repository") {
+                if status.lowercased().contains("not a git repository") {
                     result.add("Initializing Git repository")
                     let gitInitResult = runInit()
                     result.mergeIn(gitInitResult)
@@ -157,9 +157,9 @@ public class Git {
     
     public func projects() -> [String] {
         let result = run("ls-tree", arguments: ["-d", "--name-only", "HEAD", "."])
-        let names = result.split(separator: "\n").map { String($0) }
+        let names = result.components(separatedBy: "\n").map { String($0) }
         let cleanNames = names.map { $0.starts(with: "\"") ? String($0.dropFirst().dropLast()) : $0 }
-        return cleanNames.map { $0.unescaped }
+        return cleanNames.map { $0.unescaped }.filter { $0.count > 0 }
     }
     
     public func writeGitIgnore() -> Result {
@@ -329,28 +329,30 @@ public class Git {
         for commit in commits {
             let components = commit.components(separatedBy: "<DELIMITER>")
             if let hash = components.first {
-                let message = components[1]
-                if let fileString = components.last {
-                    let files = fileString.components(separatedBy: "\n").filter { $0.count > 0 }
-                    if commitSlugFilter != nil {
-                        if let file = files.last {
-                            let fileComponents = file.components(separatedBy: "/")
-                            guard fileComponents.count > 1 else {
-                                continue
-                            }
-                            
-                            let commitSlug = fileComponents[fileComponents.count - 2]
-                            guard commitSlugFilter!.contains(commitSlug) else {
-                                continue
+                if components.count > 1 {
+                    let message = components[1]
+                    if let fileString = components.last {
+                        let files = fileString.components(separatedBy: "\n").filter { $0.count > 0 }
+                        if commitSlugFilter != nil {
+                            if let file = files.last {
+                                let fileComponents = file.components(separatedBy: "/")
+                                guard fileComponents.count > 1 else {
+                                    continue
+                                }
+                                
+                                let commitSlug = fileComponents[fileComponents.count - 2]
+                                guard commitSlugFilter!.contains(commitSlug) else {
+                                    continue
+                                }
                             }
                         }
+                        
+                        data.append([
+                            "message": message,
+                            "hash": hash,
+                            "files": files
+                        ])
                     }
-                    
-                    data.append([
-                        "message": message,
-                        "hash": hash,
-                        "files": files
-                    ])
                 }
             }
         }
