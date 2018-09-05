@@ -54,7 +54,7 @@ public struct Result {
             silenceLog = true
         }
         
-        messages.append(contentsOf: result.messages)        
+        messages.append(contentsOf: result.messages)
         silenceLog = false
     }
     
@@ -72,12 +72,12 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.7.0"
+    public static let version = "1.7.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
     public static let originName = "AtlasOrigin"
-
+    
     public var baseDirectory: URL!
     public var userDirectory: URL?
     public var appDirectory: URL?
@@ -143,7 +143,7 @@ public class AtlasCore {
         }
         return result
     }
-
+    
     public func getCredentials() -> Credentials? {
         return Credentials.retrieve(baseDirectory).first
     }
@@ -154,15 +154,15 @@ public class AtlasCore {
     
     public func initGitAndGitHub(_ credentials: Credentials) -> Result {
         var result = Result(log: externalLog)
-
+        
         credentials.setDirectory(baseDirectory)
-
+        
         result.add("Syncing credentials.")
         
         if let existingCredentials = Credentials.retrieve(baseDirectory).first {
             credentials.sync(existingCredentials)
         }
-
+        
         let userDirectoryResult = setUserDirectory(credentials)
         result.mergeIn(userDirectoryResult)
         
@@ -186,13 +186,13 @@ public class AtlasCore {
             result.add("No valid token or remote path found.")
             return result
         }
-
+        
         credentials.save()
-
+        
         if git == nil {
             git = Git(self.userDirectory!, credentials: credentials)
         }
-
+        
         if let gitResult = git?.initialize(result) {
             result.mergeIn(gitResult)
         }
@@ -202,19 +202,19 @@ public class AtlasCore {
         if initGitRepository(credentials) {
             result.add("Initializing GitHub")
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
-
+            
             result.mergeIn(gitHub.setPostCommitHook(result))
             if result.success {
                 result.mergeIn(gitHub.setRepositoryLink())
                 if !result.success {
                     result.success = true
-                    result.mergeIn(gitHub.createRepository())
+                    result.mergeIn(gitHub.createRepository(result))
                     result.mergeIn(gitHub.setRepositoryLink())
                     if !result.success {
                         result.add("Failed to set repository link.")
                         return result
                     }
-
+                    
                     result.mergeIn(atlasCommit())
                 }
                 return result
@@ -294,11 +294,11 @@ public class AtlasCore {
     public func gitHubRepository() -> String? {
         return gitHub?.repositoryLink
     }
-
+    
     public func s3Repository() -> String? {
         return git?.annexRoot.count == 0 ? nil : git?.annexRoot
     }
-
+    
     public func createBaseDirectory() -> Result {
         return FileSystem.createDirectory(baseDirectory)
     }
@@ -306,7 +306,7 @@ public class AtlasCore {
     public func deleteBaseDirectory() -> Result {
         return FileSystem.deleteDirectory(baseDirectory)
     }
-
+    
     public func initProject(_ name: String) -> Bool {
         guard git?.directory != nil else {
             return false
@@ -337,7 +337,7 @@ public class AtlasCore {
         guard git?.directory != nil else {
             return nil
         }
-
+        
         return Project(
             name,
             baseDirectory: git!.directory!,
@@ -351,7 +351,7 @@ public class AtlasCore {
         guard git != nil else {
             return []
         }
-
+        
         let logData =  git!.log(projectName: projectName, full: full, commitSlugFilter: commitSlugFilter)
         
         var commits: [Commit] = []
@@ -421,12 +421,12 @@ public class AtlasCore {
                 }
             }
         }
-
+        
         _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
         
         return result
     }
-        
+    
     public func commitChanges(_ commitMessage: String?=nil) -> Result {
         var result = Result(log: externalLog)
         
@@ -471,7 +471,7 @@ public class AtlasCore {
         
         return git!.status()
     }
-
+    
     public func remote() -> String? {
         guard git != nil else {
             return nil
@@ -497,12 +497,12 @@ public class AtlasCore {
         }
         return []
     }
-
+    
     public func completedLogEntries() -> [String] {
         let logEntries = syncLogEntries()
         return logEntries.filter { $0.contains("</ENDENTRY>")}
     }
-
+    
     public func sync() {
         let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
         _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])

@@ -16,7 +16,7 @@ public class Git {
     public var credentials: Credentials!
     
     public var gitAnnex: GitAnnex? = nil
-
+    
     static let gitIgnore = [
         ".DS_Store",
         "credentials.json"
@@ -93,10 +93,10 @@ public class Git {
         )
         
         return Glue.runProcessError("git",
-                               arguments: fullArguments,
-                               currentDirectory: inDirectory ?? directory,
-                               atlasProcess: atlasProcessFactory.build()
-        )        
+                                    arguments: fullArguments,
+                                    currentDirectory: inDirectory ?? directory,
+                                    atlasProcess: atlasProcessFactory.build()
+        )
     }
     
     public func runInit() -> Result {
@@ -107,12 +107,12 @@ public class Git {
             result.add("Failed to initialize Git.")
         }
         
-//        let x = run("config", arguments: ["user.name", "Jared Cosulich"])
-//        let y = run("config", arguments: ["user.email", "jared.cosulich@gmail.com"])
-
+        _ = run("config", arguments: ["user.name", "Jared Cosulich"])
+        _ = run("config", arguments: ["user.email", "jared.cosulich@gmail.com"])
+        
         return result
     }
-
+    
     public func status() -> String? {
         let result = run("status")
         if (result == "") {
@@ -120,7 +120,7 @@ public class Git {
         }
         return result
     }
-
+    
     public func clone() -> Result {
         var result = Result()
         guard credentials != nil else {
@@ -130,8 +130,8 @@ public class Git {
         }
         
         let path = credentials!.remotePath ??
-                   "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
-
+        "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
+        
         let output = run("clone",
                          arguments: [path],
                          inDirectory: userDirectory)
@@ -261,7 +261,7 @@ public class Git {
         let escapedFiles = files.map { return "\"\($0)\"" }
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
-
+        
         if let gitAnnex = gitAnnex {
             result.mergeIn(gitAnnex.deleteFile(filePath))
         }
@@ -272,22 +272,22 @@ public class Git {
         result.add(run("gc", arguments: ["--prune=now"]))
         result.add(run("push", arguments: ["origin", "--force", "--all"]))
         result.add(run("push", arguments: ["origin", "--force", "--tags"]))
-                
-//        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
-//        git push origin --force --tags
-
+        
+        //        git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch PuzzleSchool/staged/circuitous.png' --prune-empty --tag-name-filter cat -- --all && git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin && git reflog expire --expire=now --all && git gc --prune=now
+        //        git push origin --force --tags
+        
         return result
     }
-        
+    
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
         let output = run("commit", arguments: [
-                "--author=\"Jared Cosulich <jared.cosulich@gmail.com>",
-                "-am", message ?? "Atlas commit"
+            "--author=\"Jared Cosulich <jared.cosulich@gmail.com>",
+            "-am", message ?? "Atlas commit"
             ]
         )
         if !output.contains("changed") &&
-           !output.contains("nothing to commit, working tree clean") {
+            !output.contains("nothing to commit, working tree clean") {
             result.success = false
             result.add("Unable to commit: \(output)")
         }
@@ -311,7 +311,7 @@ public class Git {
                 ":!*/staged/*",
                 ":!*\(Project.readme)",
                 ":!*\(Project.commitMessageFile)"
-            ])
+                ])
         }
         
         if projectName != nil {
@@ -323,7 +323,7 @@ public class Git {
         if log.contains("fatal: your current branch \'master\' does not have any commits yet\n") {
             return []
         }
-
+        
         var data: [[String:Any]] = []
         let commits = log.components(separatedBy: "<START COMMIT>").filter { $0.count > 0 }
         for commit in commits {
@@ -351,7 +351,7 @@ public class Git {
                             "message": message,
                             "hash": hash,
                             "files": files
-                        ])
+                            ])
                     }
                 }
             }

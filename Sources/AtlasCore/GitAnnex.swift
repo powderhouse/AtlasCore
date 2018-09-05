@@ -54,9 +54,11 @@ public class GitAnnex {
                 result.mergeIn(awsResult)
             }
             
-            result.add("Initializing S3")
-            let s3Result = initializeS3()
-            result.mergeIn(s3Result)
+            if result.success {
+                result.add("Initializing S3")
+                let s3Result = initializeS3()
+                result.mergeIn(s3Result)
+            }
         }
         
         return result
@@ -95,18 +97,36 @@ public class GitAnnex {
             return result
         }
         
-        result.add("Creating AWS IAM user.")
-
-        
         let iam = Iam(accessKeyId: credentials.s3AccessKey, secretAccessKey: credentials.s3SecretAccessKey)
-        do {
-            _ = try iam.createUser(Iam.CreateUserRequest(
-                userName: credentials.username,
-                path: "/\(AtlasCore.repositoryName)/"
-            ))
-        } catch {
-            result.success = false
-            result.add("Failed to create IAM user: \(error)")
+        
+        result.add("Checking AWS IAM for existing user.")
+        
+        let user = try? iam.getUser(Iam.GetUserRequest(userName: credentials.username))
+        
+        if user == nil {
+            do {
+                _ = try iam.getAccountAuthorizationDetails(Iam.GetAccountAuthorizationDetailsRequest())
+            } catch {
+                if "\(error)".contains(credentials.username) {
+                    result.add("IAM user already initialized.")
+                } else {
+                    result.success = false
+                    result.add("Invalid AWS credentials: \(error)")
+                }
+                return result
+            }
+            
+            result.add("Creating AWS IAM user.")
+            
+            do {
+                _ = try iam.createUser(Iam.CreateUserRequest(
+                    userName: credentials.username,
+                    path: "/\(AtlasCore.repositoryName)/"
+                ))
+            } catch {
+                result.success = false
+                result.add("Failed to create IAM user: \(error)")
+            }
         }
         
         do {
@@ -132,32 +152,25 @@ public class GitAnnex {
             result.add("Failed to add IAM user to group: \(error)")
         }
         
-//        var awsReady = false
-//        repeat {
-//            sleep(1)
-//            result.add("Verifying AWS")
-//
-//            do {
-//                let accessKeyList = try iam.listAccessKeys(Iam.ListAccessKeysRequest())
-//                print(accessKeyList)
-//
-//                do {
-//                    let groupList = try iam.listGroupsForUser(Iam.ListGroupsForUserRequest(
-//                        userName: credentials.username
-//                    ))
-//
-//                    let groupNames = groupList.groups.map { $0.groupName }
-//                    awsReady = groupNames.contains(GitAnnex.groupName)
-//                } catch {
-//                    result.success = false
-//                    result.add("Failed to list groups for IAM user: \(error)")
-//                }
-//            } catch {
-//                result.success = false
-//                result.add("Failed to list IAM access keys: \(error)")
-//            }
-//        } while !awsReady
-
+        //        var awsReady = false
+        //        repeat {
+        //            sleep(1)
+        //            result.add("Verifying AWS")
+        //
+        //            do {
+        //                let users = try iam.listUsers(Iam.ListUsersRequest())
+        //
+        //                let groupList = try iam.listGroupsForUser(Iam.ListGroupsForUserRequest(
+        //                    userName: credentials.username
+        //                ))
+        //
+        //                let groupNames = groupList.groups.map { $0.groupName }
+        //                awsReady = groupNames.contains(GitAnnex.groupName)
+        //            } catch {
+        //                result.add("Failed to list groups for IAM user: \(error)")
+        //            }
+        //        } while !awsReady
+        
         return result
     }
     
@@ -199,7 +212,18 @@ public class GitAnnex {
         }
         
         let successText = "recording state"
-        let initOutput = run("initremote", arguments: initArguments)
+        
+        var initOutput: String
+        var tries = 0
+        repeat {
+            sleep(1)
+            tries += 1
+            initOutput = run("initremote", arguments: initArguments)
+            if tries % 5 == 0 && !initOutput.contains(successText) {
+                result.add("Waiting for AWS IAM to sync. \(initOutput.contains(successText))")
+            }
+        } while !initOutput.contains(successText) && tries < 30
+        
         if !initOutput.contains(successText) {
             result.success = false
             result.add(["Unable to initialize Git Annex remote.", initOutput])
