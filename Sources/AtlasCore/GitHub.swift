@@ -258,6 +258,7 @@ public class GitHub {
             result.add("Unable to write post commit hook")
         }
         result.mergeIn(postCommitResult)
+        
         return result
     }
     

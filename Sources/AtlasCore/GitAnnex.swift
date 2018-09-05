@@ -56,7 +56,7 @@ public class GitAnnex {
             
             if result.success {
                 result.add("Initializing S3")
-                let s3Result = initializeS3()
+                let s3Result = initializeS3(result)
                 result.mergeIn(s3Result)
             }
         }
@@ -174,8 +174,8 @@ public class GitAnnex {
         return result
     }
     
-    public func initializeS3() -> Result {
-        var result = Result()
+    public func initializeS3(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
         let info = run("info", arguments: [GitAnnex.remoteName])
         
         if info.contains("remote: \(GitAnnex.remoteName)") {
@@ -219,7 +219,7 @@ public class GitAnnex {
             sleep(1)
             tries += 1
             initOutput = run("initremote", arguments: initArguments)
-            if tries % 5 == 0 && !initOutput.contains(successText) {
+            if tries % 2 == 0 && !initOutput.contains(successText) {
                 result.add("Waiting for AWS IAM to sync. \(initOutput.contains(successText))")
             }
         } while !initOutput.contains(successText) && tries < 30

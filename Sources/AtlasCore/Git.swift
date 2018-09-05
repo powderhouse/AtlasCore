@@ -107,8 +107,8 @@ public class Git {
             result.add("Failed to initialize Git.")
         }
         
-        _ = run("config", arguments: ["user.name", "Jared Cosulich"])
-        _ = run("config", arguments: ["user.email", "jared.cosulich@gmail.com"])
+        _ = run("config", arguments: ["user.name", "Atlas Test"])
+        _ = run("config", arguments: ["user.email", "atlastest@puzzleschool.com"])
         
         return result
     }
@@ -282,7 +282,7 @@ public class Git {
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
         let output = run("commit", arguments: [
-            "--author=\"Jared Cosulich <jared.cosulich@gmail.com>",
+            "--author=\"Atlas Test <atlastest@puzzleschool.com>",
             "-am", message ?? "Atlas commit"
             ]
         )
