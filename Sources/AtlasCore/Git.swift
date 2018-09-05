@@ -295,6 +295,24 @@ public class Git {
         return result
     }
     
+    public func sync(_ existingResult: Result?=nil) -> Result {
+        var result = existingResult ?? Result()
+        
+        result.add("Syncing with Github")
+        _ = run("pull", arguments: ["origin", "master"])
+        let output = run("push", arguments: ["--set-upstream", "origin", "master"])
+        result.add(output)
+        if !output.contains("master -> master") {
+            result.success = false
+            result.add("Failed to push to GitHub: \(output)")
+        }
+        
+        if let gitAnnex = gitAnnex {
+            gitAnnex.sync(result)
+        }
+        return result
+    }
+    
     public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {
         var arguments = [
             "--pretty=format:<START COMMIT>%H<DELIMITER>%B<DELIMITER>",

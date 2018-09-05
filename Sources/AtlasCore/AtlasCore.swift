@@ -203,7 +203,7 @@ public class AtlasCore {
             result.add("Initializing GitHub")
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
             
-            result.mergeIn(gitHub.setPostCommitHook(result))
+//            result.mergeIn(gitHub.setPostCommitHook(result))
             if result.success {
                 result.mergeIn(gitHub.setRepositoryLink())
                 if !result.success {
@@ -444,6 +444,7 @@ public class AtlasCore {
                 result.add("Committing files")
                 result.mergeIn(git.add())
                 result.mergeIn(git.commit(commitMessage))
+                result.mergeIn(git.sync(result))
             } else {
                 result.success = false
                 result.add("No status provided by git for committing.")

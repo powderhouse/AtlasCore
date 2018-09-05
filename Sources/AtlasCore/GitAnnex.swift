@@ -303,9 +303,12 @@ public class GitAnnex {
         return Result()
     }
     
-    public func sync() {
+    public func sync(_ existingResult: Result?=nil) {
         DispatchQueue.global(qos: .background).async {
-            _ = self.run("sync")
+            let output = self.run("sync", arguments: ["--content"])
+            if var result = existingResult {
+                result.add(output)
+            }
         }
     }
     
