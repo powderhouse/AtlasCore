@@ -17,6 +17,7 @@ class CredentialsSpec: QuickSpec {
             var credentials: Credentials!
             
             let username = "atlastest"
+            let email = "atlastest@puzzleschool.com"
             let password = "1a2b3c4d"
             let token = "TOKEN"
             let remotePath = "REMOTE_PATH"
@@ -46,6 +47,7 @@ class CredentialsSpec: QuickSpec {
                 beforeEach {
                     credentials = Credentials(
                         username,
+                        email: email,
                         password: password,
                         token: token,
                         directory: directory
@@ -76,6 +78,7 @@ class CredentialsSpec: QuickSpec {
                 beforeEach {
                     credentials = Credentials(
                         username,
+                        email: email,
                         password: password,
                         directory: directory
                     )
@@ -103,6 +106,7 @@ class CredentialsSpec: QuickSpec {
                     beforeEach {
                         credentials = Credentials(
                             username,
+                            email: email,
                             remotePath: remotePath,
                             directory: directory
                         )
@@ -135,7 +139,7 @@ class CredentialsSpec: QuickSpec {
                 var credentials: Credentials?
                 
                 beforeEach {
-                    Credentials(username, token: token, directory: directory).save()
+                    Credentials(username, email: email, token: token, directory: directory).save()
                     credentials = Credentials.retrieve(directory).first
                 }
                 
@@ -150,7 +154,7 @@ class CredentialsSpec: QuickSpec {
                 var filePath: String!
 
                 beforeEach {
-                    Credentials(username, token: token, directory: directory).save()
+                    Credentials(username, email: email, token: token, directory: directory).save()
 
                     filePath = "\(directory.path)/credentials.json"
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
@@ -172,6 +176,7 @@ class CredentialsSpec: QuickSpec {
                 it("should be complete if user, token, and s3 access keys are presnt") {
                     credentials = Credentials(
                         username,
+                        email: email,
                         token: token,
                         s3AccessKey: s3AccessKey,
                         s3SecretAccessKey: s3SecretAccessKey,
@@ -183,6 +188,7 @@ class CredentialsSpec: QuickSpec {
                 it("should be complete if user, password, and s3 access keys are presnt") {
                     credentials = Credentials(
                         username,
+                        email: email,
                         password: password,
                         s3AccessKey: s3AccessKey,
                         s3SecretAccessKey: s3SecretAccessKey,
@@ -194,6 +200,7 @@ class CredentialsSpec: QuickSpec {
                 it("should not be complete if s3 access keys are missing") {
                     credentials = Credentials(
                         username,
+                        email: email,
                         password: password,
                         directory: directory
                     )

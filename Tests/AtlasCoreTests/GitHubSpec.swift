@@ -25,6 +25,7 @@ class GitHubSpec: QuickSpec {
 
                 credentials = Credentials(
                     "atlastest",
+                    email: "atlastest@puzzleschool.com",
                     password: "1a2b3c4d",
                     token: nil,
                     directory: directory
@@ -198,13 +199,17 @@ class GitHubSpec: QuickSpec {
                 }
                 
                 it("should be nil if credentials are invalid") {
-                    let badCredentials = Credentials("BAD", password: "BAD", directory: directory)
+                    let badCredentials = Credentials("BAD", email: "BAD", password: "BAD", directory: directory)
                     let token = GitHub.getAuthenticationToken(badCredentials)
                     expect(token).to(beNil())
                 }
                 
                 it("should be nil if credentials are missing a password") {
-                    let badCredentials = Credentials(credentials.username, directory: directory)
+                    let badCredentials = Credentials(
+                        credentials.username,
+                        email: credentials.email,
+                        directory: directory
+                    )
                     let token = GitHub.getAuthenticationToken(badCredentials)
                     expect(token).to(beNil())
                 }

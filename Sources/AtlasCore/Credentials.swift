@@ -11,6 +11,7 @@ public class Credentials {
     static let filename = "credentials.json"
 
     public let username: String
+    public let email: String
     public let password: String?
     public var token: String?
     public var remotePath: String?
@@ -21,6 +22,7 @@ public class Credentials {
     public var directory: URL?
 
     public init(_ username: String,
+        email: String,
         password: String?=nil,
         token: String?=nil,
         remotePath: String?=nil,
@@ -29,6 +31,7 @@ public class Credentials {
         directory: URL?=nil
     ) {
         self.username = username
+        self.email = email
         self.password = password
         self.token = token
         self.remotePath = remotePath
@@ -71,7 +74,8 @@ public class Credentials {
         
         do {
             var credentialsHash: [String: String] = [
-                "username": username
+                "username": username,
+                "email": email
             ]
             
             if token != nil {
@@ -154,15 +158,18 @@ public class Credentials {
             do {
                 if let credentialsDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String] {
                     if let username = credentialsDict["username"] {
-                        return [Credentials(
-                            username,
-                            password: nil,
-                            token: credentialsDict["token"],
-                            remotePath: credentialsDict["remotePath"],
-                            s3AccessKey: credentialsDict["s3AccessKey"],
-                            s3SecretAccessKey: credentialsDict["s3SecretAccessKey"],
-                            directory: baseDirectory
-                        )]
+                        if let email = credentialsDict["email"] {
+                            return [Credentials(
+                                username,
+                                email: email,
+                                password: nil,
+                                token: credentialsDict["token"],
+                                remotePath: credentialsDict["remotePath"],
+                                s3AccessKey: credentialsDict["s3AccessKey"],
+                                s3SecretAccessKey: credentialsDict["s3SecretAccessKey"],
+                                directory: baseDirectory
+                            )]
+                        }
                     }
                 }
             } catch {

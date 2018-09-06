@@ -21,6 +21,7 @@ class AtlasCoreAnnexSpec: QuickSpec {
             var directory: URL!
             
             let username = "atlastest"
+            let email = "atlastest@puzzleschool.com"
             var credentials: Credentials!
             
             let fileManager = FileManager.default
@@ -56,6 +57,7 @@ Multiline
                 
                 credentials = Credentials(
                     username,
+                    email: email,
                     s3AccessKey: "test",
                     s3SecretAccessKey: "test",
                     directory: directory

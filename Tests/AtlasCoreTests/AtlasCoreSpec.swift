@@ -21,6 +21,7 @@ class AtlasCoreSpec: QuickSpec {
             var directory: URL!
 
             let username = "atlastest"
+            let email = "atlastest@puzzleschool.com"
             var credentials: Credentials!
             
             let fileManager = FileManager.default
@@ -36,6 +37,7 @@ class AtlasCoreSpec: QuickSpec {
                 
                 credentials = Credentials(
                     username,
+                    email: email,
                     directory: directory
                 )
                 
@@ -190,6 +192,7 @@ class AtlasCoreSpec: QuickSpec {
                         beforeEach {
                             newCredentials = Credentials(
                                 "atlastest",
+                                email: "atlastest@puzzleschool.com",
                                 password: "1a2b3c4d",
                                 token: nil,
                                 directory: directory
@@ -217,6 +220,7 @@ class AtlasCoreSpec: QuickSpec {
                             
                             newCredentials = Credentials(
                                     "atlastest",
+                                    email: "atlastest@puzzleschool.com",
                                     password: "1a2b3c4d",
                                     token: nil,
                                     directory: userDirectory

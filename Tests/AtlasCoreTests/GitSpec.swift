@@ -29,6 +29,7 @@ class GitSpec: QuickSpec {
                 
                 credentials = Credentials(
                     "atlastest",
+                    email: "atlastest@puzzleschool.com",
                     password: "1a2b3c4d",
                     token: nil,
                     s3AccessKey: "test",
@@ -200,6 +201,7 @@ class GitSpec: QuickSpec {
                     beforeEach {
                         credentials = Credentials(
                             "atlastest",
+                            email: "atlastest@puzzleschool.com",
                             password: "1a2b3c4d",
                             token: nil,
                             directory: directory
