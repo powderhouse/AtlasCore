@@ -220,7 +220,7 @@ public class GitAnnex {
             tries += 1
             initOutput = run("initremote", arguments: initArguments)
             if tries % 2 == 0 && !initOutput.contains(successText) {
-                result.add("Waiting for AWS IAM to sync. \(initOutput.contains(successText))")
+                result.add("Waiting for AWS IAM to sync.")
             }
         } while !initOutput.contains(successText) && tries < 30
         

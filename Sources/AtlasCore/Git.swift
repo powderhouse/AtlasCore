@@ -78,6 +78,9 @@ public class Git {
             }
         }
         
+        _ = run("config", arguments: ["user.name", credentials.username])
+        _ = run("config", arguments: ["user.email", credentials.email])
+        
         return result
     }
     
@@ -106,9 +109,6 @@ public class Git {
             result.success = false
             result.add("Failed to initialize Git.")
         }
-        
-        _ = run("config", arguments: ["user.name", credentials.username])
-        _ = run("config", arguments: ["user.email", credentials.email])
         
         return result
     }
@@ -140,6 +140,16 @@ public class Git {
             result.success = false
             result.add(["Unable to clone Atlas.", output])
         }
+        
+        if credentials!.remotePath == nil {
+            let authenticatedPath = path.replacingOccurrences(
+                of: "https://",
+                with: "https://\(credentials.username):\(credentials.token!)@"
+            )
+            _ = run("remote", arguments: ["rm", "origin"])
+            _ = run("remote", arguments: ["add", "origin", authenticatedPath])
+        }
+        
         return result
     }
     
@@ -281,9 +291,8 @@ public class Git {
     
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
-        let output = run("commit", arguments: [
-            "-am", message ?? "Atlas commit"
-        ])
+        
+        let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
         if !output.contains("changed") &&
             !output.contains("nothing to commit, working tree clean") {
             result.success = false
@@ -298,7 +307,9 @@ public class Git {
         
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
+        
         let output = run("push", arguments: ["--set-upstream", "origin", "master"])
+        print(output)
         result.add(output)
         if !output.contains("master -> master") {
             result.success = false
