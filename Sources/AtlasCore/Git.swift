@@ -309,7 +309,6 @@ public class Git {
         _ = run("pull", arguments: ["origin", "master"])
         
         let output = run("push", arguments: ["--set-upstream", "origin", "master"])
-        print(output)
         result.add(output)
         if !output.contains("master -> master") {
             result.success = false

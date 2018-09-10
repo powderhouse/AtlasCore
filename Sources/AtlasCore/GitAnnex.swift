@@ -313,6 +313,7 @@ public class GitAnnex {
                 "AWS_SECRET_ACCESS_KEY": self.credentials.s3SecretAccessKey ?? ""
             ]
             
+            var blankLineCount = 0
             Glue.runProcessErrorAndLog(
                 "git-annex",
                 arguments: ["sync", "--content"],
@@ -321,12 +322,12 @@ public class GitAnnex {
                 log: { fileHandle in
                     if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
                         if line.count > 0 {
-                            if line.contains("%") {
-                                result.add(line)
-                                if line.contains("100%") {
-                                    fileHandle.closeFile()
-                                    fileHandle.readabilityHandler = nil
-                                }
+                            result.add(line)
+                        } else {
+                            blankLineCount += 1
+                            if blankLineCount > 30 {
+                                fileHandle.closeFile()
+                                fileHandle.readabilityHandler = nil
                             }
                         }
                     } else {
