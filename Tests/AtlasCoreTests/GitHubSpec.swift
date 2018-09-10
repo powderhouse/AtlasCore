@@ -134,20 +134,20 @@ class GitHubSpec: QuickSpec {
                         }
                     }
                     
-                    context("setPostCommitHook") {
-                        beforeEach {
-                            expect(gitHub!.setPostCommitHook().success).to(beTrue(), description: "Failed to set post-commit hook")
-                        }
-                        
-                        it("should create a post-commit hook") {
-                            let gitURL = appDirectory.appendingPathComponent(".git")
-                            let hooksURL = gitURL.appendingPathComponent("hooks")
-                            let postCommitPath = hooksURL.appendingPathComponent("post-commit").path
-                            let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)
-                            expect(exists).to(beTrue(), description: "No post-commit found")
-                        }
-
-                    }
+//                    context("setPostCommitHook") {
+//                        beforeEach {
+//                            expect(gitHub!.setPostCommitHook().success).to(beTrue(), description: "Failed to set post-commit hook")
+//                        }
+//                        
+//                        it("should create a post-commit hook") {
+//                            let gitURL = appDirectory.appendingPathComponent(".git")
+//                            let hooksURL = gitURL.appendingPathComponent("hooks")
+//                            let postCommitPath = hooksURL.appendingPathComponent("post-commit").path
+//                            let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)
+//                            expect(exists).to(beTrue(), description: "No post-commit found")
+//                        }
+//
+//                    }
                 }
                 
                 context("url") {

@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.7.6"
+    public static let version = "1.7.7"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -487,7 +487,7 @@ public class AtlasCore {
     }
     
     public func syncLog() -> String? {
-        if let logUrl = userDirectory?.appendingPathComponent(GitHub.log) {
+        if let logUrl = userDirectory?.appendingPathComponent(Git.log) {
             return try? String(contentsOf: logUrl, encoding: .utf8)
         }
         return nil

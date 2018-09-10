@@ -303,7 +303,7 @@ public class GitAnnex {
         return Result()
     }
     
-    public func sync(_ existingResult: Result?=nil) {
+    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
         var result = existingResult ?? Result()
         
         DispatchQueue.global(qos: .background).async {
@@ -328,12 +328,15 @@ public class GitAnnex {
                             if blankLineCount > 30 {
                                 fileHandle.closeFile()
                                 fileHandle.readabilityHandler = nil
+                                if completed != nil {
+                                    completed!()
+                                }
                             }
                         }
                     } else {
                         result.add("Error decoding data: \(fileHandle.availableData)")
                     }
-            }
+                }
             )
             
             //            let output = self.run("sync", arguments: ["--content"])

@@ -9,6 +9,8 @@ import Foundation
 
 public class Git {
     
+    static let log = "log.txt"
+    
     var userDirectory: URL!
     public var directory: URL!
     public var atlasProcessFactory: AtlasProcessFactory!
@@ -63,11 +65,8 @@ public class Git {
             result.mergeIn(gitIgnoreResult)
             
             result.add("Committing .gitignore")
-            let addResult = add()
-            result.mergeIn(addResult)
-            
-            let commitResult = commit()
-            result.mergeIn(commitResult)
+            result.mergeIn(add())
+            result.mergeIn(commit())
         }
         
         if gitAnnex == nil && credentials.complete() {
@@ -305,6 +304,16 @@ public class Git {
     public func sync(_ existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
         
+        let resultLog = result.log
+        result.log = { message in
+            if let existingLog = resultLog {
+                existingLog(message)
+            }
+            
+            _ = self.writeToLog(message)
+        }
+        
+        _ = writeToLog("<STARTENTRY>")
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
@@ -315,8 +324,33 @@ public class Git {
             result.add("Failed to push to GitHub: \(output)")
         }
         
+        let endEntry = { _ = self.writeToLog("</ENDENTRY>") }
         if let gitAnnex = gitAnnex {
-            gitAnnex.sync(result)
+            gitAnnex.sync(result, completed: endEntry)
+        } else {
+            endEntry()
+        }
+        return result
+    }
+    
+    func writeToLog(_ message: String) -> Result {
+        var result = Result()
+        let logUrl = directory.appendingPathComponent("../\(Git.log)")
+        if !FileSystem.fileExists(logUrl) {
+            do {
+                try "".write(to: logUrl, atomically: true, encoding: .utf8)
+            } catch {
+                result.success = false
+                result.add("Unable to initialize log at \(logUrl): \(error)")
+                return result
+            }
+        }
+        
+        if let fileHandle = try? FileHandle(forWritingTo: logUrl) {
+            fileHandle.seekToEndOfFile()
+            let data = message.appending("\n\n").data(using: .utf8) ?? Data()
+            fileHandle.write(data)
+            fileHandle.closeFile()
         }
         return result
     }

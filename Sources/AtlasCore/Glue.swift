@@ -12,7 +12,12 @@ public class Glue {
     public static let path: String = "$PATH:/bin:/usr/bin:/usr/local/bin:/anaconda/bin"
     
     class func gitDir() -> String? {
-        return Bundle(for: AtlasCore.self).resourcePath?.appending("/git")
+        if let dir = Bundle(for: AtlasCore.self).resourcePath?.appending("/git") {
+            if FileSystem.fileExists(URL(fileURLWithPath: dir, isDirectory: true)) {
+                return dir
+            }
+        }
+        return nil
     }
     
     class func addEnvVars(to existing: [String: String]?) -> [String: String] {
@@ -29,6 +34,8 @@ public class Glue {
             .userDomainMask,
             true
             )[0]
+        
+        
         
         if let gitDir = gitDir() {
             env["GIT_EXEC_PATH"] = "\(gitDir)/libexec/git-core/"
