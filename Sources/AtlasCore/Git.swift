@@ -141,7 +141,7 @@ public class Git {
             result.add(["Unable to clone Atlas.", output])
         }
         
-        if credentials!.remotePath == nil {
+        if result.success && credentials!.remotePath == nil {
             let authenticatedPath = path.replacingOccurrences(
                 of: "https://",
                 with: "https://\(credentials.username):\(credentials.token!)@"

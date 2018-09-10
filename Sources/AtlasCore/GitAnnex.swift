@@ -304,11 +304,41 @@ public class GitAnnex {
     }
     
     public func sync(_ existingResult: Result?=nil) {
+        var result = existingResult ?? Result()
+        
         DispatchQueue.global(qos: .background).async {
-            let output = self.run("sync", arguments: ["--content"])
-            if var result = existingResult {
-                result.add(output)
+            
+            let credentialed_environment_variables = [
+                "AWS_ACCESS_KEY_ID": self.credentials.s3AccessKey ?? "",
+                "AWS_SECRET_ACCESS_KEY": self.credentials.s3SecretAccessKey ?? ""
+            ]
+            
+            Glue.runProcessErrorAndLog(
+                "git-annex",
+                arguments: ["sync", "--content"],
+                environment_variables: credentialed_environment_variables,
+                currentDirectory: self.directory,
+                log: { fileHandle in
+                    if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
+                        if line.count > 0 {
+                            if line.contains("%") {
+                                result.add(line)
+                                if line.contains("100%") {
+                                    fileHandle.closeFile()
+                                    fileHandle.readabilityHandler = nil
+                                }
+                            }
+                        }
+                    } else {
+                        result.add("Error decoding data: \(fileHandle.availableData)")
+                    }
             }
+            )
+            
+            //            let output = self.run("sync", arguments: ["--content"])
+            //            if var result = existingResult {
+            //                result.add(output)
+            //            }
         }
     }
     

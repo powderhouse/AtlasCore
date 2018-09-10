@@ -16,6 +16,7 @@ public protocol AtlasProcess {
     var environment: [String: String]? { get set }
     func runAndWait() -> String
     func runAndWaitError() -> String
+    func runAndWaitErrorAndLog(_ log: @escaping (_ fileHandle: FileHandle) -> Void)
 }
 
 public protocol AtlasProcessFactory {
@@ -26,14 +27,14 @@ extension Process: AtlasProcess {
     public func runAndWait() -> String {
         let pipe = Pipe()
         standardOutput = pipe
-
+        
         launch()
-//        do {
-//            try run()
-//        } catch {
-//            return "AtlasProcess Error: \(error)"
-//        }
-//        waitUntilExit()
+        //        do {
+        //            try run()
+        //        } catch {
+        //            return "AtlasProcess Error: \(error)"
+        //        }
+        //        waitUntilExit()
         
         let file:FileHandle = pipe.fileHandleForReading
         let data =  file.readDataToEndOfFile()
@@ -47,7 +48,7 @@ extension Process: AtlasProcess {
         let pipe = Pipe()
         standardOutput = pipe
         standardError = pipe
-    
+        
         launch()
         //        do {
         //            try run()
@@ -55,7 +56,7 @@ extension Process: AtlasProcess {
         //            return "AtlasProcess Error: \(error)"
         //        }
         //        waitUntilExit()
-    
+        
         let file:FileHandle = pipe.fileHandleForReading
         let data =  file.readDataToEndOfFile()
         if let result = String(data: data, encoding: String.Encoding.utf8) as String? {
@@ -63,6 +64,18 @@ extension Process: AtlasProcess {
         } else {
             return "ERROR"
         }
+    }
+    
+    public func runAndWaitErrorAndLog(_ log: @escaping (_ fileHandle: FileHandle) -> Void) {
+        let pipe = Pipe()
+        standardOutput = pipe
+        standardError = pipe
+        
+        let file:FileHandle = pipe.fileHandleForReading
+        
+        file.readabilityHandler = log
+        
+        launch()
     }
 }
 

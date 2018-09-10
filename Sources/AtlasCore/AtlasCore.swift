@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.7.4"
+    public static let version = "1.7.5"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -203,7 +203,7 @@ public class AtlasCore {
             result.add("Initializing GitHub")
             self.gitHub = GitHub(credentials, repositoryName: AtlasCore.repositoryName, git: git)
             
-//            result.mergeIn(gitHub.setPostCommitHook(result))
+            //            result.mergeIn(gitHub.setPostCommitHook(result))
             if result.success {
                 result.mergeIn(gitHub.setRepositoryLink())
                 if !result.success {
@@ -422,7 +422,8 @@ public class AtlasCore {
             }
         }
         
-        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
+        //        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
+        sync()
         
         return result
     }
@@ -505,7 +506,8 @@ public class AtlasCore {
     }
     
     public func sync() {
-        let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
-        _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])
+        _ = git?.sync()
+        //        let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
+        //        _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])
     }
 }
