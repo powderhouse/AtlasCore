@@ -210,6 +210,8 @@ class GitSpec: QuickSpec {
                         if let token = GitHub.getAuthenticationToken(credentials) {
                             credentials.setAuthenticationToken(token)
                         }
+                        
+                        Git.configure(credentials)
 
                         gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                         _ = gitHub.createRepository()

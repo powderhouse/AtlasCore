@@ -50,17 +50,19 @@ class GitHubSpec: QuickSpec {
                     let filePath = directory.path
                     let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isDirectory)
                     expect(exists).to(beTrue(), description: "No folder found")
-                    
+
+                    Git.configure(credentials)
+
                     if let token = GitHub.getAuthenticationToken(credentials) {
                         credentials.setAuthenticationToken(token)
                     } else {
                         expect(false).to(beTrue(), description: "Failed to get token")
                     }
-
+                    
                     git = Git(directory, credentials: credentials)
                     _ = git.initialize()
                     _ = git.runInit()
-
+                    
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
                     
                     appDirectory = git.directory

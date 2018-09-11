@@ -34,6 +34,18 @@ public class Git {
         }
     }
     
+    public class func configure(_ credentials: Credentials) {
+        _ = Glue.runProcessError(
+            "git",
+            arguments: ["config", "--global", "user.name", credentials.username]
+        )
+        
+        _ = Glue.runProcessError(
+            "git",
+            arguments: ["config", "--global", "user.email", credentials.email]
+        )
+    }
+    
     public init(_ userDirectory: URL, credentials: Credentials, processFactory: AtlasProcessFactory?=ProcessFactory()) {
         self.userDirectory = userDirectory
         self.directory = userDirectory.appendingPathComponent(AtlasCore.appName)
@@ -77,9 +89,6 @@ public class Git {
             }
         }
         
-        _ = run("config", arguments: ["user.name", credentials.username])
-        _ = run("config", arguments: ["user.email", credentials.email])
-        
         return result
     }
     
@@ -122,14 +131,14 @@ public class Git {
     
     public func clone() -> Result {
         var result = Result()
-        guard credentials != nil else {
+        guard credentials != nil && (credentials.remotePath != nil || credentials.token != nil) else {
             result.success = false
             result.add("Unable to clone. No Credentials found.")
             return result
         }
         
         let path = credentials!.remotePath ??
-        "https://github.com/\(credentials!.username)/\(AtlasCore.appName).git"
+        "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName).git"
         
         let output = run("clone",
                          arguments: [path],

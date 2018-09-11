@@ -29,13 +29,7 @@ public class Glue {
             true
             )[0]
         
-        env["TMPDIR"] = NSSearchPathForDirectoriesInDomains(
-            .documentDirectory,
-            .userDomainMask,
-            true
-            )[0]
-        
-        
+        env["TMPDIR"] = NSTemporaryDirectory()
         
         if let gitDir = gitDir() {
             env["GIT_EXEC_PATH"] = "\(gitDir)/libexec/git-core/"
