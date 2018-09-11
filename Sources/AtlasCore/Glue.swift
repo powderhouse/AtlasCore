@@ -13,7 +13,8 @@ public class Glue {
     
     class func gitDir() -> String? {
         if let dir = Bundle(for: AtlasCore.self).resourcePath?.appending("/git") {
-            if FileSystem.fileExists(URL(fileURLWithPath: dir, isDirectory: true)) {
+            let dirURL = URL(fileURLWithPath: dir, isDirectory: true)
+            if FileSystem.fileExists(dirURL, isDirectory: true) {
                 return dir
             }
         }
