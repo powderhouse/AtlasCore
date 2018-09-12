@@ -322,7 +322,15 @@ public class Git {
             _ = self.writeToLog(message)
         }
         
-        _ = writeToLog("<STARTENTRY>")
+        let start = "<STARTENTRY>"
+        let end = "</ENDENTRY>"
+        let starts = syncLog()?.components(separatedBy: start).count ?? 0
+        let ends = syncLog()?.components(separatedBy: end).count ?? 0
+    
+        if starts > ends {
+            _ = writeToLog(end)
+        }
+        _ = writeToLog(start)
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
@@ -333,7 +341,7 @@ public class Git {
             result.add("Failed to push to GitHub: \(output)")
         }
         
-        let endEntry = { _ = self.writeToLog("</ENDENTRY>") }
+        let endEntry = { _ = self.writeToLog(end) }
         if let gitAnnex = gitAnnex {
             gitAnnex.sync(result, completed: endEntry)
         } else {
@@ -362,6 +370,13 @@ public class Git {
             fileHandle.closeFile()
         }
         return result
+    }
+    
+    public func syncLog() -> String? {
+        if let logUrl = userDirectory?.appendingPathComponent(Git.log) {
+            return try? String(contentsOf: logUrl, encoding: .utf8)
+        }
+        return nil
     }
     
     public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {
