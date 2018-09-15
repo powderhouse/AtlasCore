@@ -22,7 +22,7 @@ public class GitAnnex {
     }
     public var s3Path: String {
         get {
-            return "https://s3.amazonaws.com/\(s3Bucket)"
+            return "https://s3.amazonaws.com/\(s3Bucket)/"
         }
     }
     

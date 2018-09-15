@@ -369,7 +369,7 @@ public class AtlasCore {
                 for filePath in fileInfo {
                     let fileComponents = filePath.components(separatedBy: "/")
                     let fileName = String(fileComponents.last!)
-                    files.append(File(name: fileName, url: "\(git!.annexRoot)/\(filePath)"))
+                    files.append(File(name: fileName, url: "\(git!.annexRoot)\(filePath)"))
                     
                     if let projectName = fileComponents.first {
                         if Project.exists(projectName, in: git!.directory!) {
