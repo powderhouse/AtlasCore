@@ -59,6 +59,14 @@ public class GitAnnex {
                 let s3Result = initializeS3(result)
                 result.mergeIn(s3Result)
             }
+        } else {
+            let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
+            if !output.contains("recording state") {
+                result.success = false
+                result.add(["Unable to enable Git Annex remote.", output])
+            }
+            sync()
+            return result
         }
         
         return result
@@ -219,6 +227,11 @@ public class GitAnnex {
             sleep(1)
             tries += 1
             initOutput = run("initremote", arguments: initArguments)
+            
+            if initOutput.contains("git-annex: Cannot reuse this bucket.") {
+                initOutput = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
+            }
+            
             if tries % 2 == 0 && !initOutput.contains(successText) {
                 result.add("Waiting for AWS IAM to sync.")
             }

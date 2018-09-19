@@ -144,13 +144,18 @@ public class Git {
                          arguments: [path],
                          inDirectory: userDirectory)
         
-        if output.contains("fatal") || !FileSystem.fileExists(directory, isDirectory: true) {
+        if output.contains("fatal") {
             result.success = false
-            result.add(["Unable to clone Atlas.", output])
+            if !output.contains("Repository not found") {
+                result.add(["Unable to clone Atlas.", output])
+            }
+            return result
         }
         
         _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
         _ = run("remote", arguments: ["add", "origin", path], inDirectory: userDirectory)
+        
+        _ = run("fetch", arguments: ["--all"])
         
         return result
     }
@@ -320,7 +325,7 @@ public class Git {
         let end = "</ENDENTRY>"
         let starts = syncLog()?.components(separatedBy: start).count ?? 0
         let ends = syncLog()?.components(separatedBy: end).count ?? 0
-    
+        
         if starts > ends {
             _ = writeToLog(end)
         }
