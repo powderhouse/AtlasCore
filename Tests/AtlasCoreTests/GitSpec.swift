@@ -211,6 +211,8 @@ class GitSpec: QuickSpec {
                             credentials.setAuthenticationToken(token)
                         }
                         
+                        git = Git(directory, credentials: credentials)
+                        
                         Git.configure(credentials)
 
                         gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
@@ -274,6 +276,8 @@ class GitSpec: QuickSpec {
                         if let token = GitHub.getAuthenticationToken(credentials) {
                             credentials.setAuthenticationToken(token)
                         }
+                        
+                        git = Git(directory, credentials: credentials)
                         
                         Git.configure(credentials)
                         

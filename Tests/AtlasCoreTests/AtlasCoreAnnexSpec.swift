@@ -110,7 +110,7 @@ Multiline
                 logEntries += 1
                 expect(
                     atlasCore.completedLogEntries().count
-                    ).toEventually(equal(logEntries), timeout: 10)
+                ).toEventually(equal(logEntries), timeout: 10)
                 
                 let filePath2 = fileDirectory.appendingPathComponent(file2).path
                 expect(project2?.copyInto([filePath2]).success).to(beTrue())
@@ -123,7 +123,7 @@ Multiline
                 logEntries += 1
                 expect(
                     atlasCore.completedLogEntries().count
-                    ).toEventually(equal(logEntries), timeout: 10)
+                ).toEventually(equal(logEntries), timeout: 10)
                 
                 expect(project2?.commitMessage(message2)).to(beTrue())
                 expect(project2?.commitStaged().success).to(beTrue())
@@ -183,6 +183,50 @@ Multiline
                     }
                 }
             }
+            
+//            context("deleting local repository and then reinitializing") {
+//                
+//                var atlasCore2: AtlasCore!
+//                
+//                beforeEach {
+//                    expect(
+//                        atlasCore.completedLogEntries().count
+//                    ).toEventually(equal(5), timeout: 30)
+//
+//                    if let appDirectory = atlasCore.appDirectory {
+//                        while FileSystem.fileExists(appDirectory, isDirectory: true) {
+//                            Helper.deleteBaseDirectory(appDirectory)
+//                        }
+//                    } else {
+//                        expect(false).to(beTrue(), description: "App directory missing")
+//                    }
+//                    
+//                    for identifier in [file1, file2, file3] {
+//                        let file = fileDirectory.appendingPathComponent(identifier)
+//                        expect(FileSystem.fileExists(file)).to(beTrue())
+//                    }
+//                    
+//                    atlasCore2 = AtlasCore(directory, externalLog: {
+//                        message in
+//                        print(message)
+//                    })
+//                    
+//                    expect(atlasCore2.initGitAndGitHub(credentials)).toNot(beNil())
+//
+//                    expect(
+//                        atlasCore.completedLogEntries().count
+//                    ).toEventually(equal(5), timeout: 30)
+//                }
+//                
+//                it("should reinitialize and download existing files") {
+//                    expect(atlasCore2.git?.gitAnnex?.s3Bucket).to(equal(s3Bucket))
+//                    expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: 10)
+//                    
+//                    let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
+//                    let file = commitDirectory.appendingPathComponent(file1)
+//                    expect(FileSystem.fileExists(file)).to(beTrue())
+//                }
+//            }
         }
     }
 }

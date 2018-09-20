@@ -80,11 +80,13 @@ public class Git {
             result.mergeIn(add())
             result.mergeIn(commit())
         }
-        
+
+        print("ORIGIN: \(origin())")
         if let origin = origin() {
             _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
             _ = run("remote", arguments: ["add", "origin", origin], inDirectory: userDirectory)
             _ = run("fetch", arguments: ["--all"])
+            print("FETCH!")
         }
         
         if gitAnnex == nil && credentials.complete() {
@@ -168,7 +170,7 @@ public class Git {
         "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName).git"
         
         let output = run("clone",
-                         arguments: [originPath],
+                         arguments: [originPath, AtlasCore.repositoryName],
                          inDirectory: userDirectory)
         
         if output.contains("fatal") {
