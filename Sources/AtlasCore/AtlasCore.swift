@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.8.3"
+    public static let version = "1.8.4"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -505,7 +505,7 @@ public class AtlasCore {
     }
     
     public func sync() {
-        var result = Result(log: externalLog)
+        let result = Result(log: externalLog)
         
         _ = git?.sync(result)
         //        let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)

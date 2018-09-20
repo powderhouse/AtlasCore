@@ -81,6 +81,12 @@ public class Git {
             result.mergeIn(commit())
         }
         
+        if let origin = authenticatedUrl() {
+            _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
+            _ = run("remote", arguments: ["add", "origin", origin], inDirectory: userDirectory)
+            _ = run("fetch", arguments: ["--all"])
+        }
+        
         if gitAnnex == nil && credentials.complete() {
             gitAnnex = GitAnnex(directory, credentials: credentials)
             
@@ -121,6 +127,31 @@ public class Git {
         return result
     }
     
+    public func authenticatedUrl() -> String? {
+        guard credentials != nil else {
+            return nil
+        }
+        
+        if let remotePath = credentials?.remotePath {
+            return remotePath
+        }
+        
+        let url = run("ls-remote", arguments: ["--get-url"])
+        
+        if url.isEmpty || url.contains("fatal") {
+            return nil
+        }
+        
+        if url.contains("https") {
+            return url.replacingOccurrences(
+                of: "https://\(credentials.username):\(credentials.token!)@",
+                with: "https://"
+            )
+        } else {
+            return url
+        }
+    }
+    
     public func status() -> String? {
         let result = run("status")
         if (result == "") {
@@ -137,11 +168,11 @@ public class Git {
             return result
         }
         
-        let path = credentials!.remotePath ??
+        let originPath = credentials!.remotePath ??
         "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName).git"
         
         let output = run("clone",
-                         arguments: [path],
+                         arguments: [originPath],
                          inDirectory: userDirectory)
         
         if output.contains("fatal") {
@@ -151,11 +182,6 @@ public class Git {
             }
             return result
         }
-        
-        _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
-        _ = run("remote", arguments: ["add", "origin", path], inDirectory: userDirectory)
-        
-        _ = run("fetch", arguments: ["--all"])
         
         return result
     }

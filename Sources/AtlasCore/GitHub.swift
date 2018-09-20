@@ -176,28 +176,15 @@ public class GitHub {
         _ = api(deleteArguments)
     }
     
-    public func url() -> String {
-        let authenticatedUrl = git.run("ls-remote", arguments: ["--get-url"])
-        
-        if authenticatedUrl.contains("https") {
-            return authenticatedUrl.replacingOccurrences(
-                of: "https://\(credentials.username):\(credentials.token!)@",
-                with: "https://"
-            )
-        } else {
-            return authenticatedUrl
-        }
-    }
-    
     public func setRepositoryLink() -> Result {
-        let fullUrl = url()
-        if fullUrl.isEmpty || fullUrl.contains("fatal") {
+        let fullUrl = git.authenticatedUrl()
+        guard fullUrl != nil else {
             return Result(
                 success: false,
-                messages: ["No repository URL found.", fullUrl]
+                messages: ["No repository URL found."]
             )
         }
-        repositoryLink = url().replacingOccurrences(of: ".git\n", with: "")
+        repositoryLink = fullUrl!.replacingOccurrences(of: ".git\n", with: "")
         return Result()
     }
     
@@ -206,60 +193,60 @@ public class GitHub {
         return gitURL.appendingPathComponent("hooks")
     }
     
-//    public func setPostCommitHook(_ existingResult: Result?=nil) -> Result {
-//        var result = existingResult ?? Result()
-//        
-//        result.add("Updating post-commit hook")
-//        
-//        let hooksURL = hooks()
-//        let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)
-//        let atlasScriptURL = hooksURL.appendingPathComponent(GitHub.syncScriptName)
-//        let logURL = git.directory.appendingPathComponent("../\(GitHub.log)")
-//        
-//        let script = """
-//        #!/bin/sh
-//        
-//        DATE=`date '+%Y-%m-%d %H:%M:%S'`
-//        DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-//        
-//        echo ""
-//        echo "<STARTENTRY>"
-//        echo ""
-//        echo "Recorded: ${DATE}"
-//        echo ""
-//        
-//        export AWS_ACCESS_KEY_ID=\(credentials.s3AccessKey ?? "")
-//        export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
-//        
-//        (cd "${DIR}" && cd "../.." && git pull origin master) || true
-//        (cd "${DIR}" && cd "../.." && git push --set-upstream origin master) || true
-//        (cd "${DIR}" && cd "../.." && git annex sync --content) || true
-//        
-//        echo ""
-//        echo "</ENDENTRY>"
-//        """
-//        let atlasScriptResult = write(script, to: atlasScriptURL)
-//        guard atlasScriptResult.success else {
-//            result.add("Unable to write atlas script.")
-//            result.mergeIn(atlasScriptResult)
-//            return result
-//        }
-//        
-//        let badText = "Bad file descriptor"
-//        let hook = """
-//        #!/bin/sh
-//        
-//        DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-//        (cd "${DIR}" && ./atlas-sync.sh) | grep -v '\(badText)' >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
-//        """
-//        let postCommitResult = write(hook, to: postCommitURL)
-//        if !postCommitResult.success {
-//            result.add("Unable to write post commit hook")
-//        }
-//        result.mergeIn(postCommitResult)
-//        
-//        return result
-//    }
+    //    public func setPostCommitHook(_ existingResult: Result?=nil) -> Result {
+    //        var result = existingResult ?? Result()
+    //
+    //        result.add("Updating post-commit hook")
+    //
+    //        let hooksURL = hooks()
+    //        let postCommitURL = hooksURL.appendingPathComponent(GitHub.postCommitScriptName)
+    //        let atlasScriptURL = hooksURL.appendingPathComponent(GitHub.syncScriptName)
+    //        let logURL = git.directory.appendingPathComponent("../\(GitHub.log)")
+    //
+    //        let script = """
+    //        #!/bin/sh
+    //
+    //        DATE=`date '+%Y-%m-%d %H:%M:%S'`
+    //        DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    //
+    //        echo ""
+    //        echo "<STARTENTRY>"
+    //        echo ""
+    //        echo "Recorded: ${DATE}"
+    //        echo ""
+    //
+    //        export AWS_ACCESS_KEY_ID=\(credentials.s3AccessKey ?? "")
+    //        export AWS_SECRET_ACCESS_KEY=\(credentials.s3SecretAccessKey ?? "")
+    //
+    //        (cd "${DIR}" && cd "../.." && git pull origin master) || true
+    //        (cd "${DIR}" && cd "../.." && git push --set-upstream origin master) || true
+    //        (cd "${DIR}" && cd "../.." && git annex sync --content) || true
+    //
+    //        echo ""
+    //        echo "</ENDENTRY>"
+    //        """
+    //        let atlasScriptResult = write(script, to: atlasScriptURL)
+    //        guard atlasScriptResult.success else {
+    //            result.add("Unable to write atlas script.")
+    //            result.mergeIn(atlasScriptResult)
+    //            return result
+    //        }
+    //
+    //        let badText = "Bad file descriptor"
+    //        let hook = """
+    //        #!/bin/sh
+    //
+    //        DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    //        (cd "${DIR}" && ./atlas-sync.sh) | grep -v '\(badText)' >> \(logURL.path.replacingOccurrences(of: " ", with: "\\ ")) 2>&1 &
+    //        """
+    //        let postCommitResult = write(hook, to: postCommitURL)
+    //        if !postCommitResult.success {
+    //            result.add("Unable to write post commit hook")
+    //        }
+    //        result.mergeIn(postCommitResult)
+    //
+    //        return result
+    //    }
     
     public func write(_ script: String, to url: URL) -> Result {
         var result = Result()

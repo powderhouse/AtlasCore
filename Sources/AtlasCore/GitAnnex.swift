@@ -36,15 +36,6 @@ public class GitAnnex {
         
         result.add("Checking Git Annex installation.")
         
-        if !installed() {
-            result.add("Installing Git Annex")
-            let installResult = install()
-            if !installResult.success {
-                return installResult
-            }
-            result.mergeIn(installResult)
-        }
-        
         if !info().contains(GitAnnex.remoteName) {
             let directoryResult = initDirectory()
             result.mergeIn(directoryResult)
@@ -65,35 +56,11 @@ public class GitAnnex {
                 result.success = false
                 result.add(["Unable to enable Git Annex remote.", output])
             }
-            sync()
+            sync(result)
             return result
         }
         
         return result
-    }
-    
-    public func installed() -> Bool {
-        let info = Glue.runProcess(
-            "brew",
-            arguments: ["info", "git-annex"],
-            currentDirectory: directory
-        )
-        return !info.contains("Not installed")
-    }
-    
-    public func install() -> Result {
-        let output = Glue.runProcess(
-            "brew",
-            arguments: ["install", "git-annex"],
-            currentDirectory: directory
-        )
-        if !output.contains("start git-annex") {
-            return Result(
-                success: false,
-                messages: ["Failed to install Git Annex"]
-            )
-        }
-        return Result()
     }
     
     public func initializeAWS(_ existingResult: Result?=nil) -> Result {
@@ -159,25 +126,6 @@ public class GitAnnex {
             result.success = false
             result.add("Failed to add IAM user to group: \(error)")
         }
-        
-        //        var awsReady = false
-        //        repeat {
-        //            sleep(1)
-        //            result.add("Verifying AWS")
-        //
-        //            do {
-        //                let users = try iam.listUsers(Iam.ListUsersRequest())
-        //
-        //                let groupList = try iam.listGroupsForUser(Iam.ListGroupsForUserRequest(
-        //                    userName: credentials.username
-        //                ))
-        //
-        //                let groupNames = groupList.groups.map { $0.groupName }
-        //                awsReady = groupNames.contains(GitAnnex.groupName)
-        //            } catch {
-        //                result.add("Failed to list groups for IAM user: \(error)")
-        //            }
-        //        } while !awsReady
         
         return result
     }
@@ -327,35 +275,43 @@ public class GitAnnex {
             ]
             
             var blankLineCount = 0
+            
+            let log: (_ fileHandle: FileHandle) -> Void  = { fileHandle in
+                if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
+                    if line.count > 0 {
+                        result.add(line)
+                    } else {
+                        blankLineCount += 1
+                        if blankLineCount > 30 {
+                            fileHandle.closeFile()
+                            fileHandle.readabilityHandler = nil
+                            if completed != nil {
+                                completed!()
+                            }
+                        }
+                    }
+                } else {
+                    result.add("Error decoding data: \(fileHandle.availableData)")
+                }
+            }
+            
+            Glue.runProcessErrorAndLog(
+                "git-annex",
+                arguments: ["get", "--json", "--json-progress", "--json-error-messages"],
+                environment_variables: credentialed_environment_variables,
+                currentDirectory: self.directory,
+                log: log
+            )
+            
+            _ = self.run("fix")
+            
             Glue.runProcessErrorAndLog(
                 "git-annex",
                 arguments: ["sync", "--content"],
                 environment_variables: credentialed_environment_variables,
                 currentDirectory: self.directory,
-                log: { fileHandle in
-                    if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
-                        if line.count > 0 {
-                            result.add(line)
-                        } else {
-                            blankLineCount += 1
-                            if blankLineCount > 30 {
-                                fileHandle.closeFile()
-                                fileHandle.readabilityHandler = nil
-                                if completed != nil {
-                                    completed!()
-                                }
-                            }
-                        }
-                    } else {
-                        result.add("Error decoding data: \(fileHandle.availableData)")
-                    }
-                }
+                log: log
             )
-            
-            //            let output = self.run("sync", arguments: ["--content"])
-            //            if var result = existingResult {
-            //                result.add(output)
-            //            }
         }
     }
     
