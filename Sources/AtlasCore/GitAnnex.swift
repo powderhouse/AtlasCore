@@ -265,7 +265,7 @@ public class GitAnnex {
     }
     
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
-        var result = existingResult ?? Result()
+        let result = existingResult ?? Result()
         
         DispatchQueue.global(qos: .background).async {
             
@@ -274,45 +274,54 @@ public class GitAnnex {
                 "AWS_SECRET_ACCESS_KEY": self.credentials.s3SecretAccessKey ?? ""
             ]
             
-            var blankLineCount = 0
-            
-            let log: (_ fileHandle: FileHandle) -> Void  = { fileHandle in
-                if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
-                    if line.count > 0 {
-                        result.add(line)
-                    } else {
-                        blankLineCount += 1
-                        if blankLineCount > 30 {
-                            fileHandle.closeFile()
-                            fileHandle.readabilityHandler = nil
-                            if completed != nil {
-                                completed!()
-                            }
-                        }
-                    }
-                } else {
-                    result.add("Error decoding data: \(fileHandle.availableData)")
-                }
-            }
-            
-            Glue.runProcessErrorAndLog(
-                "git-annex",
-                arguments: ["get", "--json", "--json-progress", "--json-error-messages"],
-                environment_variables: credentialed_environment_variables,
-                currentDirectory: self.directory,
-                log: log
-            )
-            
-            _ = self.run("fix")
-            
             Glue.runProcessErrorAndLog(
                 "git-annex",
                 arguments: ["sync", "--content"],
                 environment_variables: credentialed_environment_variables,
                 currentDirectory: self.directory,
-                log: log
+                log: self.logSync(result, completed: {
+                    Glue.runProcessErrorAndLog(
+                        "git-annex",
+                        arguments: ["get", "--json", "--json-progress", "--json-error-messages"],
+                        environment_variables: credentialed_environment_variables,
+                        currentDirectory: self.directory,
+                        log: self.logSync(result, completed: {
+                            _ = self.run("fix")
+                            
+                            if completed != nil {
+                                completed!()
+                            }
+                        })
+                    )
+                })
             )
+
         }
+    }
+    
+    func logSync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> (_ fileHandle: FileHandle) -> Void {
+        var result = existingResult ?? Result()
+        var blankLineCount = 0
+        let log: (_ fileHandle: FileHandle) -> Void  = { fileHandle in
+            if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
+                if line.count > 0 {
+                    result.add(line)
+                } else {
+                    blankLineCount += 1
+                    if blankLineCount > 30 {
+                        fileHandle.closeFile()
+                        fileHandle.readabilityHandler = nil
+                        
+                        if completed != nil {
+                            completed!()
+                        }
+                    }
+                }
+            } else {
+                result.add("Error decoding data: \(fileHandle.availableData)")
+            }
+        }
+        return log
     }
     
 }

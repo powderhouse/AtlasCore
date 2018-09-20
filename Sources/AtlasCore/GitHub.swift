@@ -177,15 +177,15 @@ public class GitHub {
     }
     
     public func setRepositoryLink() -> Result {
-        let fullUrl = git.authenticatedUrl()
-        guard fullUrl != nil else {
+        if let origin = git.origin() {
+            repositoryLink = origin.replacingOccurrences(of: ".git\n", with: "")
+            return Result()
+        } else {
             return Result(
                 success: false,
                 messages: ["No repository URL found."]
             )
         }
-        repositoryLink = fullUrl!.replacingOccurrences(of: ".git\n", with: "")
-        return Result()
     }
     
     public func hooks() -> URL {

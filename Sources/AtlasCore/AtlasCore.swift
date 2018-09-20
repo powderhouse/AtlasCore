@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.8.4"
+    public static let version = "1.8.5"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -424,8 +424,7 @@ public class AtlasCore {
             }
         }
         
-        //        _ = Glue.runProcess(".git/hooks/\(GitHub.postCommitScriptName)", currentDirectory: git!.directory!)
-        sync()
+        sync(result)
         
         return result
     }
@@ -504,11 +503,7 @@ public class AtlasCore {
         return logEntries.filter { $0.contains("</ENDENTRY>")}
     }
     
-    public func sync() {
-        let result = Result(log: externalLog)
-        
-        _ = git?.sync(result)
-        //        let scriptUrl = gitHub.hooks().appendingPathComponent(GitHub.postCommitScriptName)
-        //        _ = Glue.runProcessError("bash", arguments: [scriptUrl.path])
+    public func sync(_ existingResult: Result?=nil) {
+        _ = git?.sync(existingResult ?? Result(log: externalLog))
     }
 }

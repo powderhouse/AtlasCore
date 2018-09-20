@@ -151,27 +151,7 @@ class GitHubSpec: QuickSpec {
 //
 //                    }
                 }
-                
-                context("url") {
-                    beforeEach {
-                        if let token = GitHub.getAuthenticationToken(credentials) {
-                            credentials.setAuthenticationToken(token)
-                        }
-                        _ = gitHub?.createRepository()
-                    }
-                    
-                    it("should return the url for the repository") {
-                        let url = gitHub?.url()
-                        expect(url).to(contain(credentials.username))
-                        expect(url).to(contain(repositoryName))
-                        if let token = credentials.token {
-                            expect(url).toNot(contain(token))
-                        } else {
-                            expect(false).to(beTrue(), description: "token is nil")
-                        }
-                    }
-                }
-                
+                                
                 context("setRepositoryLink") {
                     beforeEach {
                         if let token = GitHub.getAuthenticationToken(credentials) {

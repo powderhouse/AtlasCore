@@ -257,6 +257,46 @@ class GitSpec: QuickSpec {
                         }
                     }
                 }
+                
+                context("url") {
+                    let repositoryName = "ATLASCORE"
+                    var gitHub: GitHub!
+                    
+                    beforeEach {
+                        credentials = Credentials(
+                            "atlastest",
+                            email: "atlastest@puzzleschool.com",
+                            password: "1a2b3c4d",
+                            token: nil,
+                            directory: directory
+                        )
+                        
+                        if let token = GitHub.getAuthenticationToken(credentials) {
+                            credentials.setAuthenticationToken(token)
+                        }
+                        
+                        Git.configure(credentials)
+                        
+                        gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+                        _ = gitHub.createRepository()
+                    }
+                    
+                    afterEach {
+                        gitHub.deleteRepository()
+                    }
+                    
+                    it("should return the url for the repository") {
+                        let url = git?.origin()
+                        expect(url).to(contain(credentials.username))
+                        expect(url).to(contain(repositoryName))
+                        if let token = credentials.token {
+                            expect(url).toNot(contain(token))
+                        } else {
+                            expect(false).to(beTrue(), description: "token is nil")
+                        }
+                    }
+                }
+
             }
         }
     }

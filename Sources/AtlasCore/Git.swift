@@ -81,7 +81,7 @@ public class Git {
             result.mergeIn(commit())
         }
         
-        if let origin = authenticatedUrl() {
+        if let origin = origin() {
             _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
             _ = run("remote", arguments: ["add", "origin", origin], inDirectory: userDirectory)
             _ = run("fetch", arguments: ["--all"])
@@ -127,15 +127,11 @@ public class Git {
         return result
     }
     
-    public func authenticatedUrl() -> String? {
+    public func origin() -> String? {
         guard credentials != nil else {
             return nil
         }
-        
-        if let remotePath = credentials?.remotePath {
-            return remotePath
-        }
-        
+                
         let url = run("ls-remote", arguments: ["--get-url"])
         
         if url.isEmpty || url.contains("fatal") {
