@@ -54,6 +54,7 @@ public class GitAnnex {
         } else {
             result.mergeIn(enableRemote())
             result.mergeIn(configure())
+            result.mergeIn(exportTracking())
             return result
         }
         
@@ -182,11 +183,7 @@ public class GitAnnex {
             return result
         }
         
-        let exportOutput = run("export", arguments: ["--tracking", "master", "--to", GitAnnex.remoteName])
-        if !exportOutput.contains(GitAnnex.successText) {
-            result.success = false
-            result.add(["Git Annex is unable to track master.", exportOutput])
-        }
+        result.mergeIn(exportTracking())
         
         return result
     }
@@ -231,6 +228,17 @@ public class GitAnnex {
         if !output.contains(GitAnnex.successText) {
             result.success = false
             result.add(["Unable to enable Git Annex remote.", output])
+        }
+
+        return result
+    }
+    
+    func exportTracking() -> Result {
+        var result = Result()
+        let output = run("export", arguments: ["--tracking", "master", "--to", GitAnnex.remoteName])
+        if !output.contains(GitAnnex.successText) {
+            result.success = false
+            result.add(["Git Annex is unable to track master.", output])
         }
 
         return result
