@@ -178,7 +178,14 @@ public class GitHub {
     }
     
     public func setRepositoryLink() -> Result {
-        if let origin = git.origin() {
+        if var origin = git.origin() {
+            if origin.contains("https") {
+                origin = origin.replacingOccurrences(
+                    of: "https://\(credentials.username):\(credentials.token!)@",
+                    with: "https://"
+                )
+            }
+
             repositoryLink = origin.replacingOccurrences(of: ".git", with: "")
             return Result()
         } else {

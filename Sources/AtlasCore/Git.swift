@@ -139,15 +139,8 @@ public class Git {
         }
         
         url = url.replacingOccurrences(of: "\n", with: "")
-        
-        if url.contains("https") {
-            return url.replacingOccurrences(
-                of: "https://\(credentials.username):\(credentials.token!)@",
-                with: "https://"
-            )
-        } else {
-            return url
-        }
+
+        return url
     }
     
     public func status() -> String? {
