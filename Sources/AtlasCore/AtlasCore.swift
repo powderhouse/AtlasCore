@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.8.6"
+    public static let version = "1.8.7"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -218,6 +218,12 @@ public class AtlasCore {
                     }
                     
                     result.mergeIn(atlasCommit())
+                }
+                
+                if result.success {
+                    if let git = git {
+                        result.mergeIn(git.sync(result))
+                    }
                 }
                 return result
             } else {

@@ -12,6 +12,7 @@ public class GitAnnex {
     
     public static let remoteName = "atlasS3"
     public static let groupName = "powderhouse-atlas"
+    public static let successText = "recording state"
     public let directory: URL!
     var credentials: Credentials!
     
@@ -51,12 +52,8 @@ public class GitAnnex {
                 result.mergeIn(s3Result)
             }
         } else {
-            let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
-            if !output.contains("recording state") {
-                result.success = false
-                result.add(["Unable to enable Git Annex remote.", output])
-            }
-            sync(result)
+            result.mergeIn(enableRemote())
+            result.mergeIn(configure())
             return result
         }
         
@@ -135,11 +132,7 @@ public class GitAnnex {
         let info = run("info", arguments: [GitAnnex.remoteName])
         
         if info.contains("remote: \(GitAnnex.remoteName)") {
-            let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
-            if !output.contains("recording state") {
-                result.success = false
-                result.add(["Unable to enable Git Annex remote.", output])
-            }
+            result.mergeIn(enableRemote())
             sync()
             return result
         }
@@ -155,19 +148,12 @@ public class GitAnnex {
         ]
         
         if credentials.s3AccessKey == "test" {
-            let httpOutput = run("config", arguments: [
-                "--set",
-                "annex.security.allowed-http-addresses",
-                "all"
-                ])
-            result.add(httpOutput)
+            result.mergeIn(configure())
             initArguments.append("host=localhost")
             initArguments.append("port=4572")
             initArguments.append("requeststyle=path")
             //            initArguments.append("--debug")
         }
-        
-        let successText = "recording state"
         
         var initOutput: String
         var tries = 0
@@ -177,29 +163,27 @@ public class GitAnnex {
             initOutput = run("initremote", arguments: initArguments)
             
             if initOutput.contains("git-annex: Cannot reuse this bucket.") {
-                initOutput = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
+                initOutput = enableRemote().messages.first ?? ""
             }
             
-            if tries % 2 == 0 && !initOutput.contains(successText) {
+            if tries % 2 == 0 && !initOutput.contains(GitAnnex.successText) {
                 result.add("Waiting for AWS IAM to sync.")
             }
-        } while !initOutput.contains(successText) && tries < 30
+        } while !initOutput.contains(GitAnnex.successText) && tries < 30
         
-        if !initOutput.contains(successText) {
+        if !initOutput.contains(GitAnnex.successText) {
             result.success = false
             result.add(["Unable to initialize Git Annex remote.", initOutput])
             return result
         }
         
-        let enableOutput = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
-        if !enableOutput.contains(successText) {
-            result.success = false
-            result.add(["Unable to enable Git Annex remote.", enableOutput])
+        result.mergeIn(enableRemote())
+        guard result.success else {
             return result
         }
         
         let exportOutput = run("export", arguments: ["--tracking", "master", "--to", GitAnnex.remoteName])
-        if !exportOutput.contains(successText) {
+        if !exportOutput.contains(GitAnnex.successText) {
             result.success = false
             result.add(["Git Annex is unable to track master.", exportOutput])
         }
@@ -227,10 +211,35 @@ public class GitAnnex {
         )
     }
     
+    func configure() -> Result {
+        var result = Result()
+        if credentials.s3AccessKey == "test" {
+            let httpOutput = run("config", arguments: [
+                "--set",
+                "annex.security.allowed-http-addresses",
+                "all"
+                ])
+            result.add(httpOutput)
+        }
+        return result
+    }
+    
+    func enableRemote() -> Result {
+        var result = Result()
+        //            let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
+        let output = run("enableremote", arguments: [GitAnnex.remoteName])
+        if !output.contains(GitAnnex.successText) {
+            result.success = false
+            result.add(["Unable to enable Git Annex remote.", output])
+        }
+
+        return result
+    }
+    
     public func initDirectory() -> Result {
         var result = Result()
         let output = run("init")
-        if !output.contains("recording state") {
+        if !output.contains(GitAnnex.successText) {
             result.success = false
             result.add("Failed to initialize Git Annex: \(output)")
         }
@@ -241,9 +250,9 @@ public class GitAnnex {
     public func add(_ filter: String=".") -> Result {
         var result = Result()
         let output = run("add", arguments: [filter])
-        if !output.contains("ok") {
+        if output.count > 0 && !output.contains("ok") {
             result.success = false
-            result.add("Failed to add files")
+            result.add(["Failed to add files", output])
         }
         result.add(output)
         return result
@@ -286,8 +295,6 @@ public class GitAnnex {
                         environment_variables: credentialed_environment_variables,
                         currentDirectory: self.directory,
                         log: self.logSync(result, completed: {
-                            _ = self.run("fix")
-                            
                             if completed != nil {
                                 completed!()
                             }

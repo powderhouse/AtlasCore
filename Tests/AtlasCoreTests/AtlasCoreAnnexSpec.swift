@@ -38,6 +38,7 @@ class AtlasCoreAnnexSpec: QuickSpec {
             let file1 = "index1.html"
             let file2 = "index2.html"
             let file3 = "index3.html"
+            let file4 = "index4.html"
             var fileDirectory: URL!
             
             let message1 = "The first commit"
@@ -69,8 +70,7 @@ Multiline
                 
                 atlasCore = AtlasCore(directory)
                 
-                expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
-
+                expect(atlasCore.initGitAndGitHub(credentials).success).to(beTrue())
                 s3Bucket = atlasCore.git?.gitAnnex?.s3Bucket
                 
                 logEntries += 1
@@ -87,13 +87,17 @@ Multiline
                 Helper.addFile(file3, directory: fileDirectory, contents: file3)
                 
                 expect(atlasCore.initProject(project2Name)).to(beTrue())
+                logEntries += 1
+                expect(
+                    atlasCore.completedLogEntries().count
+                ).toEventually(equal(logEntries), timeout: 10)
                 
                 project1 = atlasCore.project(project1Name)
                 project2 = atlasCore.project(project2Name)
                 
                 let filePath1 = fileDirectory.appendingPathComponent(file1).path
                 expect(project1?.copyInto([filePath1]).success).to(beTrue())
-                _ = atlasCore.atlasCommit()
+                expect(atlasCore.atlasCommit().success).to(beTrue())
                 
                 logEntries += 1
                 expect(
@@ -105,8 +109,8 @@ Multiline
                 
                 expect(project1?.commitMessage(message1)).to(beTrue())
                 expect(project1?.commitStaged().success).to(beTrue())
-                _ = atlasCore.commitChanges(message1)
                 
+                expect(atlasCore.commitChanges(message1).success).to(beTrue())
                 logEntries += 1
                 expect(
                     atlasCore.completedLogEntries().count
@@ -117,8 +121,8 @@ Multiline
                 
                 let filePath3 = fileDirectory.appendingPathComponent(file3).path
                 expect(project2?.copyInto([filePath3]).success).to(beTrue())
-                
-                _ = atlasCore.atlasCommit()
+
+                expect(atlasCore.atlasCommit().success).to(beTrue())
                 
                 logEntries += 1
                 expect(
@@ -127,9 +131,18 @@ Multiline
                 
                 expect(project2?.commitMessage(message2)).to(beTrue())
                 expect(project2?.commitStaged().success).to(beTrue())
-                _ = atlasCore.commitChanges(message2)
+                expect(atlasCore.commitChanges(message2).success).to(beTrue())
                 
-                expect(atlasCore.log().count).toEventually(equal(2), timeout: 10)
+                logEntries += 1
+                expect(
+                    atlasCore.completedLogEntries().count
+                ).toEventually(equal(logEntries), timeout: 10)
+
+                atlasCore.sync()
+                logEntries += 1
+                expect(
+                    atlasCore.completedLogEntries().count
+                ).toEventually(equal(logEntries), timeout: 10)
             }
             
             afterEach {
@@ -156,9 +169,10 @@ Multiline
 
                     let relativePath = "\(project2.name!)/committed/\(slug2)/\(file2)"
 
-                    expect(atlasCore.purge([relativePath]).success).to(beTrue())
+                    let x = atlasCore.purge([relativePath])
+                    expect(x.success).to(beTrue())
 
-                    expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(file2), timeout: 10)
+                    expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(file2), timeout: 30)
 
                     let objects = S3Helper.listObjects(s3Bucket)
 
@@ -172,7 +186,7 @@ Multiline
                     expect(atlasCore.purge([path]).success).to(beTrue())
 
                     for identifier in [slug2, file2, file3] {
-                        expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(identifier), timeout: 10, description: "\(identifier) still found")
+                        expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(identifier), timeout: 30, description: "\(identifier) still found")
 
                     }
 
@@ -184,49 +198,57 @@ Multiline
                 }
             }
             
-//            context("deleting local repository and then reinitializing") {
-//                
-//                var atlasCore2: AtlasCore!
-//                
-//                beforeEach {
-//                    expect(
-//                        atlasCore.completedLogEntries().count
-//                    ).toEventually(equal(5), timeout: 30)
-//
-//                    if let appDirectory = atlasCore.appDirectory {
-//                        while FileSystem.fileExists(appDirectory, isDirectory: true) {
-//                            Helper.deleteBaseDirectory(appDirectory)
-//                        }
-//                    } else {
-//                        expect(false).to(beTrue(), description: "App directory missing")
-//                    }
-//                    
-//                    for identifier in [file1, file2, file3] {
-//                        let file = fileDirectory.appendingPathComponent(identifier)
-//                        expect(FileSystem.fileExists(file)).to(beTrue())
-//                    }
-//                    
-//                    atlasCore2 = AtlasCore(directory, externalLog: {
-//                        message in
-//                        print(message)
-//                    })
-//                    
-//                    expect(atlasCore2.initGitAndGitHub(credentials)).toNot(beNil())
-//
-//                    expect(
-//                        atlasCore.completedLogEntries().count
-//                    ).toEventually(equal(5), timeout: 30)
-//                }
-//                
-//                it("should reinitialize and download existing files") {
-//                    expect(atlasCore2.git?.gitAnnex?.s3Bucket).to(equal(s3Bucket))
-//                    expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: 10)
-//                    
-//                    let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
-//                    let file = commitDirectory.appendingPathComponent(file1)
-//                    expect(FileSystem.fileExists(file)).to(beTrue())
-//                }
-//            }
+            context("deleting local repository and then reinitializing") {
+
+                var atlasCore2: AtlasCore!
+
+                beforeEach {
+                    if let appDirectory = atlasCore.appDirectory {
+                        while FileSystem.fileExists(appDirectory, isDirectory: true) {
+                            Helper.deleteBaseDirectory(appDirectory)
+                        }
+                    } else {
+                        expect(false).to(beTrue(), description: "App directory missing")
+                    }
+
+                    for identifier in [file1, file2, file3] {
+                        let file = fileDirectory.appendingPathComponent(identifier)
+                        expect(FileSystem.fileExists(file)).to(beTrue())
+                    }
+
+                    atlasCore2 = AtlasCore(directory)
+
+                    expect(atlasCore2.initGitAndGitHub(credentials).success).to(beTrue())
+                    logEntries += 1
+                    expect(
+                        atlasCore.completedLogEntries().count
+                    ).toEventually(equal(logEntries), timeout: 10)
+                }
+
+                it("should reinitialize and download existing files") {
+                    expect(atlasCore2.git?.gitAnnex?.s3Bucket).to(equal(s3Bucket))
+                    expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: 10)
+
+                    let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
+                    let file = commitDirectory.appendingPathComponent(file1)
+                    expect(FileSystem.fileExists(file)).to(beTrue())
+                }
+                
+                it("should properly sync with S3 when a new file is added") {
+                    Helper.addFile(file4, directory: fileDirectory, contents: file4)
+                    
+                    let filePath4 = fileDirectory.appendingPathComponent(file4).path
+                    expect(project1?.copyInto([filePath4]).success).to(beTrue())
+                    expect(atlasCore.commitChanges().success).to(beTrue())
+                    
+                    logEntries += 1
+                    expect(
+                        atlasCore.completedLogEntries().count
+                    ).toEventually(equal(logEntries), timeout: 10)
+
+                    expect(S3Helper.listObjects(s3Bucket)).toEventually(contain(file4), timeout: 30, description: "\(file4) not found")
+                }
+            }
         }
     }
 }

@@ -81,12 +81,10 @@ public class Git {
             result.mergeIn(commit())
         }
 
-        print("ORIGIN: \(origin())")
         if let origin = origin() {
             _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
             _ = run("remote", arguments: ["add", "origin", origin], inDirectory: userDirectory)
             _ = run("fetch", arguments: ["--all"])
-            print("FETCH!")
         }
         
         if gitAnnex == nil && credentials.complete() {
@@ -134,11 +132,13 @@ public class Git {
             return nil
         }
                 
-        let url = run("ls-remote", arguments: ["--get-url"])
+        var url = run("ls-remote", arguments: ["--get-url"])
         
         if url.isEmpty || url.contains("fatal") {
             return nil
         }
+        
+        url = url.replacingOccurrences(of: "\n", with: "")
         
         if url.contains("https") {
             return url.replacingOccurrences(
@@ -322,6 +322,7 @@ public class Git {
     
     public func commit(_ message: String?=nil) -> Result {
         var result = Result()
+        result.add("Committing changes")
         
         let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
         if !output.contains("changed") &&
@@ -357,9 +358,11 @@ public class Git {
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
+        _ = gitAnnex?.run("fix")
+
         let output = run("push", arguments: ["--set-upstream", "origin", "master"])
         result.add(output)
-        if !output.contains("master -> master") {
+        if !output.contains("Everything up-to-date") && !output.contains("master -> master") {
             result.success = false
             result.add("Failed to push to GitHub: \(output)")
         }

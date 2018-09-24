@@ -72,7 +72,7 @@ class AtlasCoreSpec: QuickSpec {
                 beforeEach {
                     expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
                     
-                    logEntries += 1
+                    logEntries += 2
                     expect(
                         atlasCore.completedLogEntries().count
                     ).toEventually(equal(logEntries), timeout: 10)
@@ -409,7 +409,7 @@ Multiline
 
 
                         it("should create syncLogEntries") {
-                            expect(atlasCore.syncLogEntries().count).to(equal(6))
+                            expect(atlasCore.syncLogEntries().count).to(equal(7))
                             expect(atlasCore.syncLog()).toNot(contain("Bad file descriptor"))
                         }
 
@@ -417,9 +417,9 @@ Multiline
 
                     context("syncLogEntries") {
                         it("should create more syncLogEntries if sync is called") {
-                            expect(atlasCore.syncLogEntries().count).toEventually(equal(6))
-                            atlasCore.sync()
                             expect(atlasCore.syncLogEntries().count).toEventually(equal(7))
+                            atlasCore.sync()
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(8))
                         }
                     }
 

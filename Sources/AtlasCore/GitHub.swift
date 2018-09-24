@@ -158,6 +158,7 @@ public class GitHub {
     public func validRepository() -> Bool {
         let update = git.run("remote", arguments: ["update"])
         if update.count == 0 { return false }
+        if !update.contains("origin") { return false }
         if update.contains("error: Could not fetch origin") { return false }
         return true
     }
@@ -178,7 +179,7 @@ public class GitHub {
     
     public func setRepositoryLink() -> Result {
         if let origin = git.origin() {
-            repositoryLink = origin.replacingOccurrences(of: ".git\n", with: "")
+            repositoryLink = origin.replacingOccurrences(of: ".git", with: "")
             return Result()
         } else {
             return Result(
