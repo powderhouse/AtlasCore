@@ -37,6 +37,8 @@ public class GitAnnex {
         
         result.add("Checking Git Annex installation.")
         
+        var initialized = false
+        
         if !info().contains(GitAnnex.remoteName) {
             let directoryResult = initDirectory()
             result.mergeIn(directoryResult)
@@ -51,11 +53,27 @@ public class GitAnnex {
                 let s3Result = initializeS3(result)
                 result.mergeIn(s3Result)
             }
+            
+            initialized = true
         } else {
             result.mergeIn(enableRemote())
+            //            runLong("get",
+            //                arguments: ["--json", "--json-progress", "--json-error-messages"],
+            //                result: result,
+            //                completed: {
+            //                    result.mergeIn(self.configure())
+            //                    result.mergeIn(self.exportTracking())
+            //                    initialized = true
+            //                }
+            //            )
+            result.add(run("get"))
             result.mergeIn(configure())
             result.mergeIn(exportTracking())
-            return result
+            initialized = true
+        }
+        
+        while !initialized {
+            sleep(2)
         }
         
         return result
@@ -192,14 +210,20 @@ public class GitAnnex {
         return [command] + additionalArguments
     }
     
+    func credential_environment_variables(_ environment_variables:[String:String]=[:]) -> [String:String] {
+        var credentialed_environment_variables = environment_variables
+        credentialed_environment_variables["AWS_ACCESS_KEY_ID"] = credentials.s3AccessKey ?? ""
+        credentialed_environment_variables["AWS_SECRET_ACCESS_KEY"] = credentials.s3SecretAccessKey ?? ""
+        return credentialed_environment_variables
+    }
+    
     func run(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:]) -> String {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
         )
-        var credentialed_environment_variables = environment_variables
-        credentialed_environment_variables["AWS_ACCESS_KEY_ID"] = credentials.s3AccessKey ?? ""
-        credentialed_environment_variables["AWS_SECRET_ACCESS_KEY"] = credentials.s3SecretAccessKey ?? ""
+        
+        let credentialed_environment_variables = credential_environment_variables(environment_variables)
         
         return Glue.runProcessError("git-annex",
                                     arguments: fullArguments,
@@ -207,6 +231,23 @@ public class GitAnnex {
                                     currentDirectory: directory
         )
     }
+    
+    func runLong(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:], result: Result, completed: (() -> Void)?=nil) {
+        let fullArguments = buildArguments(
+            command,
+            additionalArguments: arguments
+        )
+        
+        let credentialed_environment_variables = credential_environment_variables(environment_variables)
+        
+        Glue.runProcessErrorAndLog("git-annex",
+                                   arguments: fullArguments,
+                                   environment_variables: credentialed_environment_variables,
+                                   currentDirectory: directory,
+                                   log: self.logSync(result, completed: completed)
+        )
+    }
+    
     
     func configure() -> Result {
         var result = Result()
@@ -229,7 +270,7 @@ public class GitAnnex {
             result.success = false
             result.add(["Unable to enable Git Annex remote.", output])
         }
-
+        
         return result
     }
     
@@ -240,7 +281,7 @@ public class GitAnnex {
             result.success = false
             result.add(["Git Annex is unable to track master.", output])
         }
-
+        
         return result
     }
     
@@ -285,32 +326,21 @@ public class GitAnnex {
         let result = existingResult ?? Result()
         
         DispatchQueue.global(qos: .background).async {
-            
-            let credentialed_environment_variables = [
-                "AWS_ACCESS_KEY_ID": self.credentials.s3AccessKey ?? "",
-                "AWS_SECRET_ACCESS_KEY": self.credentials.s3SecretAccessKey ?? ""
-            ]
-            
-            Glue.runProcessErrorAndLog(
-                "git-annex",
-                arguments: ["sync", "--content"],
-                environment_variables: credentialed_environment_variables,
-                currentDirectory: self.directory,
-                log: self.logSync(result, completed: {
-                    Glue.runProcessErrorAndLog(
-                        "git-annex",
-                        arguments: ["get", "--json", "--json-progress", "--json-error-messages"],
-                        environment_variables: credentialed_environment_variables,
-                        currentDirectory: self.directory,
-                        log: self.logSync(result, completed: {
-                            if completed != nil {
-                                completed!()
+            self.runLong("sync",
+                         arguments: ["--content"],
+                         result: result,
+                         completed: {
+                            self.runLong("get",
+                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
+                                         result: result,
+                                         completed: {
+                                            if completed != nil {
+                                                completed!()
+                                            }
                             }
-                        })
-                    )
-                })
+                            )
+            }
             )
-
         }
     }
     
