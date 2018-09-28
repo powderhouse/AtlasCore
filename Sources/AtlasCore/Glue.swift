@@ -33,8 +33,8 @@ public class Glue {
         env["TMPDIR"] = NSTemporaryDirectory()
         
         if let gitDir = gitDir() {
-            env["GIT_EXEC_PATH"] = "\(gitDir)/libexec/git-core/"
-            env["PATH"] = "\(gitDir)/bin/:\(gitDir)/libexec/git-core/:\(path)"
+            env["GIT_EXEC_PATH"] = "\(gitDir)/bin/bundle/"
+            env["PATH"] = "\(gitDir)/bin/:\(gitDir)/bin/bundle/:\(path)"
         } else {
             env["PATH"] = path
         }
