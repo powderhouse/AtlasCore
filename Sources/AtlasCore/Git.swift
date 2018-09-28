@@ -317,6 +317,8 @@ public class Git {
         var result = Result()
         result.add("Committing changes")
         
+        _ = gitAnnex?.run("fix")
+        
         let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
         if !output.contains("changed") &&
             !output.contains("nothing to commit, working tree clean") {
@@ -351,8 +353,6 @@ public class Git {
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
-        _ = gitAnnex?.run("fix")
-
         let output = run("push", arguments: ["--set-upstream", "origin", "master"])
         result.add(output)
         if !output.contains("Everything up-to-date") && !output.contains("master -> master") {
