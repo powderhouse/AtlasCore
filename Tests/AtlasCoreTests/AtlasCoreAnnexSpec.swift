@@ -54,6 +54,14 @@ Multiline
             
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
+
+                while FileSystem.fileExists(directory, isDirectory: true) {
+                    Helper.deleteBaseDirectory(directory)
+                }
+                
+                // Ugh how do you avoid this hardcoding?
+                S3Helper.deleteBucket("\(GitAnnex.groupName)-\(username)")
+
                 Helper.createBaseDirectory(directory)
                 
                 credentials = Credentials(
