@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.9.3"
+    public static let version = "1.9.4"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -92,7 +92,7 @@ public class AtlasCore {
         self.externalLog = externalLog
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
-        }
+        }        
     }
     
     public func initialize() -> Result {
@@ -183,7 +183,7 @@ public class AtlasCore {
         
         guard credentials.token != nil || credentials.remotePath != nil else {
             result.success = false
-            result.add("No valid token or remote path found.")
+            result.add("No valid token or remote path found in credentials.")
             return result
         }
         
@@ -208,7 +208,11 @@ public class AtlasCore {
             //            result.mergeIn(gitHub.setPostCommitHook(result))
             if result.success {
                 result.mergeIn(gitHub.setRepositoryLink())
-                if !result.success {
+                if result.success {
+                    if let git = git {
+                        result.mergeIn(git.sync(result))
+                    }
+                } else {
                     result.success = true
                     result.mergeIn(gitHub.createRepository(result))
                     result.mergeIn(gitHub.setRepositoryLink())
@@ -219,12 +223,7 @@ public class AtlasCore {
                     
                     result.mergeIn(atlasCommit())
                 }
-                
-                if result.success {
-                    if let git = git {
-                        result.mergeIn(git.sync(result))
-                    }
-                }
+
                 return result
             } else {
                 result.success = false

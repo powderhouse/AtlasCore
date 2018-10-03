@@ -95,10 +95,6 @@ Multiline
                 Helper.addFile(file3, directory: fileDirectory, contents: file3)
                 
                 expect(atlasCore.initProject(project2Name)).to(beTrue())
-                logEntries += 1
-                expect(
-                    atlasCore.completedLogEntries().count
-                ).toEventually(equal(logEntries), timeout: 10)
                 
                 project1 = atlasCore.project(project1Name)
                 project2 = atlasCore.project(project2Name)

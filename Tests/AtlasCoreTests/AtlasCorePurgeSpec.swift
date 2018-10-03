@@ -58,7 +58,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                 beforeEach {
                     expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
                     
-                    logEntries += 2
+                    logEntries += 1
                     expect(
                         atlasCore.completedLogEntries().count
                     ).toEventually(equal(logEntries), timeout: 30)

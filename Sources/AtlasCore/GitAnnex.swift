@@ -232,7 +232,7 @@ public class GitAnnex {
         )
     }
     
-    func runLong(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:], result: Result, completed: (() -> Void)?=nil) {
+    func runLong(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:], result: Result, info: String?=nil, completed: (() -> Void)?=nil) {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -244,7 +244,7 @@ public class GitAnnex {
                                    arguments: fullArguments,
                                    environment_variables: credentialed_environment_variables,
                                    currentDirectory: directory,
-                                   log: self.logSync(result, completed: completed)
+                                   log: self.logSync(result, info: info, completed: completed)
         )
     }
     
@@ -323,7 +323,9 @@ public class GitAnnex {
     }
     
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
-        let result = existingResult ?? Result()
+        var result = existingResult ?? Result()
+        
+        _ = info()
         
         DispatchQueue.global(qos: .background).async {
             self.runLong("sync",
@@ -337,20 +339,24 @@ public class GitAnnex {
                                             if completed != nil {
                                                 completed!()
                                             }
-                            }
+                                        }
                             )
-            }
+                        }
             )
         }
     }
     
-    func logSync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> (_ fileHandle: FileHandle) -> Void {
+    func logSync(_ existingResult: Result?=nil, info: String?=nil, completed: (() -> Void)?=nil) -> (_ fileHandle: FileHandle) -> Void {
         var result = existingResult ?? Result()
         var blankLineCount = 0
         let log: (_ fileHandle: FileHandle) -> Void  = { fileHandle in
             if let line = String(data: fileHandle.availableData, encoding: String.Encoding.utf8) {
                 if line.count > 0 {
-                    result.add(line)
+                    if let info = info {
+                        result.add(info + " - " + line)
+                    } else {
+                        result.add(line)
+                    }
                 } else {
                     blankLineCount += 1
                     if blankLineCount > 30 {

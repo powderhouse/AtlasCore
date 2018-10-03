@@ -109,11 +109,13 @@ public class Git {
             additionalArguments: arguments
         )
         
-        return Glue.runProcessError("git",
-                                    arguments: fullArguments,
-                                    currentDirectory: inDirectory ?? directory,
-                                    atlasProcess: atlasProcessFactory.build()
+        let result = Glue.runProcessError("git",
+            arguments: fullArguments,
+            currentDirectory: inDirectory ?? directory,
+            atlasProcess: atlasProcessFactory.build()
         )
+
+        return result
     }
     
     public func runInit() -> Result {
@@ -353,11 +355,13 @@ public class Git {
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
-        let output = run("push", arguments: ["--set-upstream", "origin", "master"])
-        result.add(output)
-        if !output.contains("Everything up-to-date") && !output.contains("master -> master") {
+        let push = { self.run("push", arguments: ["--set-upstream", "origin", "master"]) }
+        let output = push()
+        if !(output.contains("Everything up-to-date") || output.contains("master -> master") || output.contains("set up to track remote branch")) {
             result.success = false
             result.add("Failed to push to GitHub: \(output)")
+        } else {//if !output.contains("set up to track remote branch") {
+            result.add(output)
         }
         
         let endEntry = { _ = self.writeToLog(end) }
