@@ -360,7 +360,7 @@ public class Git {
         if !(output.contains("Everything up-to-date") || output.contains("master -> master") || output.contains("set up to track remote branch")) {
             result.success = false
             result.add("Failed to push to GitHub: \(output)")
-        } else {//if !output.contains("set up to track remote branch") {
+        } else if !output.contains("Create a pull request") {
             result.add(output)
         }
         
