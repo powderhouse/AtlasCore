@@ -19,6 +19,9 @@ public class Git {
     
     public var gitAnnex: GitAnnex? = nil
     
+    public var syncing = false
+    public var queuedSyncResult: Result? = nil
+    
     static let gitIgnore = [
         ".DS_Store",
         "credentials.json"
@@ -80,7 +83,7 @@ public class Git {
             result.mergeIn(add())
             result.mergeIn(commit())
         }
-
+        
         if let origin = origin() {
             _ = run("remote", arguments: ["rm", "origin"], inDirectory: userDirectory)
             _ = run("remote", arguments: ["add", "origin", origin], inDirectory: userDirectory)
@@ -110,11 +113,11 @@ public class Git {
         )
         
         let result = Glue.runProcessError("git",
-            arguments: fullArguments,
-            currentDirectory: inDirectory ?? directory,
-            atlasProcess: atlasProcessFactory.build()
+                                          arguments: fullArguments,
+                                          currentDirectory: inDirectory ?? directory,
+                                          atlasProcess: atlasProcessFactory.build()
         )
-
+        
         return result
     }
     
@@ -133,7 +136,7 @@ public class Git {
         guard credentials != nil else {
             return nil
         }
-                
+        
         var url = run("ls-remote", arguments: ["--get-url"])
         
         if url.isEmpty || url.contains("fatal") {
@@ -141,7 +144,7 @@ public class Git {
         }
         
         url = url.replacingOccurrences(of: "\n", with: "")
-
+        
         return url
     }
     
@@ -334,6 +337,14 @@ public class Git {
     public func sync(_ existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
         
+        if syncing {
+            self.queuedSyncResult = result
+            result.add("Git sync in progress. Waiting for it to complete...")
+            return result
+        }
+        
+        syncing = true
+        
         let resultLog = result.log
         result.log = { message in
             if let existingLog = resultLog {
@@ -351,6 +362,7 @@ public class Git {
         if starts > ends {
             _ = writeToLog(end)
         }
+        
         _ = writeToLog(start)
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
@@ -364,7 +376,15 @@ public class Git {
             result.add(output)
         }
         
-        let endEntry = { _ = self.writeToLog(end) }
+        let endEntry = {
+            self.syncing = false
+            if var queuedSyncResult = self.queuedSyncResult {
+                self.queuedSyncResult = nil
+                queuedSyncResult.mergeIn(self.sync(queuedSyncResult))
+            }
+            
+            _ = self.writeToLog(end)
+        }
         if let gitAnnex = gitAnnex {
             gitAnnex.sync(result, completed: endEntry)
         } else {

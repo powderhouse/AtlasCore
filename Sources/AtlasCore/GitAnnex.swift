@@ -171,7 +171,7 @@ public class GitAnnex {
             initArguments.append("host=localhost")
             initArguments.append("port=4572")
             initArguments.append("requeststyle=path")
-//            initArguments.append("--debug")
+            //            initArguments.append("--debug")
         }
         
         var initOutput: String
@@ -339,9 +339,9 @@ public class GitAnnex {
                                             if completed != nil {
                                                 completed!()
                                             }
-                                        }
+                            }
                             )
-                        }
+            }
             )
         }
     }
