@@ -56,10 +56,12 @@ public class Glue {
         return process.runAndWaitError()
     }
     
-    public class func runProcessErrorAndLog(_ command: String, arguments: [String]?=[], environment_variables: [String: String]?=nil, currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process(), log: @escaping (_ fileHandle: FileHandle) -> Void) {
-        let process = initializeProcess(command, arguments: arguments, environment_variables: environment_variables, currentDirectory: currentDirectory, atlasProcess: atlasProcess)
+    public class func runProcessErrorAndLog(_ command: String, arguments: [String]?=[], environment_variables: [String: String]?=nil, currentDirectory: URL?=nil, atlasProcess: AtlasProcess=Process(), log: @escaping (_ fileHandle: FileHandle) -> Void, completed: ((Process) -> Void)?=nil) {
+        var process = initializeProcess(command, arguments: arguments, environment_variables: environment_variables, currentDirectory: currentDirectory, atlasProcess: atlasProcess)
         
-        return process.runAndWaitErrorAndLog(log)
+        process.terminationHandler = completed
+        
+        process.runAndWaitErrorAndLog(log)
     }
     
     class func initializeProcess(_ command: String, arguments: [String]?, environment_variables: [String: String]?, currentDirectory: URL?, atlasProcess: AtlasProcess) -> AtlasProcess {

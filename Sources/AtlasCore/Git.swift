@@ -390,6 +390,7 @@ public class Git {
         } else {
             endEntry()
         }
+        
         return result
     }
     

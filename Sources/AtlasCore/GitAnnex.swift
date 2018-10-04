@@ -232,7 +232,7 @@ public class GitAnnex {
         )
     }
     
-    func runLong(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:], result: Result, info: String?=nil, completed: (() -> Void)?=nil) {
+    func runLong(_ command: String, arguments: [String]=[], environment_variables:[String:String]=[:], result: Result, info: String?=nil, completed: ((Process) -> Void)?=nil) {
         let fullArguments = buildArguments(
             command,
             additionalArguments: arguments
@@ -244,7 +244,8 @@ public class GitAnnex {
                                    arguments: fullArguments,
                                    environment_variables: credentialed_environment_variables,
                                    currentDirectory: directory,
-                                   log: self.logSync(result, info: info, completed: completed)
+                                   log: self.logSync(result, info: info),
+                                   completed: completed
         )
     }
     
@@ -323,30 +324,28 @@ public class GitAnnex {
     }
     
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
-        var result = existingResult ?? Result()
+        let result = existingResult ?? Result()
         
         _ = info()
         
         DispatchQueue.global(qos: .background).async {
             self.runLong("sync",
-                         arguments: ["--content"],
-                         result: result,
-                         completed: {
-                            self.runLong("get",
-                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
-                                         result: result,
-                                         completed: {
-                                            if completed != nil {
-                                                completed!()
-                                            }
-                            }
-                            )
-            }
+                arguments: ["--content"],
+                result: result,
+                completed: { process in
+                    self.runLong("get",
+                        arguments: ["--json", "--json-progress", "--json-error-messages"],
+                        result: result,
+                        completed: { process in
+                            completed?()
+                        }
+                    )
+                }
             )
         }
     }
     
-    func logSync(_ existingResult: Result?=nil, info: String?=nil, completed: (() -> Void)?=nil) -> (_ fileHandle: FileHandle) -> Void {
+    func logSync(_ existingResult: Result?=nil, info: String?=nil) -> (_ fileHandle: FileHandle) -> Void {
         var result = existingResult ?? Result()
         var blankLineCount = 0
         let log: (_ fileHandle: FileHandle) -> Void  = { fileHandle in
@@ -362,10 +361,6 @@ public class GitAnnex {
                     if blankLineCount > 30 {
                         fileHandle.closeFile()
                         fileHandle.readabilityHandler = nil
-                        
-                        if completed != nil {
-                            completed!()
-                        }
                     }
                 }
             } else {

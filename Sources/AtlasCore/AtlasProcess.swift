@@ -14,6 +14,7 @@ public protocol AtlasProcess {
     var launchPath: String? { get set }
     var arguments: [String]? { get set }
     var environment: [String: String]? { get set }
+    var terminationHandler: ((Process) -> Void)? { get set }
     func runAndWait() -> String
     func runAndWaitError() -> String
     func runAndWaitErrorAndLog(_ log: @escaping (_ fileHandle: FileHandle) -> Void)
