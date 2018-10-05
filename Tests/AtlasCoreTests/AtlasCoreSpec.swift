@@ -67,10 +67,33 @@ class AtlasCoreSpec: QuickSpec {
                     expect(path).to(contain("Application Support"))
                 }
             }
+            
+            context("with bad credentials") {
+                it("should return a failed result with no directory or credentials added") {
+                    let badCredentials = Credentials(
+                        username,
+                        email: email,
+                        password: "WRONGPASSWORD"
+                    )
+                    let result = atlasCore.initGitAndGitHub(badCredentials)
+                    expect(result.success).to(beFalse())
+                    
+                    let userDirectory = directory.appendingPathComponent(username)
+                    let userDirectoryExists = FileSystem.fileExists(
+                        userDirectory,
+                        isDirectory: true
+                    )
+                    expect(userDirectoryExists).to(beFalse())
+                    
+                    let credentialsFile = directory.appendingPathComponent(Credentials.filename)
+                    let credentialsFileExists = FileSystem.fileExists(credentialsFile)
+                    expect(credentialsFileExists).to(beFalse())
+                }
+            }
 
             context("with git and GitHub initialized") {
                 beforeEach {
-                    expect(atlasCore.initGitAndGitHub(credentials)).toNot(beNil())
+                    expect(atlasCore.initGitAndGitHub(credentials).success).to(beTrue())
                     
                     logEntries += 1
                     expect(

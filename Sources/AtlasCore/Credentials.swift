@@ -8,7 +8,7 @@
 import Foundation
 
 public class Credentials {
-    static let filename = "credentials.json"
+    public static let filename = "credentials.json"
 
     public let username: String
     public let email: String

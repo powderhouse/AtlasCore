@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "1.9.7"
+    public static let version = "1.9.8"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -183,7 +183,10 @@ public class AtlasCore {
         
         guard credentials.token != nil || credentials.remotePath != nil else {
             result.success = false
-            result.add("No valid token or remote path found in credentials.")
+            result.add("Failed to authenticate with GitHub and no local repository provided.")
+            if let userDirectory = userDirectory {
+                _ = FileSystem.deleteDirectory(userDirectory)
+            }
             return result
         }
         
