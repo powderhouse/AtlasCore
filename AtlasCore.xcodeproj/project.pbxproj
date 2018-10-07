@@ -2434,7 +2434,7 @@
       };
       "OBJ_124" = {
          isa = "PBXFileReference";
-         path = "Async.swift";
+         path = "Await.swift";
          sourceTree = "<group>";
       };
       "OBJ_1240" = {
@@ -2715,7 +2715,7 @@
             "OBJ_131",
             "OBJ_135",
          );
-         name = "SwiftAWSIam 1.1.6";
+         name = "SwiftAWSIam 0.0.2";
          path = "";
          sourceTree = "SOURCE_ROOT";
       };
@@ -2767,7 +2767,7 @@
             "OBJ_134",
          );
          name = "SwiftAWSIam";
-         path = ".build/checkouts/iam.git--5650659440842381798/Sources/SwiftAWSIam";
+         path = ".build/checkouts/iam.git--4343086036575736324/Sources/SwiftAWSIam";
          sourceTree = "SOURCE_ROOT";
       };
       "OBJ_1310" = {
@@ -2949,7 +2949,7 @@
          isa = "PBXFileReference";
          explicitFileType = "sourcecode.swift";
          name = "Package.swift";
-         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/iam.git--5650659440842381798/Package.swift";
+         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/iam.git--4343086036575736324/Package.swift";
          sourceTree = "<group>";
       };
       "OBJ_1350" = {
@@ -2998,7 +2998,7 @@
             "OBJ_137",
             "OBJ_175",
          );
-         name = "AWSSDKSwiftCore 1.0.10";
+         name = "AWSSDKSwiftCore 0.0.1";
          path = "";
          sourceTree = "SOURCE_ROOT";
       };
@@ -3064,7 +3064,7 @@
             "OBJ_172",
          );
          name = "AWSSDKSwiftCore";
-         path = ".build/checkouts/aws-sdk-swift-core.git--4837282371143309106/Sources/AWSSDKSwiftCore";
+         path = ".build/checkouts/aws-sdk-swift-core.git-5242949483241660798/Sources/AWSSDKSwiftCore";
          sourceTree = "SOURCE_ROOT";
       };
       "OBJ_1370" = {
@@ -4843,7 +4843,7 @@
          isa = "PBXFileReference";
          explicitFileType = "sourcecode.swift";
          name = "Package.swift";
-         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/aws-sdk-swift-core.git--4837282371143309106/Package.swift";
+         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/aws-sdk-swift-core.git-5242949483241660798/Package.swift";
          sourceTree = "<group>";
       };
       "OBJ_1750" = {
@@ -5773,7 +5773,7 @@
             "OBJ_188",
             "OBJ_234",
          );
-         name = "Prorsum 0.3.3";
+         name = "Prorsum 0.0.1";
          path = "";
          sourceTree = "SOURCE_ROOT";
       };
@@ -5822,7 +5822,7 @@
          children = (
          );
          name = "Performance";
-         path = ".build/checkouts/Prorsum.git--8295785803236466221/Sources/Performance";
+         path = ".build/checkouts/Prorsum.git-1264169463945877571/Sources/Performance";
          sourceTree = "SOURCE_ROOT";
       };
       "OBJ_1870" = {
@@ -5873,7 +5873,7 @@
             "OBJ_222",
          );
          name = "Prorsum";
-         path = ".build/checkouts/Prorsum.git--8295785803236466221/Sources/Prorsum";
+         path = ".build/checkouts/Prorsum.git-1264169463945877571/Sources/Prorsum";
          sourceTree = "SOURCE_ROOT";
       };
       "OBJ_1880" = {
@@ -7201,7 +7201,7 @@
          isa = "PBXFileReference";
          explicitFileType = "sourcecode.swift";
          name = "Package.swift";
-         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/Prorsum.git--8295785803236466221/Package.swift";
+         path = "/Users/jcosulich/workspace/AtlasCore/.build/checkouts/Prorsum.git-1264169463945877571/Package.swift";
          sourceTree = "<group>";
       };
       "OBJ_235" = {
@@ -8729,7 +8729,7 @@
             "OBJ_44",
             "OBJ_71",
          );
-         name = "Quick 1.3.0";
+         name = "Quick 1.3.2";
          path = "";
          sourceTree = "SOURCE_ROOT";
       };
@@ -10713,7 +10713,7 @@
             "OBJ_73",
             "OBJ_129",
          );
-         name = "Nimble 7.1.3";
+         name = "Nimble 7.3.1";
          path = "";
          sourceTree = "SOURCE_ROOT";
       };
@@ -11966,7 +11966,7 @@
       };
       "OBJ_92" = {
          isa = "PBXFileReference";
-         path = "AsyncMatcherWrapper.swift";
+         path = "Async.swift";
          sourceTree = "<group>";
       };
       "OBJ_920" = {
@@ -12239,17 +12239,17 @@
       "OBJ_966" = {
          isa = "PBXGroup";
          children = (
-            "SwiftAWSIam::SwiftAWSIam::Product",
+            "CLibreSSL::CLibreSSL::Product",
             "HypertextApplicationLanguage::HypertextApplicationLanguage::Product",
-            "AtlasCore::AtlasCoreTests::Product",
-            "Prorsum::Prorsum::Product",
-            "Quick::QuickSpecBase::Product",
-            "Nimble::Nimble::Product",
             "Quick::Quick::Product",
             "AtlasCore::AtlasCore::Product",
+            "Prorsum::Prorsum::Product",
+            "AtlasCore::AtlasCoreTests::Product",
+            "Nimble::Nimble::Product",
             "AWSSDKSwiftCore::AWSSDKSwiftCore::Product",
+            "Quick::QuickSpecBase::Product",
             "ProrsumNet::ProrsumNet::Product",
-            "CLibreSSL::CLibreSSL::Product",
+            "SwiftAWSIam::SwiftAWSIam::Product",
             "CHTTPParser::CHTTPParser::Product",
          );
          name = "Products";
