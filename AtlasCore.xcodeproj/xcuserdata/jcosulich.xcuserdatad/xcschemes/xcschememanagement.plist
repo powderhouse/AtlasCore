@@ -7,7 +7,7 @@
 		<key>AWSSDKSwiftCorePackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<key>AtlasCore-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -17,12 +17,12 @@
 		<key>AtlasCorePackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<key>AtlasCorePackageTests.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 		<key>CHTTPParserPackageDescription.xcscheme</key>
 		<dict>
@@ -42,7 +42,7 @@
 		<key>NimblePackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>7</integer>
+			<integer>3</integer>
 		</dict>
 		<key>ProrsumNetPackageDescription.xcscheme</key>
 		<dict>
@@ -57,7 +57,7 @@
 		<key>QuickPackageDescription.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>10</integer>
+			<integer>4</integer>
 		</dict>
 		<key>SwiftAWSIamPackageDescription.xcscheme</key>
 		<dict>

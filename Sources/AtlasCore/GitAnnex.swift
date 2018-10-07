@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftAWSIam
 
 public class GitAnnex {
     
@@ -88,60 +87,60 @@ public class GitAnnex {
             return result
         }
         
-        let iam = Iam(accessKeyId: credentials.s3AccessKey, secretAccessKey: credentials.s3SecretAccessKey)
+        let iam = Iam(accessKeyId: credentials.s3AccessKey!, secretAccessKey: credentials.s3SecretAccessKey!)
         
         result.add("Checking AWS IAM for existing user.")
         
-        let user = try? iam.getUser(Iam.GetUserRequest(userName: credentials.username))
-        
-        if user == nil {
-            do {
-                _ = try iam.getAccountAuthorizationDetails(Iam.GetAccountAuthorizationDetailsRequest())
-            } catch {
-                if "\(error)".contains(credentials.username) {
-                    result.add("IAM user already initialized.")
-                } else {
-                    result.success = false
-                    result.add("Invalid AWS credentials: \(error)")
-                }
-                return result
-            }
-            
-            result.add("Creating AWS IAM user.")
-            
-            do {
-                _ = try iam.createUser(Iam.CreateUserRequest(
-                    userName: credentials.username,
-                    path: "/\(AtlasCore.repositoryName)/"
-                ))
-            } catch {
-                result.success = false
-                result.add("Failed to create IAM user: \(error)")
-            }
-        }
-        
-        do {
-            let accessKey = try iam.createAccessKey(Iam.CreateAccessKeyRequest(
-                userName: credentials.username
-            )).accessKey
-            
-            credentials.setS3AccessKey(accessKey.accessKeyId)
-            credentials.setS3SecretAccessKey(accessKey.secretAccessKey)
-            credentials.save()
-        } catch {
-            result.success = false
-            result.add("Failed to create IAM user access key: \(error)")
-        }
-        
-        do {
-            try iam.addUserToGroup(Iam.AddUserToGroupRequest(
-                userName: credentials.username,
-                groupName: GitAnnex.groupName
-            ))
-        } catch {
-            result.success = false
-            result.add("Failed to add IAM user to group: \(error)")
-        }
+        let user = iam.getUser(credentials.username)
+        print(user)
+//        if user == nil {
+//            do {
+//                _ = try iam.getAccountAuthorizationDetails(Iam.GetAccountAuthorizationDetailsRequest())
+//            } catch {
+//                if "\(error)".contains(credentials.username) {
+//                    result.add("IAM user already initialized.")
+//                } else {
+//                    result.success = false
+//                    result.add("Invalid AWS credentials: \(error)")
+//                }
+//                return result
+//            }
+//
+//            result.add("Creating AWS IAM user.")
+//
+//            do {
+//                _ = try iam.createUser(Iam.CreateUserRequest(
+//                    userName: credentials.username,
+//                    path: "/\(AtlasCore.repositoryName)/"
+//                ))
+//            } catch {
+//                result.success = false
+//                result.add("Failed to create IAM user: \(error)")
+//            }
+//        }
+//
+//        do {
+//            let accessKey = try iam.createAccessKey(Iam.CreateAccessKeyRequest(
+//                userName: credentials.username
+//            )).accessKey
+//
+//            credentials.setS3AccessKey(accessKey.accessKeyId)
+//            credentials.setS3SecretAccessKey(accessKey.secretAccessKey)
+//            credentials.save()
+//        } catch {
+//            result.success = false
+//            result.add("Failed to create IAM user access key: \(error)")
+//        }
+//
+//        do {
+//            try iam.addUserToGroup(Iam.AddUserToGroupRequest(
+//                userName: credentials.username,
+//                groupName: GitAnnex.groupName
+//            ))
+//        } catch {
+//            result.success = false
+//            result.add("Failed to add IAM user to group: \(error)")
+//        }
         
         return result
     }

@@ -14,7 +14,6 @@ let package = Package(
         ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/swift-aws/iam.git", from: "1.0.0"),
         .package(url: "https://github.com/Quick/Quick.git", from: "1.0.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "7.1.0"),
         ],
@@ -23,7 +22,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "AtlasCore",
-            dependencies: ["SwiftAWSIam"]),
+            dependencies: []),
         .testTarget(
             name: "AtlasCoreTests",
             dependencies: ["AtlasCore", "Quick", "Nimble"]),
