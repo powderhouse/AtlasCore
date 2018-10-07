@@ -14,6 +14,34 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::CNIOSHA1"
+               BuildableName = "CNIOSHA1.framework"
+               BlueprintName = "CNIOSHA1"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::NIOPriorityQueue"
+               BuildableName = "NIOPriorityQueue.framework"
+               BlueprintName = "NIOPriorityQueue"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftAWSIam::SwiftAWSIam"
                BuildableName = "SwiftAWSIam.framework"
                BlueprintName = "SwiftAWSIam"
@@ -28,9 +56,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "HypertextApplicationLanguage::HypertextApplicationLanguage"
-               BuildableName = "HypertextApplicationLanguage.framework"
-               BlueprintName = "HypertextApplicationLanguage"
+               BlueprintIdentifier = "swift-nio::NIOConcurrencyHelpers"
+               BuildableName = "NIOConcurrencyHelpers.framework"
+               BlueprintName = "NIOConcurrencyHelpers"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,9 +70,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Prorsum::Prorsum"
-               BuildableName = "Prorsum.framework"
-               BlueprintName = "Prorsum"
+               BlueprintIdentifier = "swift-nio::CNIOAtomics"
+               BuildableName = "CNIOAtomics.framework"
+               BlueprintName = "CNIOAtomics"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -56,9 +84,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Quick::QuickSpecBase"
-               BuildableName = "QuickSpecBase.framework"
-               BlueprintName = "QuickSpecBase"
+               BlueprintIdentifier = "swift-nio::CNIODarwin"
+               BuildableName = "CNIODarwin.framework"
+               BlueprintName = "CNIODarwin"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -84,9 +112,79 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Quick::Quick"
-               BuildableName = "Quick.framework"
-               BlueprintName = "Quick"
+               BlueprintIdentifier = "swift-nio::CNIOZlib"
+               BuildableName = "CNIOZlib.framework"
+               BlueprintName = "CNIOZlib"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::NIOHTTP1"
+               BuildableName = "NIOHTTP1.framework"
+               BlueprintName = "NIOHTTP1"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::CNIOLinux"
+               BuildableName = "CNIOLinux.framework"
+               BlueprintName = "CNIOLinux"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::NIO"
+               BuildableName = "NIO.framework"
+               BlueprintName = "NIO"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio-ssl::NIOOpenSSL"
+               BuildableName = "NIOOpenSSL.framework"
+               BlueprintName = "NIOOpenSSL"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "swift-nio::CNIOHTTPParser"
+               BuildableName = "CNIOHTTPParser.framework"
+               BlueprintName = "CNIOHTTPParser"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -112,6 +210,48 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "HypertextApplicationLanguage::HypertextApplicationLanguage"
+               BuildableName = "HypertextApplicationLanguage.framework"
+               BlueprintName = "HypertextApplicationLanguage"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Quick::Quick"
+               BuildableName = "Quick.framework"
+               BlueprintName = "Quick"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Quick::QuickSpecBase"
+               BuildableName = "QuickSpecBase.framework"
+               BlueprintName = "QuickSpecBase"
+               ReferencedContainer = "container:AtlasCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "AWSSDKSwiftCore::AWSSDKSwiftCore"
                BuildableName = "AWSSDKSwiftCore.framework"
                BlueprintName = "AWSSDKSwiftCore"
@@ -126,9 +266,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ProrsumNet::ProrsumNet"
-               BuildableName = "ProrsumNet.framework"
-               BlueprintName = "ProrsumNet"
+               BlueprintIdentifier = "swift-nio::NIOTLS"
+               BuildableName = "NIOTLS.framework"
+               BlueprintName = "NIOTLS"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -140,23 +280,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CLibreSSL::CLibreSSL"
-               BuildableName = "CLibreSSL.framework"
-               BlueprintName = "CLibreSSL"
-               ReferencedContainer = "container:AtlasCore.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CHTTPParser::CHTTPParser"
-               BuildableName = "CHTTPParser.framework"
-               BlueprintName = "CHTTPParser"
+               BlueprintIdentifier = "swift-nio-ssl::CNIOOpenSSL"
+               BuildableName = "CNIOOpenSSL.framework"
+               BlueprintName = "CNIOOpenSSL"
                ReferencedContainer = "container:AtlasCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -195,9 +321,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "SwiftAWSIam::SwiftAWSIam"
-            BuildableName = "SwiftAWSIam.framework"
-            BlueprintName = "SwiftAWSIam"
+            BlueprintIdentifier = "swift-nio::CNIOSHA1"
+            BuildableName = "CNIOSHA1.framework"
+            BlueprintName = "CNIOSHA1"
             ReferencedContainer = "container:AtlasCore.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
