@@ -56,7 +56,8 @@ public class GitAnnex {
             
             initialized = true
         } else {
-            result.mergeIn(enableRemote())
+            let enableOutput = enableRemote()
+            result.mergeIn(enableOutput)
             //            runLong("get",
             //                arguments: ["--json", "--json-progress", "--json-error-messages"],
             //                result: result,
@@ -66,9 +67,14 @@ public class GitAnnex {
             //                    initialized = true
             //                }
             //            )
+            let configureOutput = configure()
+            result.mergeIn(configureOutput)
+            
+            let exportOutput = exportTracking()
+            result.mergeIn(exportOutput)
+            
             result.add(run("get"))
-            result.mergeIn(configure())
-            result.mergeIn(exportTracking())
+            
             initialized = true
         }
         
@@ -330,17 +336,17 @@ public class GitAnnex {
         
         DispatchQueue.global(qos: .background).async {
             self.runLong("sync",
-                arguments: ["--content"],
-                result: result,
-                completed: { process in
-                    self.runLong("get",
-                        arguments: ["--json", "--json-progress", "--json-error-messages"],
-                        result: result,
-                        completed: { process in
-                            completed?()
-                        }
-                    )
-                }
+                         arguments: ["--content"],
+                         result: result,
+                         completed: { process in
+                            self.runLong("get",
+                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
+                                         result: result,
+                                         completed: { process in
+                                            completed?()
+                            }
+                            )
+            }
             )
         }
     }
