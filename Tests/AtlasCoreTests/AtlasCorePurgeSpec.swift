@@ -197,7 +197,7 @@ class AtlasCorePurgeSpec: QuickSpec {
                                 atlasCore.completedLogEntries().count
                                 ).toEventually(equal(logEntries), timeout: 30)
 
-                            expect(atlasCore.purge([project.directory().path]).success).to(beTrue())
+                            expect(atlasCore.purge([project.name]).success).to(beTrue())
 
                             logEntries += 1
                             expect(

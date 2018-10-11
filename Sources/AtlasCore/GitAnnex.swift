@@ -73,6 +73,7 @@ public class GitAnnex {
             let exportOutput = exportTracking()
             result.mergeIn(exportOutput)
             
+            result.add("Downloading all existing files. This could take a while.")
             result.add(run("get"))
             
             initialized = true

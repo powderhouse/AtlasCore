@@ -53,9 +53,13 @@ public class FileSystem {
             try fileManager.removeItem(at: url)
         } catch {
             result.success = false
-            result.add("Unable to delete directrory: \(url) - \(error)")
+            result.add("Unable to delete: \(url) - \(error)")
         }
         return result
+    }
+    
+    public class func deleteFile(_ url: URL) -> Result {
+        return deleteDirectory(url)
     }
     
     public class func filesInDirectory(_ url: URL, excluding: [String]=[], directoriesOnly: Bool=false) -> [String] {
@@ -109,7 +113,7 @@ public class FileSystem {
         
         return result
     }
-
+    
     public class func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Result {
         return move([filePath], into: directory, renamedTo: newName)
     }
@@ -120,9 +124,9 @@ public class FileSystem {
             if let fileName = filePath.split(separator: "/").last {
                 let destinationName = newName == nil ? String(fileName) : newName!
                 let destination = directory.appendingPathComponent(destinationName)
-
+                
                 let output = Glue.runProcessError("mv", arguments: [filePath, destination.path])
-
+                
                 if !FileSystem.fileExists(destination) {
                     result.success = false
                     result.add(["Unable to move \(filePath)", output])
@@ -143,5 +147,5 @@ public class FileSystem {
         
         return result
     }
-
+    
 }

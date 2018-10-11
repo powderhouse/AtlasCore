@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.0.2"
+    public static let version = "2.0.3"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -425,9 +425,14 @@ public class AtlasCore {
         for directory in directories {
             if directory.contains("committed") {
                 let fullDirectory = git!.directory!.appendingPathComponent(directory)
-                let files = FileSystem.filesInDirectory(fullDirectory)
+                var files = FileSystem.filesInDirectory(fullDirectory)
                 if files.count == 1 && files.first!.contains(Project.readme) {
                     result.mergeIn(git!.removeFile("\(directory)/\(Project.readme)", existingResult: result))
+                }
+                
+                files = FileSystem.filesInDirectory(fullDirectory)
+                if files.count == 0 {
+                    result.mergeIn(git!.removeFile(directory, existingResult: result))
                 }
             }
         }

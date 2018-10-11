@@ -287,28 +287,41 @@ public class Git {
     
     public func removeFile(_ filePath: String, existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
-        let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
-        
-        if history.count == 0 || history.contains("unknown revision or path") {
+
+        result.add("Removing \(filePath)")
+
+        let fileUrl = directory.appendingPathComponent(filePath)
+        if FileSystem.fileExists(fileUrl) {
+            _ = FileSystem.deleteFile(fileUrl)
+        } else if FileSystem.fileExists(fileUrl, isDirectory: true) {
+            _ = FileSystem.deleteDirectory(fileUrl)
+        } else {
             result.success = false
-            result.add(["\(filePath) does not exist in log.", history])
+            result.add("Unable to find file")
             return result
         }
+        _ = run("add", arguments: ["-u"])
+        _ = commit()
+
+        var files = [filePath]
+        let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
+        if history.count > 0 && !history.contains("unknown revision or path") {
+            files += history.components(separatedBy: "\n").filter { return $0.count > 0 }
+        }
         
-        result.add("Removing \(filePath)")
-        let files = history.components(separatedBy: "\n").filter { return $0.count > 0 }
         let escapedFiles = files.map { return "\"\($0)\"" }
-        var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --cached --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
+        var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
         
-        if let gitAnnex = gitAnnex {
-            result.mergeIn(gitAnnex.deleteFile(filePath))
-        }
+//        if let gitAnnex = gitAnnex {
+//            result.mergeIn(gitAnnex.deleteFile(filePath))
+//        }
         
         result.add(run("filter-branch", arguments: filterBranchArguments))
         result.add(run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"]))
         result.add(run("reflog", arguments: ["expire", "--expire=now", "--all"]))
         result.add(run("gc", arguments: ["--prune=now"]))
+        
         result.add(run("push", arguments: ["origin", "--force", "--all"]))
         result.add(run("push", arguments: ["origin", "--force", "--tags"]))
         
@@ -334,7 +347,7 @@ public class Git {
         return result
     }
     
-    public func sync(_ existingResult: Result?=nil) -> Result {
+    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> Result {
         var result = existingResult ?? Result()
         
         if syncing {
@@ -384,6 +397,9 @@ public class Git {
             }
             
             _ = self.writeToLog(end)
+            if let completed = completed {
+                completed()
+            }
         }
         if let gitAnnex = gitAnnex {
             gitAnnex.sync(result, completed: endEntry)

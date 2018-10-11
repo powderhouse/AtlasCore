@@ -186,8 +186,7 @@ Multiline
                 }
 
                 it("should remove project and all files from S3 when the project is deleted") {
-                    let path = project2.directory().path
-                    expect(atlasCore.purge([path]).success).to(beTrue())
+                    expect(atlasCore.purge([project2.name]).success).to(beTrue())
 
                     for identifier in [slug2, file2, file3] {
                         expect(S3Helper.listObjects(s3Bucket)).toEventuallyNot(contain(identifier), timeout: 30, description: "\(identifier) still found")
