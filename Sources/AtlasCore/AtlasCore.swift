@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.0.3"
+    public static let version = "2.0.4"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -516,7 +516,7 @@ public class AtlasCore {
         return logEntries.filter { $0.contains("</ENDENTRY>")}
     }
     
-    public func sync(_ existingResult: Result?=nil) {
-        _ = git?.sync(existingResult ?? Result(log: externalLog))
+    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
+        _ = git?.sync(existingResult ?? Result(log: externalLog), completed: completed)
     }
 }
