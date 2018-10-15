@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.0.5"
+    public static let version = "2.0.6"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -200,6 +200,15 @@ public class AtlasCore {
         
         if let gitResult = git?.initialize(result) {
             result.mergeIn(gitResult)
+        }
+        
+        guard result.success else {
+            result.add("Failed to initialize Git and GitHub.")
+            _ = deleteCredentials()
+            if let userDirectory = userDirectory {
+                _ = FileSystem.deleteDirectory(userDirectory)
+            }
+            return result
         }
         
         appDirectory = git?.directory

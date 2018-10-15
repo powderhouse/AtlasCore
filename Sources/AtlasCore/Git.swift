@@ -94,6 +94,9 @@ public class Git {
             gitAnnex = GitAnnex(directory, credentials: credentials)
             
             if let gitAnnexResult = gitAnnex?.initialize(result) {
+                if !gitAnnexResult.success {
+                    gitAnnex = nil
+                }
                 result.mergeIn(gitAnnexResult)
             }
         }
