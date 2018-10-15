@@ -74,7 +74,14 @@ public class GitAnnex {
             result.mergeIn(exportOutput)
             
             result.add("Downloading all existing files. This could take a while.")
-            result.add(run("get"))
+            
+            let getOutput = run("get")
+            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
+                result.success = false
+                result.add("Unable to sync with S3. Please check credentials.")
+                return result
+            }
+            result.add(getOutput)
             
             initialized = true
         }
@@ -109,7 +116,8 @@ public class GitAnnex {
                     result.add("IAM user already initialized.")
                 } else {
                     result.success = false
-                    result.add("Invalid AWS credentials: \(error)")
+                    result.add("Invalid AWS credentials")
+                    result.add(error.localizedDescription)
                 }
                 return result
             }
