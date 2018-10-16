@@ -20,6 +20,8 @@ public class Credentials {
     public var s3SecretAccessKey: String?
     
     public var directory: URL?
+    
+    public var authenticationError: String?
 
     public init(_ username: String,
         email: String,
@@ -28,6 +30,7 @@ public class Credentials {
         remotePath: String?=nil,
         s3AccessKey: String?=nil,
         s3SecretAccessKey: String?=nil,
+        authenticationError: String?=nil,
         directory: URL?=nil
     ) {
         self.username = username
@@ -44,6 +47,8 @@ public class Credentials {
         if s3SecretAccessKey?.count ?? 0 > 0 {
             self.s3SecretAccessKey = s3SecretAccessKey
         }
+
+        self.authenticationError = authenticationError
     }
     
     public func sync(_ credentials: Credentials) {
@@ -92,6 +97,10 @@ public class Credentials {
 
             if s3SecretAccessKey != nil {
                 credentialsHash["s3SecretAccessKey"] = s3SecretAccessKey
+            }
+
+            if authenticationError != nil {
+                credentialsHash["authenticationError"] = authenticationError
             }
 
             let jsonCredentials = try JSONSerialization.data(
@@ -143,6 +152,10 @@ public class Credentials {
     public func setS3SecretAccessKey(_ s3SecretAccessKey: String?) {
         self.s3SecretAccessKey = s3SecretAccessKey
     }
+    
+    public func setAuthenticationError(_ authenticationError: String?) {
+        self.authenticationError = authenticationError
+    }
 
     public class func retrieve(_ baseDirectory: URL) -> [Credentials] {
         let path = baseDirectory.appendingPathComponent(filename)
@@ -167,6 +180,7 @@ public class Credentials {
                                 remotePath: credentialsDict["remotePath"],
                                 s3AccessKey: credentialsDict["s3AccessKey"],
                                 s3SecretAccessKey: credentialsDict["s3SecretAccessKey"],
+                                authenticationError: credentialsDict["authenticationError"],
                                 directory: baseDirectory
                             )]
                         }

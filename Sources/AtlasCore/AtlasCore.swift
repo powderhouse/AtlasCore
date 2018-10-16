@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.0.7"
+    public static let version = "2.0.8"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -184,6 +184,8 @@ public class AtlasCore {
         guard credentials.token != nil || credentials.remotePath != nil else {
             result.success = false
             result.add("Failed to authenticate with GitHub and no local repository provided.")
+            credentials.setAuthenticationError("Please check your GitHub credentials.")
+            credentials.save()
             if let userDirectory = userDirectory {
                 _ = FileSystem.deleteDirectory(userDirectory)
             }
@@ -204,6 +206,8 @@ public class AtlasCore {
         
         guard result.success else {
             result.add("Failed to initialize Git and GitHub.")
+            credentials.setAuthenticationError("Please check your AWS credentials.")
+            credentials.save()
             git = nil
             if let userDirectory = userDirectory {
                 _ = FileSystem.deleteDirectory(userDirectory)

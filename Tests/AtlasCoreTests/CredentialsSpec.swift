@@ -20,6 +20,8 @@ class CredentialsSpec: QuickSpec {
             let email = "atlastest@puzzleschool.com"
             let password = "1a2b3c4d"
             let token = "TOKEN"
+            let s3AccessKey = "S3ACCESSKEY"
+            let s3SecretAccessKey = "S3SECRETACCESSKEY"
             let remotePath = "REMOTE_PATH"
 
             var directory: URL!
@@ -50,6 +52,8 @@ class CredentialsSpec: QuickSpec {
                         email: email,
                         password: password,
                         token: token,
+                        s3AccessKey: s3AccessKey,
+                        s3SecretAccessKey: s3SecretAccessKey,
                         directory: directory
                     )
                 }
@@ -58,6 +62,8 @@ class CredentialsSpec: QuickSpec {
                     expect(credentials.username).to(equal(username))
                     expect(credentials.password).to(equal(password))
                     expect(credentials.token).to(equal(token))
+                    expect(credentials.s3AccessKey).to(equal(s3AccessKey))
+                    expect(credentials.s3SecretAccessKey).to(equal(s3SecretAccessKey))
                 }
                 
                 context("save") {
@@ -138,14 +144,28 @@ class CredentialsSpec: QuickSpec {
                 
                 var credentials: Credentials?
                 
+                let authenticationError = "Failed to authenticate."
+                
                 beforeEach {
-                    Credentials(username, email: email, token: token, directory: directory).save()
+                    Credentials(
+                        username,
+                        email: email,
+                        token: token,
+                        s3AccessKey: s3AccessKey,
+                        s3SecretAccessKey: s3SecretAccessKey,
+                        authenticationError: authenticationError,
+                        directory: directory
+                    ).save()
                     credentials = Credentials.retrieve(directory).first
                 }
                 
                 it("should retrieve and instantiate the saved credentials") {
                     expect(credentials).toNot(beNil())
                     expect(credentials?.username).to(equal(username))
+                    expect(credentials?.token).to(equal(token))
+                    expect(credentials?.s3AccessKey).to(equal(s3AccessKey))
+                    expect(credentials?.s3SecretAccessKey).to(equal(s3SecretAccessKey))
+                    expect(credentials?.authenticationError).to(equal(authenticationError))
                     expect(credentials?.token).to(equal(token))
                 }
             }
