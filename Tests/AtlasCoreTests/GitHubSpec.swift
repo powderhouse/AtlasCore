@@ -154,6 +154,10 @@ class GitHubSpec: QuickSpec {
                                 
                 context("setRepositoryLink") {
                     beforeEach {
+                        _ = Glue.runProcess("git",
+                            arguments: ["remote", "rm", "origin"],
+                            currentDirectory: git?.directory
+                        )
                         if let token = GitHub.getAuthenticationToken(credentials) {
                             credentials.setAuthenticationToken(token)
                         }
