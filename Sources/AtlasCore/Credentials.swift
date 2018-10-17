@@ -72,10 +72,10 @@ public class Credentials {
     }
 
     public func save() {
-        guard token != nil || remotePath != nil else {
-            printCredentials("No token or remote path provided: \(username)")
-            return
-        }
+//        guard token != nil || remotePath != nil else {
+//            printCredentials("No token or remote path provided: \(username)")
+//            return
+//        }
         
         do {
             var credentialsHash: [String: String] = [

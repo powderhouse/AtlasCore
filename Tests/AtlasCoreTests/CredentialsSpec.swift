@@ -101,10 +101,10 @@ class CredentialsSpec: QuickSpec {
                         credentials.save()
                     }
                     
-                    it("should not write the credentials to a file in the specified directory because the token is missing") {
+                    it("should write the credentials to a file even though the token is missing") {
                         let filePath = "\(directory.path)/credentials.json"
                         let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
-                        expect(exists).toNot(beTrue(), description: "Credentials json found but should not be")
+                        expect(exists).to(beTrue(), description: "Credentials json not found ")
                     }
                 }
                 

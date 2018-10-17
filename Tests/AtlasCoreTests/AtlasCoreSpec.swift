@@ -69,7 +69,7 @@ class AtlasCoreSpec: QuickSpec {
             }
             
             context("with bad credentials") {
-                it("should return a failed result with no directory or credentials added") {
+                it("should return a failed result with no directory added") {
                     let badCredentials = Credentials(
                         username,
                         email: email,
@@ -84,10 +84,6 @@ class AtlasCoreSpec: QuickSpec {
                         isDirectory: true
                     )
                     expect(userDirectoryExists).to(beFalse())
-                    
-                    let credentialsFile = directory.appendingPathComponent(Credentials.filename)
-                    let credentialsFileExists = FileSystem.fileExists(credentialsFile)
-                    expect(credentialsFileExists).to(beFalse())
                 }
             }
 
