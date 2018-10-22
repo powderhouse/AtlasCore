@@ -212,7 +212,7 @@ class AtlasCoreSpec: QuickSpec {
                             newCredentials = Credentials(
                                 "atlastest",
                                 email: "atlastest@puzzleschool.com",
-                                password: "1a2b3c4d",
+                                password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
                                 token: nil,
                                 directory: directory
                             )
@@ -240,7 +240,7 @@ class AtlasCoreSpec: QuickSpec {
                             newCredentials = Credentials(
                                     "atlastest",
                                     email: "atlastest@puzzleschool.com",
-                                    password: "1a2b3c4d",
+                                    password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
                                     token: nil,
                                     directory: userDirectory
                             )

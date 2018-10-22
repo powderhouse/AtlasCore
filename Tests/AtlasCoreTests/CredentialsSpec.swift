@@ -18,7 +18,7 @@ class CredentialsSpec: QuickSpec {
             
             let username = "atlastest"
             let email = "atlastest@puzzleschool.com"
-            let password = "1a2b3c4d"
+            let password = ProcessInfo.processInfo.environment["GITHUBPASSWORD"]
             let token = "TOKEN"
             let s3AccessKey = "S3ACCESSKEY"
             let s3SecretAccessKey = "S3SECRETACCESSKEY"
