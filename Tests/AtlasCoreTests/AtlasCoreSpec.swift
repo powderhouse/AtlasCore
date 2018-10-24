@@ -11,7 +11,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class AtlasCoreSpec: QuickSpec {
+class AtlasCoreSpec: CoreSpec {
     override func spec() {
         
         describe("AtlasCore") {
@@ -212,7 +212,7 @@ class AtlasCoreSpec: QuickSpec {
                             newCredentials = Credentials(
                                 "atlastest",
                                 email: "atlastest@puzzleschool.com",
-                                password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
+                                password: self.githubPassword,
                                 token: nil,
                                 directory: directory
                             )
@@ -240,7 +240,7 @@ class AtlasCoreSpec: QuickSpec {
                             newCredentials = Credentials(
                                     "atlastest",
                                     email: "atlastest@puzzleschool.com",
-                                    password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
+                                    password: self.githubPassword,
                                     token: nil,
                                     directory: userDirectory
                             )

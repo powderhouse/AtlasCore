@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class GitHubSpec: QuickSpec {
+class GitHubSpec: CoreSpec {
     override func spec() {
         describe("GitHub") {
             
@@ -26,7 +26,7 @@ class GitHubSpec: QuickSpec {
                 credentials = Credentials(
                     "atlastest",
                     email: "atlastest@puzzleschool.com",
-                    password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
+                    password: self.githubPassword,
                     token: nil,
                     directory: directory
                 )

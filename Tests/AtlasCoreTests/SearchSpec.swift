@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class SearchSpec: QuickSpec {
+class SearchSpec: CoreSpec {
     override func spec() {
         describe("Search") {
             

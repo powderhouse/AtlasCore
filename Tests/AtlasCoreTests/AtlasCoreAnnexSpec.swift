@@ -11,7 +11,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class AtlasCoreAnnexSpec: QuickSpec {
+class AtlasCoreAnnexSpec: CoreSpec {
     override func spec() {
         
         describe("AtlasCoreAnnex") {

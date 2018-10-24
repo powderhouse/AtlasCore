@@ -15,7 +15,7 @@ struct PerformanceCapture {
     public var duration: TimeInterval
 }
 
-class PerformanceCoreSpec: QuickSpec {
+class PerformanceCoreSpec: CoreSpec {
     override func spec() {
         
         describe("AtlasCore") {
@@ -39,7 +39,7 @@ class PerformanceCoreSpec: QuickSpec {
                 credentials = Credentials(
                     "atlastest",
                     email: "atlastest@puzzleschool.com",
-                    password: ProcessInfo.processInfo.environment["GITHUBPASSWORD"],
+                    password: self.githubPassword,
                     token: nil,
                     directory: directory
                 )

@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class AtlasCorePurgeSpec: QuickSpec {
+class AtlasCorePurgeSpec: CoreSpec {
     override func spec() {
         
         describe("AtlasCorePurge") {

@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class GlueSpec: QuickSpec {
+class GlueSpec: CoreSpec {
     override func spec() {
         describe("Git") {
             

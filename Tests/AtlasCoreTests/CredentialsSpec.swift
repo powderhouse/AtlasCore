@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class CredentialsSpec: QuickSpec {
+class CredentialsSpec: CoreSpec {
     override func spec() {
         describe("Credentials") {
             
@@ -18,7 +18,6 @@ class CredentialsSpec: QuickSpec {
             
             let username = "atlastest"
             let email = "atlastest@puzzleschool.com"
-            let password = ProcessInfo.processInfo.environment["GITHUBPASSWORD"]
             let token = "TOKEN"
             let s3AccessKey = "S3ACCESSKEY"
             let s3SecretAccessKey = "S3SECRETACCESSKEY"
@@ -50,7 +49,7 @@ class CredentialsSpec: QuickSpec {
                     credentials = Credentials(
                         username,
                         email: email,
-                        password: password,
+                        password: self.githubPassword,
                         token: token,
                         s3AccessKey: s3AccessKey,
                         s3SecretAccessKey: s3SecretAccessKey,
@@ -60,7 +59,7 @@ class CredentialsSpec: QuickSpec {
                 
                 it("should initialize properly") {
                     expect(credentials.username).to(equal(username))
-                    expect(credentials.password).to(equal(password))
+                    expect(credentials.password).to(equal(self.githubPassword))
                     expect(credentials.token).to(equal(token))
                     expect(credentials.s3AccessKey).to(equal(s3AccessKey))
                     expect(credentials.s3SecretAccessKey).to(equal(s3SecretAccessKey))
@@ -85,14 +84,14 @@ class CredentialsSpec: QuickSpec {
                     credentials = Credentials(
                         username,
                         email: email,
-                        password: password,
+                        password: self.githubPassword,
                         directory: directory
                     )
                 }
 
                 it("should initialize properly") {
                     expect(credentials.username).to(equal(username))
-                    expect(credentials.password).to(equal(password))
+                    expect(credentials.password).to(equal(self.githubPassword))
                     expect(credentials.token).to(beNil())
                 }
                 
@@ -209,7 +208,7 @@ class CredentialsSpec: QuickSpec {
                     credentials = Credentials(
                         username,
                         email: email,
-                        password: password,
+                        password: self.githubPassword,
                         s3AccessKey: s3AccessKey,
                         s3SecretAccessKey: s3SecretAccessKey,
                         directory: directory
@@ -221,7 +220,7 @@ class CredentialsSpec: QuickSpec {
                     credentials = Credentials(
                         username,
                         email: email,
-                        password: password,
+                        password: self.githubPassword,
                         directory: directory
                     )
                     expect(credentials.complete()).to(beFalse())

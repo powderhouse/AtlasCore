@@ -10,7 +10,7 @@ import Quick
 import Nimble
 import AtlasCore
 
-class FileSystemSpec: QuickSpec {
+class FileSystemSpec: CoreSpec {
     override func spec() {
         
         describe("FileSystem") {
