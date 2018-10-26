@@ -350,6 +350,10 @@ public class Git {
         return result
     }
     
+    func files() -> [String] {
+        return run("ls-files").components(separatedBy: "\n")
+    }
+    
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> Result {
         var result = existingResult ?? Result()
         
@@ -405,7 +409,20 @@ public class Git {
             }
         }
         if let gitAnnex = gitAnnex {
-            gitAnnex.sync(result, completed: endEntry)
+            let annexFiles = gitAnnex.files()
+            var synced = true
+            for gitFile in self.files() {
+                if !annexFiles.contains(gitFile) {
+                    synced = false
+                    break
+                }
+            }
+
+            if synced {
+                endEntry()
+            } else {
+                gitAnnex.sync(result, completed: endEntry)
+            }
         } else {
             endEntry()
         }

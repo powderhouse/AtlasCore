@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftAWSIam
+import SwiftAWSS3
 
 public class GitAnnex {
     
@@ -338,6 +339,30 @@ public class GitAnnex {
         return Result()
     }
     
+    public func files() -> [String] {
+        var s3Files: [String] = []
+        
+        var endpoint: String? = nil
+        if credentials.s3AccessKey == "test" {
+            endpoint = "http://localhost:4572"
+        }
+        
+        let s3 = S3(accessKeyId: credentials.s3AccessKey, secretAccessKey: credentials.s3SecretAccessKey, endpoint: endpoint)
+        
+        do {
+            let objects = try s3.listObjectsV2(S3.ListObjectsV2Request(bucket: s3Bucket))
+            for object in objects.contents! {
+                if let key = object.key {
+                    s3Files.append(key)
+                }
+            }
+        } catch {
+            print("S3 FILES ERROR: \(error)")
+        }
+        
+        return s3Files
+    }
+    
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
         let result = existingResult ?? Result()
         
@@ -353,7 +378,7 @@ public class GitAnnex {
                                          result: result,
                                          completed: { process in
                                             completed?()
-                            }
+                                         }
                             )
             }
             )
