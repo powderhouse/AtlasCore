@@ -351,7 +351,7 @@ public class Git {
     }
     
     func files() -> [String] {
-        return run("ls-files").components(separatedBy: "\n")
+        return run("ls-files").components(separatedBy: "\n").filter { $0.count > 0 }
     }
     
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> Result {
