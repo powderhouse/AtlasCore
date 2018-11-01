@@ -7,6 +7,11 @@
 
 import Foundation
 
+public struct QueuedSync {
+    public var result: Result?=nil
+    public var completed: (() -> Void)?=nil
+}
+
 public class Git {
     
     static let log = "log.txt"
@@ -20,7 +25,7 @@ public class Git {
     public var gitAnnex: GitAnnex? = nil
     
     public var syncing = false
-    public var queuedSyncResult: Result? = nil
+    public var queuedSync: QueuedSync? = nil
     
     static let gitIgnore = [
         ".DS_Store",
@@ -290,9 +295,9 @@ public class Git {
     
     public func removeFile(_ filePath: String, existingResult: Result?=nil) -> Result {
         var result = existingResult ?? Result()
-
+        
         result.add("Removing \(filePath)")
-
+        
         let fileUrl = directory.appendingPathComponent(filePath)
         if FileSystem.fileExists(fileUrl) {
             _ = FileSystem.deleteFile(fileUrl)
@@ -305,7 +310,7 @@ public class Git {
         }
         _ = run("add", arguments: ["-u"])
         _ = commit()
-
+        
         var files = [filePath]
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         if history.count > 0 && !history.contains("unknown revision or path") {
@@ -315,11 +320,7 @@ public class Git {
         let escapedFiles = files.map { return "\"\($0)\"" }
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
-        
-//        if let gitAnnex = gitAnnex {
-//            result.mergeIn(gitAnnex.deleteFile(filePath))
-//        }
-        
+                
         result.add(run("filter-branch", arguments: filterBranchArguments))
         result.add(run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"]))
         result.add(run("reflog", arguments: ["expire", "--expire=now", "--all"]))
@@ -378,7 +379,7 @@ public class Git {
         var result = existingResult ?? Result()
         
         if syncing {
-            self.queuedSyncResult = result
+            self.queuedSync = QueuedSync(result: result, completed: completed)
             result.add("Git sync in progress. Waiting for it to complete...")
             return result
         }
@@ -417,15 +418,15 @@ public class Git {
         }
         
         let endEntry = {
-            self.syncing = false
-            if var queuedSyncResult = self.queuedSyncResult {
-                self.queuedSyncResult = nil
-                queuedSyncResult.mergeIn(self.sync(queuedSyncResult))
-            }
-            
             _ = self.writeToLog(end)
             if let completed = completed {
                 completed()
+            }
+            
+            self.syncing = false
+            if let queuedSync = self.queuedSync {
+                self.queuedSync = nil
+                _ = self.sync(queuedSync.result, completed: queuedSync.completed)
             }
         }
         if let gitAnnex = gitAnnex {
