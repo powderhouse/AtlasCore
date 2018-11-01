@@ -373,14 +373,15 @@ public class GitAnnex {
                          arguments: ["--content"],
                          result: result,
                          completed: { process in
-                            self.runLong("get",
-                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
-                                         result: result,
-                                         completed: { process in
-                                            completed?()
-                                         }
-                            )
-            }
+                            completed?()
+//                            self.runLong("get",
+//                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
+//                                         result: result,
+//                                         completed: { process in
+//                                            completed?()
+//                                         }
+//                            )
+                         }
             )
         }
     }
