@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/powderhouse/aws-sdk-swift-core.git",
         "state": {
           "branch": null,
-          "revision": "48ebc3cc6dbadfbc1b48beff9d16eb17feba5b86",
-          "version": "0.0.2"
+          "revision": "0bf47334be193884b0900e845ce6c721589c8f87",
+          "version": "0.0.3"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/powderhouse/iam.git",
         "state": {
           "branch": null,
-          "revision": "46655c85540ff196bd958603567dae1351fb930b",
-          "version": "0.0.3"
+          "revision": "948445595099cea4ac83ac5e623e36c35e04f2c6",
+          "version": "0.0.4"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/powderhouse/s3.git",
         "state": {
           "branch": null,
-          "revision": "fa29eb284fb74c6a1fc6061bc28fd5db71ce1177",
-          "version": "0.0.2"
+          "revision": "0001b3cd83f7467128929de77da081c12ebac17b",
+          "version": "0.0.3"
         }
       }
     ]
