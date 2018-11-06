@@ -37,9 +37,7 @@ class GitHubSpec: CoreSpec {
             }
 
             context("initialized") {
-                var appDirectory: URL!
                 let fileManager = FileManager.default
-                var isFile : ObjCBool = false
                 var isDirectory : ObjCBool = true
                 
                 var git: Git!
@@ -64,8 +62,6 @@ class GitHubSpec: CoreSpec {
                     _ = git.runInit()
                     
                     gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
-                    
-                    appDirectory = git.directory
                 }
 
                 afterEach {
@@ -135,21 +131,6 @@ class GitHubSpec: CoreSpec {
                             expect(gitHub?.repositoryLink).to(contain(remoteName))
                         }
                     }
-                    
-//                    context("setPostCommitHook") {
-//                        beforeEach {
-//                            expect(gitHub!.setPostCommitHook().success).to(beTrue(), description: "Failed to set post-commit hook")
-//                        }
-//                        
-//                        it("should create a post-commit hook") {
-//                            let gitURL = appDirectory.appendingPathComponent(".git")
-//                            let hooksURL = gitURL.appendingPathComponent("hooks")
-//                            let postCommitPath = hooksURL.appendingPathComponent("post-commit").path
-//                            let exists = fileManager.fileExists(atPath: postCommitPath, isDirectory: &isFile)
-//                            expect(exists).to(beTrue(), description: "No post-commit found")
-//                        }
-//
-//                    }
                 }
                                 
                 context("setRepositoryLink") {

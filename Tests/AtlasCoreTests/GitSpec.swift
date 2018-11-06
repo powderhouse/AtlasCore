@@ -260,7 +260,7 @@ class GitSpec: CoreSpec {
                     }
                 }
                 
-                context("url") {
+                context("origin") {
                     let repositoryName = "ATLASCORE"
                     var gitHub: GitHub!
                     
@@ -290,14 +290,38 @@ class GitSpec: CoreSpec {
                     }
                     
                     it("should return the url for the repository") {
-                        let url = git?.origin()
-                        expect(url).to(contain(credentials.username))
-                        expect(url).to(contain(repositoryName))
-//                        if let token = credentials.token {
-//                            expect(url).toNot(contain(token))
-//                        } else {
-//                            expect(false).to(beTrue(), description: "token is nil")
-//                        }
+                        let origin = git?.origin()
+                        expect(origin).to(contain(credentials.username))
+                        expect(origin).to(contain(repositoryName))
+                        if let token = credentials.token {
+                            expect(origin).to(contain(token))
+                        } else {
+                            expect(false).to(beTrue(), description: "token is nil")
+                        }
+                    }
+                    
+                    context("with a new token") {
+                        beforeEach {
+                            if let token = GitHub.getAuthenticationToken(credentials) {
+                                expect(token).toNot(equal(credentials.token))
+                                credentials.setAuthenticationToken(token)
+                            }
+                            
+                            git = Git(directory, credentials: credentials)
+                            
+                            Git.configure(credentials)
+                            
+                            gitHub = GitHub(credentials, repositoryName: repositoryName, git: git)
+                        }
+                        
+                        it("should use the new token") {
+                            let origin = git?.origin()
+                            if let token = credentials.token {
+                                expect(origin).to(contain(token))
+                            } else {
+                                expect(false).to(beTrue(), description: "token is nil")
+                            }
+                        }
                     }
                 }
 

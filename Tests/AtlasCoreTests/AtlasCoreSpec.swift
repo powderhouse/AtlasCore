@@ -174,7 +174,7 @@ class AtlasCoreSpec: CoreSpec {
 
                 context("future instances of AtlasCore") {
                     var atlasCore2: AtlasCore!
-
+                    
                     beforeEach {
                         atlasCore.closeSearch()
 
