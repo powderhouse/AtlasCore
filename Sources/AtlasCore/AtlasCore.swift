@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.1.4"
+    public static let version = "2.1.5"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -349,11 +349,29 @@ public class AtlasCore {
     }
     
     public func projects() -> [Project] {
-        guard git?.directory != nil else {
+        guard appDirectory != nil else {
             return []
         }
         
-        return git!.projects().map { project($0)! }
+//        return git!.projects().map { project($0)! }
+        
+        var directories = FileSystem.filesInDirectory(
+            appDirectory!,
+            excluding: [AtlasCore.defaultProjectName, ".git"],
+            directoriesOnly: true
+        ).sorted()
+        
+        directories.removeAll(where: { $0 == AtlasCore.defaultProjectName })
+        directories = [AtlasCore.defaultProjectName] + directories
+        
+        let p = directories.filter {
+            let url = appDirectory!.appendingPathComponent($0)
+            let subFolders = FileSystem.filesInDirectory(url)
+            return subFolders.contains(Project.readme)
+        }
+        
+        return p.map { project($0)! }
+
     }
     
     public func project(_ name: String) -> Project? {
