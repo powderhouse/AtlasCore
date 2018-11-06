@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.1.6"
+    public static let version = "2.1.7"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -517,6 +517,10 @@ public class AtlasCore {
         }
         
         return git!.status()
+    }
+    
+    public func filesSyncedWithAnnex() -> Bool {
+        return git?.filesSyncedWithAnnex() ?? false
     }
     
     public func remote() -> String? {
