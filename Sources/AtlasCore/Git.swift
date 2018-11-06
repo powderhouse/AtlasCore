@@ -153,7 +153,21 @@ public class Git {
         
         url = url.replacingOccurrences(of: "\n", with: "")
         
+        if let token = credentials.token {
+            if !url.contains(substring: token) {
+                return defaultOrigin()
+            }
+        }
+        
         return url
+    }
+    
+    public func defaultOrigin() -> String? {
+        guard credentials?.username != nil && credentials?.token != nil else {
+            return nil
+        }
+        
+        return "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName)"
     }
     
     public func status() -> String? {
@@ -172,8 +186,7 @@ public class Git {
             return result
         }
         
-        let originPath = credentials!.remotePath ??
-        "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName).git"
+        let originPath = credentials!.remotePath ?? "\(defaultOrigin()!).git"
         
         let output = run("clone",
                          arguments: [originPath, AtlasCore.repositoryName],
@@ -320,7 +333,7 @@ public class Git {
         let escapedFiles = files.map { return "\"\($0)\"" }
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
-                
+        
         result.add(run("filter-branch", arguments: filterBranchArguments))
         result.add(run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"]))
         result.add(run("reflog", arguments: ["expire", "--expire=now", "--all"]))
