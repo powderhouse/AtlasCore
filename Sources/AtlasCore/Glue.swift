@@ -9,7 +9,7 @@ import Foundation
 
 public class Glue {
     
-    public static let path: String = "$PATH:/bin:/usr/bin:/usr/local/bin:/anaconda/bin"
+    public static let path: String = "$PATH:/bin:/usr/bin:/usr/sbin:/usr/local/bin:/anaconda/bin"
     
     class func gitDir() -> String? {
         if let dir = Bundle(for: AtlasCore.self).resourcePath?.appending("/git") {
