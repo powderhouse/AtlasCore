@@ -384,16 +384,19 @@ public class Git {
             "remote": remote
         ]
         
+        let ignore = [
+            "annex-uuid"
+        ]
         if let gitAnnex = gitAnnex {
             let annexFiles = gitAnnex.files()
             let localFiles = self.files()
-            for gitFile in localFiles {
+            for gitFile in localFiles where !ignore.contains(gitFile) {
                 if !annexFiles.contains(gitFile) {
                     missing["remote"]!.append(gitFile)
                 }
             }
             
-            for annexFile in annexFiles {
+            for annexFile in annexFiles where !ignore.contains(annexFile) {
                 if !localFiles.contains(annexFile) {
                     missing["local"]!.append(annexFile)
                 }
