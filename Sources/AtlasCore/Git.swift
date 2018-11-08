@@ -369,23 +369,37 @@ public class Git {
     }
     
     public func filesSyncedWithAnnex() -> Bool {
+        let missing = missingFilesBetweenLocalAndS3()
+        if missing["local"]!.count > 0 || missing["remote"]!.count > 0 {
+            return false
+        }
+        return true
+    }
+    
+    public func missingFilesBetweenLocalAndS3() -> [String: [String]] {
+        let local: [String] = []
+        let remote: [String] = []
+        var missing = [
+            "local": local,
+            "remote": remote
+        ]
+        
         if let gitAnnex = gitAnnex {
             let annexFiles = gitAnnex.files()
             let localFiles = self.files()
             for gitFile in localFiles {
                 if !annexFiles.contains(gitFile) {
-                    return false
+                    missing["remote"]!.append(gitFile)
                 }
             }
             
             for annexFile in annexFiles {
                 if !localFiles.contains(annexFile) {
-                    return false
+                    missing["local"]!.append(annexFile)
                 }
             }
         }
-        
-        return true
+        return missing
     }
     
     public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> Result {

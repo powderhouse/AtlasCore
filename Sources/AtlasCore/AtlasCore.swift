@@ -522,7 +522,11 @@ public class AtlasCore {
     public func filesSyncedWithAnnex() -> Bool {
         return git?.filesSyncedWithAnnex() ?? false
     }
-    
+
+    public func missingFilesBetweenLocalAndS3() -> [String: [String]] {
+        return git?.missingFilesBetweenLocalAndS3() ?? [:]
+    }
+
     public func remote() -> String? {
         guard git != nil else {
             return nil
