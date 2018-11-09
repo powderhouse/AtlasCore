@@ -366,6 +366,13 @@ public class Git {
         return result
     }
     
+    public func push() -> Result {
+        var result = Result()
+        result.add("Pushing changes")
+        result.add(run("push", arguments: ["--set-upstream", "origin", "master"]))
+        return result
+    }
+    
     func files() -> [String] {
         return run("ls-files").components(separatedBy: "\n").filter { $0.count > 0 }
     }
@@ -440,8 +447,7 @@ public class Git {
         result.add("Syncing with Github")
         _ = run("pull", arguments: ["origin", "master"])
         
-        let push = { self.run("push", arguments: ["--set-upstream", "origin", "master"]) }
-        let output = push()
+        let output = push().allMessages
         if !(output.contains("Everything up-to-date") || output.contains("master -> master") || output.contains("set up to track remote branch")) {
             result.success = false
             result.add("Failed to push to GitHub: \(output)")
@@ -564,7 +570,7 @@ public class Git {
                             "message": message,
                             "hash": hash,
                             "files": files
-                        ])
+                            ])
                     }
                 }
             }

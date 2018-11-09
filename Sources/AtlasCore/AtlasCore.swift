@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.2.2"
+    public static let version = "2.2.3"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -92,7 +92,7 @@ public class AtlasCore {
         self.externalLog = externalLog
         if baseDirectory == nil {
             self.baseDirectory = getDefaultBaseDirectory()
-        }        
+        }
     }
     
     public func initialize() -> Result {
@@ -239,7 +239,7 @@ public class AtlasCore {
                     
                     result.mergeIn(atlasCommit())
                 }
-
+                
                 return result
             } else {
                 result.success = false
@@ -353,13 +353,13 @@ public class AtlasCore {
             return []
         }
         
-//        return git!.projects().map { project($0)! }
+        //        return git!.projects().map { project($0)! }
         
         var directories = FileSystem.filesInDirectory(
             appDirectory!,
             excluding: [AtlasCore.defaultProjectName, ".git"],
             directoriesOnly: true
-        ).sorted()
+            ).sorted()
         
         directories.removeAll(where: { $0 == AtlasCore.defaultProjectName })
         directories = [AtlasCore.defaultProjectName] + directories
@@ -371,7 +371,7 @@ public class AtlasCore {
         }
         
         return p.map { project($0)! }
-
+        
     }
     
     public func project(_ name: String) -> Project? {
@@ -500,6 +500,7 @@ public class AtlasCore {
                                         let commitMessage = try String(contentsOf: readme, encoding: .utf8)
                                         result.mergeIn(git.add(commitPath))
                                         result.mergeIn(git.commit(commitMessage, path: commitPath))
+                                        result.mergeIn(git.push())
                                     } catch {
                                         result.add("Unable to read commit message for: \(commitPath)")
                                     }
@@ -543,11 +544,11 @@ public class AtlasCore {
     public func filesSyncedWithAnnex() -> Bool {
         return git?.filesSyncedWithAnnex() ?? false
     }
-
+    
     public func missingFilesBetweenLocalAndS3() -> [String: [String]] {
         return git?.missingFilesBetweenLocalAndS3() ?? [:]
     }
-
+    
     public func remote() -> String? {
         guard git != nil else {
             return nil
