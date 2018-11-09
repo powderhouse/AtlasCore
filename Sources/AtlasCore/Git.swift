@@ -170,8 +170,8 @@ public class Git {
         return "https://\(credentials.username):\(credentials.token!)@github.com/\(credentials!.username)/\(AtlasCore.appName)"
     }
     
-    public func status() -> String? {
-        let result = run("status")
+    public func status(_ path: String?=nil) -> String? {
+        let result = path == nil ? run("status") : run("status", arguments: [path!])
         if (result == "") {
             return nil
         }
@@ -348,13 +348,15 @@ public class Git {
         return result
     }
     
-    public func commit(_ message: String?=nil) -> Result {
+    public func commit(_ message: String?=nil, path: String?=nil) -> Result {
         var result = Result()
         result.add("Committing changes")
         
         _ = gitAnnex?.run("fix")
         
-        let output = run("commit", arguments: ["-am", message ?? "Atlas commit"])
+        let message = message ?? "Atlas commit"
+        let path = path ?? "."
+        let output = run("commit", arguments: ["-m", message, path])
         if !output.contains("changed") &&
             !output.contains("nothing to commit, working tree clean") {
             result.success = false

@@ -296,7 +296,7 @@ class AtlasCoreSpec: CoreSpec {
                 context("complex setup") {
 
                     let project1Name = "Project"
-                    let project2Name = "AnotherProject"
+                    let project2Name = "SecondProject"
                     var project1: Project!
                     var project2: Project!
 
@@ -335,18 +335,6 @@ Multiline
                             atlasCore.completedLogEntries().count
                         ).toEventually(equal(logEntries), timeout: 10)
 
-                        slug1 = project1!.commitSlug(message1)
-                        slug2 = project2!.commitSlug(message2)
-
-                        expect(project1?.commitMessage(message1)).to(beTrue())
-                        expect(project1?.commitStaged().success).to(beTrue())
-                        _ = atlasCore.commitChanges(message1)
-
-                        logEntries += 1
-                        expect(
-                            atlasCore.completedLogEntries().count
-                        ).toEventually(equal(logEntries), timeout: 10)
-
                         let filePath2 = fileDirectory.appendingPathComponent(file2).path
                         expect(project2?.copyInto([filePath2]).success).to(beTrue())
 
@@ -354,15 +342,27 @@ Multiline
                         expect(project2?.copyInto([filePath3]).success).to(beTrue())
 
                         _ = atlasCore.atlasCommit()
-
                         logEntries += 1
                         expect(
                             atlasCore.completedLogEntries().count
                         ).toEventually(equal(logEntries), timeout: 10)
 
+                        slug1 = project1!.commitSlug(message1)
+                        slug2 = project2!.commitSlug(message2)
+                        
+                        expect(project1?.commitMessage(message1)).to(beTrue())
+                        expect(project1?.commitStaged().success).to(beTrue())
+
                         expect(project2?.commitMessage(message2)).to(beTrue())
                         expect(project2?.commitStaged().success).to(beTrue())
-                        _ = atlasCore.commitChanges(message2)
+                        
+                        _ = atlasCore.commitChanges()
+                        
+                        logEntries += 1
+                        expect(
+                            atlasCore.completedLogEntries().count
+                        ).toEventually(equal(logEntries), timeout: 10)
+
 
                         expect(atlasCore.log().count).toEventually(equal(2), timeout: 10)
                     }
@@ -428,7 +428,7 @@ Multiline
 
 
                         it("should create syncLogEntries") {
-                            expect(atlasCore.syncLogEntries().count).to(equal(6))
+                            expect(atlasCore.syncLogEntries().count).to(equal(5))
                             expect(atlasCore.syncLog()).toNot(contain("Bad file descriptor"))
                         }
 
@@ -436,9 +436,9 @@ Multiline
 
                     context("syncLogEntries") {
                         it("should create more syncLogEntries if sync is called") {
-                            expect(atlasCore.syncLogEntries().count).toEventually(equal(6))
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(5))
                             atlasCore.sync()
-                            expect(atlasCore.syncLogEntries().count).toEventually(equal(7))
+                            expect(atlasCore.syncLogEntries().count).toEventually(equal(6))
                         }
                     }
 

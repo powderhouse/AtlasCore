@@ -17,7 +17,10 @@ public class Project {
     public var name: String!
     var projectDirectory: URL!
     
-    public let states = ["unstaged", "staged", "committed"]
+    public static let unstaged = "unstaged"
+    public static let staged = "staged"
+    public static let committed = "committed"
+    public static let states = [unstaged, staged, committed]
     
     public static let commitMessageFile = "commit_message.txt"
     public static let readme = "readme.md"
@@ -51,7 +54,7 @@ public class Project {
             """
             createReadme(projectReadmeMessage)
             
-            for subfolderName in self.states {
+            for subfolderName in Project.states {
                 let subfolderURL = createFolder(subfolderName)
                 let readmeMessage = """
                 This folder contains all of your \(subfolderName) files for the project \(projectName)
@@ -108,7 +111,7 @@ public class Project {
     
     public func allFileUrls() -> [URL] {
         var all: [URL] = []
-        for state in states {
+        for state in Project.states {
             if state == "committed" {
                 let commits = files(state)
                 for commit in commits {

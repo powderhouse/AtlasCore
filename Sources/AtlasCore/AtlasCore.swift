@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.2.0"
+    public static let version = "2.2.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -473,7 +473,7 @@ public class AtlasCore {
         return result
     }
     
-    public func commitChanges(_ commitMessage: String?=nil) -> Result {
+    public func commitChanges(_ message: String?=nil) -> Result {
         var result = Result(log: externalLog)
         
         result.add("Checking git status")
@@ -488,8 +488,29 @@ public class AtlasCore {
                 }
                 
                 result.add("Committing files")
+                for project in projects() {
+                    let commitsDir = project.directory(Project.committed)
+                    for commit in FileSystem.filesInDirectory(commitsDir, directoriesOnly: true) {
+                        if let projectName = project.name {
+                            let commitPath = "\(projectName)/\(Project.committed)/\(commit)"
+                            if let commitStatus = git.status(commitPath) {
+                                if !commitStatus.contains("nothing to commit, working tree clean") {
+                                    do {
+                                        let readme = commitsDir.appendingPathComponent("\(commit)/\(Project.readme)")
+                                        let commitMessage = try String(contentsOf: readme, encoding: .utf8)
+                                        result.mergeIn(git.add(commitPath))
+                                        result.mergeIn(git.commit(commitMessage, path: commitPath))
+                                    } catch {
+                                        result.add("Unable to read commit message for: \(commitPath)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 result.mergeIn(git.add())
-                result.mergeIn(git.commit(commitMessage))
+                result.mergeIn(git.commit(message ?? "Atlas Commit"))
                 result.mergeIn(git.sync(result))
             } else {
                 result.success = false

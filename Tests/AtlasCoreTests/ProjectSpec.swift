@@ -59,7 +59,7 @@ class ProjectSpec: CoreSpec {
             context("initialization") {
                 
                 it("should create subfolders with readmes in them") {
-                    for subfolderName in project.states {
+                    for subfolderName in Project.states {
                         let folder = project.directory().appendingPathComponent(subfolderName)
                         let exists = fileManager.fileExists(atPath: folder.path, isDirectory: &isDirectory)
                         expect(exists).to(beTrue(), description: "No subfolder found for \(subfolderName)")
