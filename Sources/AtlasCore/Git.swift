@@ -539,6 +539,11 @@ public class Git {
             if let hash = components.first {
                 if components.count > 1 {
                     let message = components[1]
+                    
+                    if message.contains("git-annex in") {
+                        continue
+                    }
+                    
                     if let fileString = components.last {
                         let files = fileString.components(separatedBy: "\n").filter { $0.count > 0 }
                         if commitSlugFilter != nil {
@@ -559,7 +564,7 @@ public class Git {
                             "message": message,
                             "hash": hash,
                             "files": files
-                            ])
+                        ])
                     }
                 }
             }
