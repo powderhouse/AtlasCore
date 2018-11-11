@@ -212,7 +212,7 @@ class ProjectSpec: CoreSpec {
             }
             
             context("copy") {
-                let fileName = "index.html"
+                let fileName = "index file.html"
                 var fileDirectory: URL!
                 
                 beforeEach {
@@ -226,7 +226,8 @@ class ProjectSpec: CoreSpec {
                 
                 it("adds the file to the project") {
                     let stagedDirectory = project.directory().appendingPathComponent("staged")
-                    let projectFilePath = stagedDirectory.appendingPathComponent(fileName).path
+                    let safeFilename = fileName.replacingOccurrences(of: " ", with: "_")
+                    let projectFilePath = stagedDirectory.appendingPathComponent(safeFilename).path
                     let exists = fileManager.fileExists(atPath: projectFilePath, isDirectory: &isFile)
                     expect(exists).to(beTrue(), description: "File not found in project's staged directory")
                 }

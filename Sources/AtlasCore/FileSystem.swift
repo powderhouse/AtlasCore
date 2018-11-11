@@ -84,24 +84,31 @@ public class FileSystem {
         return contents!
     }
     
-    public class func copy(_ filePath: String, into directory: URL) -> Result {
-        return copy([filePath], into: directory)
+    public class func copy(_ filePath: String, into directory: URL, safe: Bool=false) -> Result {
+        return copy([filePath], into: directory, safe: safe)
     }
     
-    public class func copy(_ filePaths: [String], into directory: URL) -> Result {
+    public class func copy(_ filePaths: [String], into directory: URL, safe: Bool=false) -> Result {
         var result = Result()
         
         for filePath in filePaths {
-            let output = Glue.runProcessError("cp", arguments: [filePath, directory.path])
+            var destination = directory.path
+            if safe {
+                if let filename = filePath.components(separatedBy: "/").last {
+                    destination += "/\(filename.replacingOccurrences(of: " ", with: "_"))"
+                }
+            }
+            
+            let output = Glue.runProcessError("cp", arguments: [filePath, destination])
             if let fileName = filePath.split(separator: "/").last {
                 if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
                     result.success = false
-                    result.add(["Unable to copy \(filePath) to \(directory.path)", output])
+                    result.add(["Unable to copy \(filePath) to \(destination)", output])
                     return result
                 }
                 if !FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
                     result.success = false
-                    result.add(["\(filePath) no longer exists at \(directory.path)", output])
+                    result.add(["\(filePath) no longer exists at \(destination)", output])
                     return result
                 }
             } else {

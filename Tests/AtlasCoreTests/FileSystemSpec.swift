@@ -107,7 +107,7 @@ class FileSystemSpec: CoreSpec {
             }
             
             context("copy") {
-                let fileName1 = "index1.html"
+                let fileName1 = "index 1.html"
                 let fileName2 = "index2.html"
                 var startDirectory: URL!
                 var endDirectory: URL!
@@ -143,6 +143,22 @@ class FileSystemSpec: CoreSpec {
                         let startFilePath = startDirectory.appendingPathComponent(fileName).path
                         let exists = fileManager.fileExists(atPath: startFilePath, isDirectory: &isFile)
                         expect(exists).to(beTrue(), description: "File not found in start directory")
+                    }
+                }
+                
+                context("safe copy") {
+                    it("replaces all spaces in the filename with underscores") {
+                        let filePath1 = startDirectory.appendingPathComponent(fileName1).path
+                        let filePath2 = startDirectory.appendingPathComponent(fileName2).path
+
+                        expect(FileSystem.copy([filePath1, filePath2], into: endDirectory, safe: true).success).to(beTrue())
+
+                        for fileName in [fileName1, fileName2] {
+                            let safeFilename = fileName.replacingOccurrences(of: " ", with: "_")
+                            let filePath = endDirectory.appendingPathComponent(safeFilename).path
+                            let exists = fileManager.fileExists(atPath: filePath, isDirectory: &isFile)
+                            expect(exists).to(beTrue(), description: "Safe file not found")
+                        }
                     }
                 }
             }

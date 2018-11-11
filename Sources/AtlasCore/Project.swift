@@ -287,7 +287,7 @@ public class Project {
     public func copyInto(_ filePaths: [String]) -> Result {
         var result = Result(log: externalLog)
         result.add("Copying files into staged directory")
-        result.mergeIn(FileSystem.copy(filePaths, into: directory("staged")))
+        result.mergeIn(FileSystem.copy(filePaths, into: directory("staged"), safe: true))
         return result
     }
 }
