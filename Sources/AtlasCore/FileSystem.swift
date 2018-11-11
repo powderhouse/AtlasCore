@@ -92,16 +92,12 @@ public class FileSystem {
         var result = Result()
         
         for filePath in filePaths {
-            var destination = directory.path
-            if safe {
-                if let filename = filePath.components(separatedBy: "/").last {
-                    destination += "/\(filename.replacingOccurrences(of: " ", with: "_"))"
-                }
-            }
+            if let filename = filePath.components(separatedBy: "/").last {
+                let safeFilename = "/\(filename.replacingOccurrences(of: " ", with: "_"))"
+                let destination = directory.path + "/" + (safe ? safeFilename : filename)
             
-            let output = Glue.runProcessError("cp", arguments: [filePath, destination])
-            if let fileName = filePath.split(separator: "/").last {
-                if !FileSystem.fileExists(directory.appendingPathComponent("\(fileName)")) {
+                let output = Glue.runProcessError("cp", arguments: [filePath, destination])
+                if !FileSystem.fileExists(URL(fileURLWithPath: destination)) {
                     result.success = false
                     result.add(["Unable to copy \(filePath) to \(destination)", output])
                     return result
