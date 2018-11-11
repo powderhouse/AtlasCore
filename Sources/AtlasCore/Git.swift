@@ -171,7 +171,7 @@ public class Git {
     }
     
     public func status(_ path: String?=nil) -> String? {
-        let result = path == nil ? run("status") : run("status", arguments: [path!])
+        let result = run("status", arguments: ["-u", path].compactMap { $0 })
         if (result == "") {
             return nil
         }
@@ -399,7 +399,7 @@ public class Git {
         if let gitAnnex = gitAnnex {
             if let annexFiles = gitAnnex.files() {
                 let localFiles = self.files()
-            
+                
                 for gitFile in localFiles where !ignore.contains(gitFile) {
                     if !annexFiles.contains(gitFile) {
                         missing["remote"]!.append(gitFile)
