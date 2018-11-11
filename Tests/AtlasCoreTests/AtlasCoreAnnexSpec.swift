@@ -228,13 +228,13 @@ Multiline
                     ).toEventually(equal(logEntries), timeout: 10)
                 }
 
-                it("should reinitialize and download existing files") {
+                it("should reinitialize but not download existing files") {
                     expect(atlasCore2.git?.gitAnnex?.s3Bucket).to(equal(s3Bucket))
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: 10)
 
                     let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
                     let file = commitDirectory.appendingPathComponent(file1)
-                    expect(FileSystem.fileExists(file)).to(beTrue())
+                    expect(FileSystem.fileExists(file)).to(beFalse())
                 }
                 
                 it("should properly sync with S3 when a new file is added") {

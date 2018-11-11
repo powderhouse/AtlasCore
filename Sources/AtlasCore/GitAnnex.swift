@@ -74,15 +74,21 @@ public class GitAnnex {
             let exportOutput = exportTracking()
             result.mergeIn(exportOutput)
             
-            result.add("Downloading all existing files. This could take a while.")
+//            result.add("Downloading all existing files. This could take a while.")
+//
+//            let getOutput = run("get")
+//            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
+//                result.success = false
+//                result.add("Unable to sync with S3. Please check credentials.")
+//                return result
+//            }
+//            result.add(getOutput)
             
-            let getOutput = run("get")
-            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
+            if files() == nil {
                 result.success = false
                 result.add("Unable to sync with S3. Please check credentials.")
                 return result
             }
-            result.add(getOutput)
             
             initialized = true
         }
@@ -339,7 +345,7 @@ public class GitAnnex {
         return Result()
     }
     
-    public func files() -> [String] {
+    public func files() -> [String]? {
         var s3Files: [String] = []
         
         var endpoint: String? = nil
@@ -358,6 +364,7 @@ public class GitAnnex {
             }
         } catch {
             print("S3 FILES ERROR: \(error)")
+            return nil
         }
         
         return s3Files
