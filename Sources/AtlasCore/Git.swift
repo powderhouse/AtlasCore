@@ -362,7 +362,7 @@ public class Git {
         
         _ = gitAnnex?.run("fix")
         
-        let message = message ?? "Atlas commit"
+        let message = message ?? "Atlas commit - no message provided"
         let path = path ?? "."
         let output = run("commit", arguments: ["-m", message, path])
         if !output.contains("changed") &&

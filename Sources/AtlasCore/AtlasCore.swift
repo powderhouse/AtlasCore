@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.2.8"
+    public static let version = "2.2.9"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -512,7 +512,7 @@ public class AtlasCore {
                 
                 result.mergeIn(git.add())
                 _ = git.reset("*/\(Project.committed)")
-                result.mergeIn(git.commit(message ?? "Atlas Commit"))
+                result.mergeIn(git.commit("Atlas System Commit"))
                 result.mergeIn(git.sync(result, completed: { result.add("Changes Successfully Pushed To GitHub") }))
             } else {
                 result.success = false
