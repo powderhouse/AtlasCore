@@ -260,6 +260,14 @@ public class Git {
         return Result()
     }
     
+    public func reset(_ path: String) -> Result {
+        let output = run("reset", arguments: ["--", path])
+        return Result(
+            success: true,
+            messages: [output]
+        )
+    }
+    
     public func move(_ filePath: String, into directory: URL, renamedTo newName: String?=nil) -> Result {
         return move([filePath], into: directory, renamedTo: newName)
     }

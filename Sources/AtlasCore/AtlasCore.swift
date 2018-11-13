@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.2.7"
+    public static let version = "2.2.8"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -511,8 +511,9 @@ public class AtlasCore {
                 }
                 
                 result.mergeIn(git.add())
+                _ = git.reset("*/\(Project.committed)")
                 result.mergeIn(git.commit(message ?? "Atlas Commit"))
-                result.mergeIn(git.sync(result))
+                result.mergeIn(git.sync(result, completed: { result.add("Changes Successfully Pushed To GitHub") }))
             } else {
                 result.success = false
                 result.add("No status provided by git for committing.")
@@ -520,6 +521,12 @@ public class AtlasCore {
         } else {
             result.success = false
             result.add("Git not found for committing.")
+        }
+        
+        if let newStatus = git?.status() {
+            if newStatus.contains("Untracked files") || newStatus.contains("Changes to be committed") {
+                result.mergeIn(commitChanges(message))
+            }
         }
         
         return result
