@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.3.0"
+    public static let version = "2.3.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -499,6 +499,7 @@ public class AtlasCore {
                                         let readme = commitsDir.appendingPathComponent("\(commit)/\(Project.readme)")
                                         let commitMessage = try String(contentsOf: readme, encoding: .utf8)
                                         result.mergeIn(git.add(commitPath))
+                                        _ = git.reset(":!:\(commitPath)")
                                         result.mergeIn(git.commit(commitMessage, path: commitPath))
                                         result.mergeIn(git.push())
                                     } catch {
@@ -510,8 +511,11 @@ public class AtlasCore {
                     }
                 }
                 
-                result.mergeIn(git.add(":!:*/\(Project.committed)/*/*"))
-                result.mergeIn(git.commit("Atlas System Commit"))
+                let commitsPath = "*/\(Project.committed)/*/*"
+                let noCommitsPath = ":!:\(commitsPath)"
+                result.mergeIn(git.add(noCommitsPath))
+                _ = git.reset(commitsPath)
+                result.mergeIn(git.commit("Atlas System Commit", path: noCommitsPath))
                 result.mergeIn(git.sync(result, completed: { result.add("Changes Successfully Pushed To GitHub") }))
             } else {
                 result.success = false
