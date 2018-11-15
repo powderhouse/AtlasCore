@@ -33,3 +33,4 @@ let package = Package(
 
 
 // GENERATE: swift package generate-xcodeproj --xcconfig-overrides settings.xcconfig
+// LOCAL STACK: SERVICES=s3 localstack start

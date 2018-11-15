@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.2.9"
+    public static let version = "2.3.0"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -361,7 +361,7 @@ public class AtlasCore {
             directoriesOnly: true
             ).sorted()
         
-        directories.removeAll(where: { $0 == AtlasCore.defaultProjectName })
+        directories = directories.filter { $0 != AtlasCore.defaultProjectName }
         directories = [AtlasCore.defaultProjectName] + directories
         
         let p = directories.filter {
@@ -510,8 +510,7 @@ public class AtlasCore {
                     }
                 }
                 
-                result.mergeIn(git.add())
-                _ = git.reset("*/\(Project.committed)")
+                result.mergeIn(git.add(":!:*/\(Project.committed)/*/*"))
                 result.mergeIn(git.commit("Atlas System Commit"))
                 result.mergeIn(git.sync(result, completed: { result.add("Changes Successfully Pushed To GitHub") }))
             } else {

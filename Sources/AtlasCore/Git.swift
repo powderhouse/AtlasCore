@@ -247,7 +247,13 @@ public class Git {
     public func add(_ filter: String=".") -> Result {
         
         if gitAnnex != nil {
-            return gitAnnex!.add(filter)
+            var annexFilter = filter
+            if annexFilter.contains(":!:") {
+                annexFilter = filter.replacingOccurrences(
+                    of: ":!:",
+                    with: "--exclude=")
+            }
+            return gitAnnex!.add(annexFilter)
         }
         
         let output = run("add", arguments: [filter])
@@ -381,8 +387,14 @@ public class Git {
         return result
     }
     
-    func files() -> [String] {
-        return run("ls-files").components(separatedBy: "\n").filter { $0.count > 0 }
+    func files(modifiedOnly: Bool=false, path: String=".") -> [String] {
+        var arguments: [String] = []
+        if modifiedOnly {
+            arguments += ["--others", "--modified"]
+        }
+        arguments += ["--", path]
+        
+        return run("ls-files", arguments: arguments).components(separatedBy: "\n").filter { $0.count > 0 }
     }
     
     public func filesSyncedWithAnnex() -> Bool {

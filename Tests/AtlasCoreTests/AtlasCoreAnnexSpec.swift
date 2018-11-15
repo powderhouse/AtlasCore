@@ -206,6 +206,10 @@ Multiline
                 var atlasCore2: AtlasCore!
 
                 beforeEach {
+                    let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
+                    let file = commitDirectory.appendingPathComponent(file1)
+                    expect(FileSystem.fileExists(file)).to(beTrue())
+
                     if let appDirectory = atlasCore.appDirectory {
                         while FileSystem.fileExists(appDirectory, isDirectory: true) {
                             Helper.deleteBaseDirectory(appDirectory)
@@ -214,11 +218,8 @@ Multiline
                         expect(false).to(beTrue(), description: "App directory missing")
                     }
 
-                    for identifier in [file1, file2, file3] {
-                        let file = fileDirectory.appendingPathComponent(identifier)
-                        expect(FileSystem.fileExists(file)).to(beTrue())
-                    }
-
+                    expect(FileSystem.fileExists(file)).to(beFalse())
+                    
                     atlasCore2 = AtlasCore(directory)
 
                     expect(atlasCore2.initGitAndGitHub(credentials).success).to(beTrue())
