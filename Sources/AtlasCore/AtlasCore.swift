@@ -72,7 +72,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.3.1"
+    public static let version = "2.3.2"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -468,7 +468,7 @@ public class AtlasCore {
             }
         }
         
-        sync(result)
+        sync(result, completed: { result.add("Sync Completed") })
         
         return result
     }
