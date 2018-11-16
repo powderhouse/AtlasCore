@@ -71,26 +71,28 @@ public class GitAnnex {
             let configureOutput = configure()
             result.mergeIn(configureOutput)
             
-            let exportOutput = exportTracking()
-            result.mergeIn(exportOutput)
-            
-//            result.add("Downloading all existing files. This could take a while.")
-//
-//            let getOutput = run("get")
-//            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
-//                result.success = false
-//                result.add("Unable to sync with S3. Please check credentials.")
-//                return result
-//            }
-//            result.add(getOutput)
-            
-            if files() == nil {
-                result.success = false
-                result.add("Unable to sync with S3. Please check credentials.")
-                return result
-            }
-            
-            initialized = true
+            sync(result, completed: {
+                let exportOutput = self.exportTracking()
+                result.mergeIn(exportOutput)
+                
+                
+                //            result.add("Downloading all existing files. This could take a while.")
+                //
+                //            let getOutput = run("get")
+                //            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
+                //                result.success = false
+                //                result.add("Unable to sync with S3. Please check credentials.")
+                //                return result
+                //            }
+                //            result.add(getOutput)
+                
+                if self.files() == nil {
+                    result.success = false
+                    result.add("Unable to sync with S3. Please check credentials.")
+                }
+                
+                initialized = true
+            })
         }
         
         while !initialized {
@@ -381,14 +383,14 @@ public class GitAnnex {
                          result: result,
                          completed: { process in
                             completed?()
-//                            self.runLong("get",
-//                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
-//                                         result: result,
-//                                         completed: { process in
-//                                            completed?()
-//                                         }
-//                            )
-                         }
+                            //                            self.runLong("get",
+                            //                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
+                            //                                         result: result,
+                            //                                         completed: { process in
+                            //                                            completed?()
+                            //                                         }
+                            //                            )
+            }
             )
         }
     }
