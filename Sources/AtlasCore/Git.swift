@@ -29,7 +29,8 @@ public class Git {
     
     static let gitIgnore = [
         ".DS_Store",
-        "credentials.json"
+        "credentials.json",
+        ".git-rewrite"
     ]
     
     public var annexRoot: String {
