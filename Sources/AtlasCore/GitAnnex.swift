@@ -59,40 +59,31 @@ public class GitAnnex {
         } else {
             let enableOutput = enableRemote()
             result.mergeIn(enableOutput)
-            //            runLong("get",
-            //                arguments: ["--json", "--json-progress", "--json-error-messages"],
-            //                result: result,
-            //                completed: {
-            //                    result.mergeIn(self.configure())
-            //                    result.mergeIn(self.exportTracking())
-            //                    initialized = true
-            //                }
-            //            )
+
             let configureOutput = configure()
             result.mergeIn(configureOutput)
+
+            let exportOutput = self.exportTracking()
+            result.mergeIn(exportOutput)
             
-            sync(result, completed: {
-                let exportOutput = self.exportTracking()
-                result.mergeIn(exportOutput)
-                
-                
-                //            result.add("Downloading all existing files. This could take a while.")
-                //
-                //            let getOutput = run("get")
-                //            if getOutput.contains("HttpExceptionRequest") || getOutput.contains("The AWS Access Key Id you provided does not exist in our records.") {
-                //                result.success = false
-                //                result.add("Unable to sync with S3. Please check credentials.")
-                //                return result
-                //            }
-                //            result.add(getOutput)
-                
-                if self.files() == nil {
-                    result.success = false
-                    result.add("Unable to sync with S3. Please check credentials.")
-                }
-                
-                initialized = true
-            })
+            if self.files() == nil {
+                result.success = false
+                result.add("Unable to sync with S3. Please check credentials.")
+            }
+            
+            initialized = true
+
+//            sync(result, completed: {
+//                let exportOutput = self.exportTracking()
+//                result.mergeIn(exportOutput)
+//                
+//                if self.files() == nil {
+//                    result.success = false
+//                    result.add("Unable to sync with S3. Please check credentials.")
+//                }
+//                
+//                initialized = true
+//            })
         }
         
         while !initialized {
