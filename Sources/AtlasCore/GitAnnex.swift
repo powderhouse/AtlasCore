@@ -63,27 +63,17 @@ public class GitAnnex {
             let configureOutput = configure()
             result.mergeIn(configureOutput)
 
-            let exportOutput = self.exportTracking()
-            result.mergeIn(exportOutput)
-            
-            if self.files() == nil {
-                result.success = false
-                result.add("Unable to sync with S3. Please check credentials.")
-            }
-            
-            initialized = true
-
-//            sync(result, completed: {
-//                let exportOutput = self.exportTracking()
-//                result.mergeIn(exportOutput)
-//                
-//                if self.files() == nil {
-//                    result.success = false
-//                    result.add("Unable to sync with S3. Please check credentials.")
-//                }
-//                
-//                initialized = true
-//            })
+            sync(result, completed: {
+                let exportOutput = self.exportTracking()
+                result.mergeIn(exportOutput)
+                
+                if self.files() == nil {
+                    result.success = false
+                    result.add("Unable to sync with S3. Please check credentials.")
+                }
+                
+                initialized = true
+            })
         }
         
         while !initialized {
@@ -374,14 +364,7 @@ public class GitAnnex {
                          result: result,
                          completed: { process in
                             completed?()
-                            //                            self.runLong("get",
-                            //                                         arguments: ["--json", "--json-progress", "--json-error-messages"],
-                            //                                         result: result,
-                            //                                         completed: { process in
-                            //                                            completed?()
-                            //                                         }
-                            //                            )
-            }
+                         }
             )
         }
     }
