@@ -62,6 +62,9 @@ public class GitAnnex {
 
             let configureOutput = configure()
             result.mergeIn(configureOutput)
+            
+            let wantedOutput = wanted()
+            result.mergeIn(wantedOutput)
 
             sync(result, completed: {
                 let exportOutput = self.exportTracking()
@@ -206,6 +209,8 @@ public class GitAnnex {
             return result
         }
         
+        result.mergeIn(wanted())
+        
         result.mergeIn(exportTracking())
         
         return result
@@ -277,6 +282,13 @@ public class GitAnnex {
             result.add(["Unable to enable Git Annex remote.", output])
         }
         
+        return result
+    }
+    
+    func wanted() -> Result {
+        var result = Result()
+        let output = run("wanted", arguments: [".", "exclude=*"])
+        result.add(output)
         return result
     }
     
