@@ -287,7 +287,7 @@ public class GitAnnex {
     
     func wanted() -> Result {
         var result = Result()
-        let output = run("wanted", arguments: [".", "exclude=*"])
+        let output = run("wanted", arguments: [".", "present"])
         result.add(output)
         return result
     }
