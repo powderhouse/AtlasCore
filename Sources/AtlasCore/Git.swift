@@ -336,9 +336,12 @@ public class Git {
             result.add("Unable to find file")
             return result
         }
+        
+        result.add("Removing local file and committing changes")
         _ = run("add", arguments: ["-u"])
         _ = commit()
         
+        result.add("Checking log")
         var files = [filePath]
         let history = run("log", arguments: ["--pretty=", "--name-only", "--follow", filePath])
         if history.count > 0 && !history.contains("unknown revision or path") {
@@ -349,11 +352,19 @@ public class Git {
         var filterBranchArguments = ["--force", "--index-filter", "git rm -rf --ignore-unmatch \(escapedFiles.joined(separator: " "))"]
         filterBranchArguments.append(contentsOf: ["--prune-empty", "--tag-name-filter", "cat", "--", "--all"])
         
+        result.add("Running filter-branch, this can take a while. Please be patient :)")
         result.add(run("filter-branch", arguments: filterBranchArguments))
+        
+        result.add("Running for-each-ref")
         result.add(run("for-each-ref", arguments: ["--format='delete %(refname)'", "refs/original", "| git update-ref --stdin"]))
+        
+        result.add("Running reflog")
         result.add(run("reflog", arguments: ["expire", "--expire=now", "--all"]))
+        
+        result.add("Running garbage collection")
         result.add(run("gc", arguments: ["--prune=now"]))
         
+        result.add("Pushing changes to GitHub")
         result.add(run("push", arguments: ["origin", "--force", "--all"]))
         result.add(run("push", arguments: ["origin", "--force", "--tags"]))
         
