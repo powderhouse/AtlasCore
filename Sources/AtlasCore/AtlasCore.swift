@@ -45,7 +45,7 @@ public struct Result {
         self.log = log
     }
     
-    mutating func mergeIn(_ result: Result) {
+    mutating func mergeIn(_ result: Result, file: String = #file, function: String = #function, line: Int = #line) {
         if !result.success {
             success = false
         }
@@ -54,17 +54,18 @@ public struct Result {
             silenceLog = true
         }
         
-        messages.append(contentsOf: result.messages)
+        add(result.messages, file: file, function: function, line: line)
         silenceLog = false
     }
     
-    mutating func add(_ message: String) {
-        add([message])
+    mutating func add(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
+//        let message = "\(file.split(separator: "/").last ?? ""):\(line) -> \(message)"
+        self.messages.append(message)
     }
     
-    mutating func add(_ messages: [String]) {
+    mutating func add(_ messages: [String], file: String = #file, function: String = #function, line: Int = #line) {
         for message in messages {
-            self.messages.append(message)
+            add(message, file: file, function: function, line: line)
         }
     }
 }
@@ -72,7 +73,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.3.7"
+    public static let version = "2.3.8"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
