@@ -128,17 +128,25 @@ public class FileSystem {
                 let destinationName = newName == nil ? String(fileName) : newName!
                 let destination = directory.appendingPathComponent(destinationName)
                 
-                let output = Glue.runProcessError("mv", arguments: [filePath, destination.path])
-                
-                if !FileSystem.fileExists(destination) {
-                    result.success = false
-                    result.add(["Unable to move \(filePath)", output])
-                    return result
+                let fileMoved = {
+                    return FileSystem.fileExists(destination) &&
+                           !FileSystem.fileExists(URL(fileURLWithPath: filePath))
                 }
                 
-                if FileSystem.fileExists(URL(fileURLWithPath: filePath)) {
+                var attempt = 0
+                var output: String = ""
+                while attempt < 5 && !fileMoved() {
+                    output = Glue.runProcessError("mv", arguments: [filePath, destination.path])
+                    
+                    if !fileMoved() {
+                        attempt += 1
+                        sleep(1)
+                    }
+                }
+                
+                if !fileMoved() {
                     result.success = false
-                    result.add(["\(filePath) still exists (was not moved).", output])
+                    result.add(["Unable to move \(filePath)", output])
                     return result
                 }
             } else {
