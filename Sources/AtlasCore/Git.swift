@@ -331,10 +331,11 @@ public class Git {
             _ = FileSystem.deleteFile(fileUrl)
         } else if FileSystem.fileExists(fileUrl, isDirectory: true) {
             _ = FileSystem.deleteDirectory(fileUrl)
-        } else {
-            result.success = false
-            result.add("Unable to find file")
-            return result
+// This seems to prevent files that have been removed locally from being purged successfully.
+//        } else {
+//            result.success = false
+//            result.add("Unable to find file")
+//            return result
         }
         
         result.add("Removing local file and committing changes")

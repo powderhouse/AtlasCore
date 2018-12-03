@@ -178,9 +178,9 @@ class AtlasCorePurgeSpec: CoreSpec {
                             expect(exists).to(beFalse(), description: "Commit folder still found")
                         }
 
-                        it("fails if the file can not be found") {
+                        it("tries even if the file can not be found") {
                             let nonexistentFilePath = gitCommittedFilePath.replacingOccurrences(of: fileName, with: "nonexistent")
-                            expect(atlasCore.purge([nonexistentFilePath]).success).to(beFalse())
+                            expect(atlasCore.purge([nonexistentFilePath]).success).to(beTrue())
                         }
                     }
 
