@@ -59,8 +59,10 @@ public struct Result {
     }
     
     mutating func add(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
-//        let message = "\(file.split(separator: "/").last ?? ""):\(line) -> \(message)"
-        self.messages.append(message)
+        if message.count > 0 {
+            //        let message = "\(file.split(separator: "/").last ?? ""):\(line) -> \(message)"
+            self.messages.append(message)
+        }
     }
     
     mutating func add(_ messages: [String], file: String = #file, function: String = #function, line: Int = #line) {
@@ -73,7 +75,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.3.9"
+    public static let version = "2.4.0"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
