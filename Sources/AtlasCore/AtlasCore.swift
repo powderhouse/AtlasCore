@@ -75,7 +75,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.4.1"
+    public static let version = "2.4.2"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -471,7 +471,10 @@ public class AtlasCore {
             }
         }
         
-        sync(result, completed: { result.add("Sync Completed") })
+        sync(result, completed: { (_ result: Result) -> Void in
+            var result = result
+            result.add("Sync Completed")
+        })
         
         return result
     }
@@ -519,7 +522,14 @@ public class AtlasCore {
                 result.mergeIn(git.add(noCommitsPath))
                 _ = git.reset(commitsPath)
                 result.mergeIn(git.commit("Atlas System Commit", path: noCommitsPath))
-                result.mergeIn(git.sync(result, completed: { result.add("Changes Successfully Pushed To GitHub") }))
+                result.mergeIn(git.sync(result, completed: { (_ result: Result) -> Void in
+                    var result = result
+                    if result.success {
+                        result.add("Changes successfully pushed to GitHub")
+                    } else {
+                        result.add("Failed to push changes to GitHub")
+                    }
+                }))
             } else {
                 result.success = false
                 result.add("No status provided by git for committing.")
@@ -590,7 +600,7 @@ public class AtlasCore {
         return logEntries.filter { $0.contains("</ENDENTRY>")}
     }
     
-    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
+    public func sync(_ existingResult: Result?=nil, completed: ((_ result: Result) -> Void)?=nil) {
         _ = git?.sync(existingResult ?? Result(log: externalLog), completed: completed)
     }
 }

@@ -66,7 +66,8 @@ public class GitAnnex {
             let wantedOutput = wanted()
             result.mergeIn(wantedOutput)
 
-            sync(result, completed: {
+            sync(result, completed: { (_ result: Result) -> Void in
+                var result = result
                 let exportOutput = self.exportTracking()
                 result.mergeIn(exportOutput)
                 
@@ -365,7 +366,7 @@ public class GitAnnex {
         return s3Files
     }
     
-    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) {
+    public func sync(_ existingResult: Result?=nil, completed: ((_ result: Result) -> Void)?=nil) {
         let result = existingResult ?? Result()
         
         _ = info()
@@ -375,7 +376,7 @@ public class GitAnnex {
                          arguments: ["--content"],
                          result: result,
                          completed: { process in
-                            completed?()
+                            completed?(result)
                          }
             )
         }

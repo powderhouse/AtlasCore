@@ -9,7 +9,7 @@ import Foundation
 
 public struct QueuedSync {
     public var result: Result?=nil
-    public var completed: (() -> Void)?=nil
+    public var completed: ((_ result: Result) -> Void)?=nil
 }
 
 public class Git {
@@ -449,7 +449,7 @@ public class Git {
         return missing
     }
     
-    public func sync(_ existingResult: Result?=nil, completed: (() -> Void)?=nil) -> Result {
+    public func sync(_ existingResult: Result?=nil, completed: ((_ result: Result) -> Void)?=nil) -> Result {
         var result = existingResult ?? Result()
         
         if syncing {
@@ -490,10 +490,10 @@ public class Git {
             result.add(output)
         }
         
-        let endEntry = {
+        let endEntry: (_ result: Result) -> Void = { result in
             _ = self.writeToLog(end)
             if let completed = completed {
-                completed()
+                completed(result)
             }
             
             self.syncing = false
@@ -504,12 +504,12 @@ public class Git {
         }
         if let gitAnnex = gitAnnex {
             if filesSyncedWithAnnex() {
-                endEntry()
+                endEntry(result)
             } else {
                 gitAnnex.sync(result, completed: endEntry)
             }
         } else {
-            endEntry()
+            endEntry(result)
         }
         
         return result
