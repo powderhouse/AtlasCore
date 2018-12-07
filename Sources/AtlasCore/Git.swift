@@ -86,8 +86,8 @@ public class Git {
             result.mergeIn(gitIgnoreResult)
             
             result.add("Committing .gitignore")
-            result.mergeIn(add())
-            result.mergeIn(commit())
+            result.mergeIn(add(AtlasCore.noCommitsPath))
+            result.mergeIn(commit(path: AtlasCore.noCommitsPath))
         }
         
         if let origin = origin() {
@@ -339,8 +339,8 @@ public class Git {
         }
         
         result.add("Removing local file and committing changes")
-        _ = run("add", arguments: ["-u"])
-        _ = commit()
+        _ = run("add", arguments: ["-u", filePath])
+        _ = commit(path: filePath)
         
         result.add("Checking log")
         var files = [filePath]

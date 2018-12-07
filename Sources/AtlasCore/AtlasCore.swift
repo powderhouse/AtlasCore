@@ -75,11 +75,13 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.4.2"
+    public static let version = "2.4.3"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
     public static let originName = "AtlasOrigin"
+    public static let commitsPath = "*/\(Project.committed)/*/*"
+    public static let noCommitsPath = ":!:\(commitsPath)"
     
     public var baseDirectory: URL!
     public var userDirectory: URL?
@@ -517,11 +519,10 @@ public class AtlasCore {
                     }
                 }
                 
-                let commitsPath = "*/\(Project.committed)/*/*"
-                let noCommitsPath = ":!:\(commitsPath)"
-                result.mergeIn(git.add(noCommitsPath))
-                _ = git.reset(commitsPath)
-                result.mergeIn(git.commit("Atlas System Commit", path: noCommitsPath))
+                
+                result.mergeIn(git.add(AtlasCore.noCommitsPath))
+                _ = git.reset(AtlasCore.commitsPath)
+                result.mergeIn(git.commit("Atlas System Commit", path: AtlasCore.noCommitsPath))
                 result.mergeIn(git.sync(result, completed: { (_ result: Result) -> Void in
                     var result = result
                     if result.success {
