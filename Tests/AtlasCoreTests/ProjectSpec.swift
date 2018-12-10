@@ -301,6 +301,37 @@ class ProjectSpec: CoreSpec {
                 
             }
             
+            context("createFile") {
+                var stagedDirectory: URL?
+                var file: URL!
+                let fileName = "test.note"
+                let message = "this is a test"
+
+                beforeEach {
+                    stagedDirectory = project.directory("staged")
+                    file = stagedDirectory?.appendingPathComponent(fileName)
+                    project.createFile(file, message: message)
+                }
+                
+                it("should create the file") {
+                    let exists = fileManager.fileExists(atPath: file.path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "File not found in staged directory")
+                }
+                
+                it("should write the message to the file") {
+                    let contents = try? String(contentsOf: file, encoding: .utf8)
+                    expect(contents).to(equal(message))
+                }
+            }
+            
+            context("createReadme") {
+                it("should create the readme file") {
+                    let path = project.directory(Project.staged).appendingPathComponent(Project.readme).path
+                    let exists = fileManager.fileExists(atPath: path, isDirectory: &isFile)
+                    expect(exists).to(beTrue(), description: "Readme not found in staged directory")
+                }
+            }
+            
         }
     }
 }

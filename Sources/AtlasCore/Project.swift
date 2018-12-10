@@ -79,6 +79,16 @@ public class Project {
         return folderURL
     }
     
+    public func createFile(_ url: URL, message: String) {
+        if !FileSystem.fileExists(url, isDirectory: false) {
+            do {
+                try message.write(to: url, atomically: true, encoding: .utf8)
+            } catch {
+                return
+            }
+        }
+    }
+    
     public func createReadme(_ message: String, in containingDirectory: URL?=nil) {
         var dir = containingDirectory
         if dir == nil {
@@ -86,15 +96,7 @@ public class Project {
         }
         
         guard dir != nil else { return }
-
-        let readme = dir!.appendingPathComponent(Project.readme, isDirectory: false)
-        if !FileSystem.fileExists(readme, isDirectory: false) {
-            do {
-                try message.write(to: readme, atomically: true, encoding: .utf8)
-            } catch {
-                return
-            }
-        }
+        createFile(dir!.appendingPathComponent(Project.readme), message: message)
     }
     
     public func directory(_ name: String?=nil) -> URL {
