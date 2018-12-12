@@ -159,12 +159,16 @@ Multiline
                 }
             }
             
-            it("should sync with s3, reflecting files and directory structures") {
+            it("should sync with s3, reflecting files and directory structures and then remove files locally") {
                 let objects = S3Helper.listObjects(s3Bucket)
 
                 for identifier in [slug1, slug2, file1, file2, file3] {
                     expect(objects).toEventually(contain(identifier), timeout: 10, description: "\(identifier) not found")
                 }
+                
+//                for identifier in [file1, file2, file3] {
+//                    expect(FileSystem.fileExists(file)).to(beTrue())
+//                }
             }
 
             context("purging files and projects") {
@@ -208,7 +212,6 @@ Multiline
                 beforeEach {
                     let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
                     let file = commitDirectory.appendingPathComponent(file1)
-                    expect(FileSystem.fileExists(file)).to(beTrue())
 
                     if let appDirectory = atlasCore.appDirectory {
                         while FileSystem.fileExists(appDirectory, isDirectory: true) {

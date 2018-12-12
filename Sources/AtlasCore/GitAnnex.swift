@@ -277,7 +277,7 @@ public class GitAnnex {
     func enableRemote() -> Result {
         var result = Result()
         //            let output = run("enableremote", arguments: [GitAnnex.remoteName, "publicurl=\(s3Path)"])
-        let output = run("enableremote", arguments: [GitAnnex.remoteName])
+        let output = run("enableremote", arguments: [GitAnnex.remoteName, "versioning=yes"])
         if !output.contains(GitAnnex.successText) {
             result.success = false
             result.add(["Unable to enable Git Annex remote.", output])
