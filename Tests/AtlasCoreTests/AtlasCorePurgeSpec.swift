@@ -63,8 +63,6 @@ class AtlasCorePurgeSpec: CoreSpec {
                         atlasCore.completedLogEntries().count
                     ).toEventually(equal(logEntries), timeout: 30)
                     
-                    print(atlasCore.completedLogEntries())
-                    
                     expect(atlasCore.validRepository()).toEventually(beTrue(), timeout: TimeInterval(30))
                     
                     expect(atlasCore.initSearch().success).to(beTrue())

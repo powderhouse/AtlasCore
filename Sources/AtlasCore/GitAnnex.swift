@@ -288,8 +288,10 @@ public class GitAnnex {
     
     func wanted() -> Result {
         var result = Result()
-        let output = run("wanted", arguments: [".", "exclude=*"])
-        result.add(output)
+        let wantedOutput = run("wanted", arguments: [".", "standard"])
+        let groupOutput = run("group", arguments: [".", "source"])
+        result.add(wantedOutput)
+        result.add(groupOutput)
         return result
     }
     
