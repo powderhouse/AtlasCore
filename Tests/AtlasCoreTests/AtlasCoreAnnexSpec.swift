@@ -137,6 +137,12 @@ Multiline
                 expect(project2?.commitStaged().success).to(beTrue())
                 expect(atlasCore.commitChanges(message2).success).to(beTrue())
                 
+                for identifier in [file2, file3] {
+                    let commitDir = project2.directory(Project.committed).appendingPathComponent(slug2)
+                    let file = commitDir.appendingPathComponent(identifier)
+                    expect(FileSystem.fileExists(file)).to(beTrue())
+                }
+
                 logEntries += 1
                 expect(
                     atlasCore.completedLogEntries().count
@@ -159,16 +165,18 @@ Multiline
                 }
             }
             
-            it("should sync with s3, reflecting files and directory structures and then remove files locally") {
+            it("should sync with s3, reflecting files and directory structures, and then remove files locally") {
                 let objects = S3Helper.listObjects(s3Bucket)
 
                 for identifier in [slug1, slug2, file1, file2, file3] {
                     expect(objects).toEventually(contain(identifier), timeout: 10, description: "\(identifier) not found")
                 }
                 
-//                for identifier in [file1, file2, file3] {
-//                    expect(FileSystem.fileExists(file)).to(beTrue())
-//                }
+                for identifier in [file2, file3] {
+                    let commitDir = project2.directory(Project.committed).appendingPathComponent(slug2)
+                    let file = commitDir.appendingPathComponent(identifier)
+                    expect(FileSystem.fileExists(file)).to(beFalse())
+                }
             }
 
             context("purging files and projects") {
