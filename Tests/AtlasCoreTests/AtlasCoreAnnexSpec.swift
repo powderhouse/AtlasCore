@@ -175,7 +175,7 @@ Multiline
                 for identifier in [file2, file3] {
                     let commitDir = project2.directory(Project.committed).appendingPathComponent(slug2)
                     let file = commitDir.appendingPathComponent(identifier)
-                    expect(FileSystem.fileExists(file)).to(beFalse())
+                    expect(FileSystem.fileExists(file)).toEventually(beFalse())
                 }
             }
 
