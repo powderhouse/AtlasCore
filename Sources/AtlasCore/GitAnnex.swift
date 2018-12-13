@@ -169,6 +169,7 @@ public class GitAnnex {
             GitAnnex.remoteName,
             "type=S3",
             "encryption=none",
+            "versioning=yes",
             "bucket=\(s3Bucket)",
             "exporttree=yes",
             "public=yes",

@@ -165,9 +165,8 @@ Multiline
             }
             
             it("should sync with s3, reflecting files and directory structures, and then remove files locally") {
-                let remoteFiles = atlasCore.remoteFiles()
-
                 for identifier in [slug1, slug2, file1, file2, file3] {
+                    let remoteFiles = atlasCore.remoteFiles()
                     let matches = remoteFiles.filter { $0.contains(identifier) }.count
                     expect(matches).toEventually(beGreaterThan(0), description: "\(identifier) not found")
                 }
@@ -212,7 +211,7 @@ Multiline
                     }
                 }
             }
-            
+
             context("deleting local repository and then reinitializing") {
 
                 var atlasCore2: AtlasCore!
@@ -230,7 +229,7 @@ Multiline
                     }
 
                     expect(FileSystem.fileExists(file)).to(beFalse())
-                    
+
                     atlasCore2 = AtlasCore(directory)
 
                     expect(atlasCore2.initGitAndGitHub(credentials).success).to(beTrue())
@@ -248,14 +247,14 @@ Multiline
                     let file = commitDirectory.appendingPathComponent(file1)
                     expect(FileSystem.fileExists(file)).to(beFalse())
                 }
-                
+
                 it("should properly sync with S3 when a new file is added") {
                     Helper.addFile(file4, directory: fileDirectory, contents: file4)
-                    
+
                     let filePath4 = fileDirectory.appendingPathComponent(file4).path
                     expect(project1?.copyInto([filePath4]).success).to(beTrue())
                     expect(atlasCore.commitChanges().success).to(beTrue())
-                    
+
                     logEntries += 1
                     expect(
                         atlasCore.completedLogEntries().count
