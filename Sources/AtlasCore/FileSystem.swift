@@ -9,20 +9,26 @@ import Foundation
 
 public class FileSystem {
     
-    public class func fileExists(_ url: URL, isDirectory: Bool=false) -> Bool {
-        let fileManager = FileManager.default
-        
-        var isDir : ObjCBool = (isDirectory ? true : false)
-        
-        if fileManager.fileExists(atPath: url.path, isDirectory: &isDir) {
-            return isDirectory && isDir.boolValue || !isDirectory && !isDir.boolValue
-        } else {
-            return false
+    public class func fileExists(_ url: URL) -> Bool {
+        if let resourceIsReachable = try? url.checkResourceIsReachable() {
+            if resourceIsReachable {
+                return true
+            }
         }
+        
+        return false
+    }
+    
+    public class func fileContentsExist(_ url: URL) -> Bool {
+        let fileManager = FileManager.default
+
+        var isDir : ObjCBool = false
+
+        return fileManager.fileExists(atPath: url.path, isDirectory: &isDir)
     }
     
     public class func createDirectory(_ url: URL) -> Result {
-        if fileExists(url, isDirectory: true) {
+        if fileExists(url) {
             return Result()
         }
         
@@ -77,7 +83,7 @@ public class FileSystem {
         if directoriesOnly {
             contents = contents!.filter {
                 let contentUrl = url.appendingPathComponent($0)
-                return fileExists(contentUrl, isDirectory: true)
+                return fileExists(contentUrl)
             }
         }
         

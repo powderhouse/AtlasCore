@@ -75,7 +75,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.4.8"
+    public static let version = "2.4.9"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -139,7 +139,7 @@ public class AtlasCore {
         if let username = activeCredentials?.username {
             self.userDirectory = baseDirectory.appendingPathComponent(username)
             if let userDirectory = self.userDirectory {
-                if !FileSystem.fileExists(userDirectory, isDirectory: true) {
+                if !FileSystem.fileExists(userDirectory) {
                     result.add("Creating user directory.")
                     let directoryResult = FileSystem.createDirectory(userDirectory)
                     result.mergeIn(directoryResult)
@@ -264,7 +264,7 @@ public class AtlasCore {
         }
         
         let readme = git!.directory.appendingPathComponent(Project.readme, isDirectory: false)
-        if !FileSystem.fileExists(readme, isDirectory: false) {
+        if !FileSystem.fileExists(readme) {
             do {
                 try "Welcome to Atlas".write(to: readme, atomically: true, encoding: .utf8)
             } catch {

@@ -56,7 +56,7 @@ class AtlasCoreSpec: CoreSpec {
                 logEntries = 0
                 externalLogMessages = []
                 atlasCore.closeSearch()
-                while FileSystem.fileExists(directory, isDirectory: true) {
+                while FileSystem.fileExists(directory) {
                     Helper.deleteBaseDirectory(directory)
                 }
             }
@@ -79,10 +79,7 @@ class AtlasCoreSpec: CoreSpec {
                     expect(result.success).to(beFalse())
                     
                     let userDirectory = directory.appendingPathComponent(username)
-                    let userDirectoryExists = FileSystem.fileExists(
-                        userDirectory,
-                        isDirectory: true
-                    )
+                    let userDirectoryExists = FileSystem.fileExists(userDirectory)
                     expect(userDirectoryExists).to(beFalse())
                 }
             }

@@ -49,7 +49,7 @@ class AtlasCorePurgeSpec: CoreSpec {
             afterEach {
                 logEntries = 0
                 atlasCore.closeSearch()
-                while FileSystem.fileExists(directory, isDirectory: true) {
+                while FileSystem.fileExists(directory) {
                     Helper.deleteBaseDirectory(directory)
                 }
             }

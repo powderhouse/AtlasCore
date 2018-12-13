@@ -67,7 +67,7 @@ public class Git {
         result.add("Initializing Git")
         
         if !clone().success {
-            if !FileSystem.fileExists(self.directory, isDirectory: true) {
+            if !FileSystem.fileExists(self.directory) {
                 result.add("Creating Git repository.")
                 let gitDirectoryResult = FileSystem.createDirectory(self.directory)
                 result.mergeIn(gitDirectoryResult)
@@ -329,7 +329,7 @@ public class Git {
         let fileUrl = directory.appendingPathComponent(filePath)
         if FileSystem.fileExists(fileUrl) {
             _ = FileSystem.deleteFile(fileUrl)
-        } else if FileSystem.fileExists(fileUrl, isDirectory: true) {
+        } else if FileSystem.fileExists(fileUrl) {
             _ = FileSystem.deleteDirectory(fileUrl)
 // This seems to prevent files that have been removed locally from being purged successfully.
 //        } else {

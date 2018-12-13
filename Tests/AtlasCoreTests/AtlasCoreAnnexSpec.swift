@@ -55,7 +55,7 @@ Multiline
             beforeEach {
                 directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ATLAS_CORE")
 
-                while FileSystem.fileExists(directory, isDirectory: true) {
+                while FileSystem.fileExists(directory) {
                     Helper.deleteBaseDirectory(directory)
                 }
                 
@@ -156,7 +156,7 @@ Multiline
             
             afterEach {
                 logEntries = 0
-                while FileSystem.fileExists(directory, isDirectory: true) {
+                while FileSystem.fileExists(directory) {
                     Helper.deleteBaseDirectory(directory)
                 }
                 if let s3Bucket = atlasCore.git?.gitAnnex?.s3Bucket {
@@ -164,17 +164,18 @@ Multiline
                 }
             }
             
-            it("should sync with s3, reflecting files and directory structures, and then remove files locally") {
+            it("should sync with s3, reflecting files and directory structures, and then remove file contents locally") {
                 for identifier in [slug1, slug2, file1, file2, file3] {
                     let remoteFiles = atlasCore.remoteFiles()
                     let matches = remoteFiles.filter { $0.contains(identifier) }.count
                     expect(matches).toEventually(beGreaterThan(0), description: "\(identifier) not found")
                 }
-                
+
                 for identifier in [file2, file3] {
                     let commitDir = project2.directory(Project.committed).appendingPathComponent(slug2)
                     let file = commitDir.appendingPathComponent(identifier)
-                    expect(FileSystem.fileExists(file)).toEventually(beFalse())
+                    expect(FileSystem.fileExists(file)).toEventually(beTrue())
+                    expect(FileSystem.fileContentsExist(file)).toEventually(beFalse())
                 }
             }
 
@@ -221,7 +222,7 @@ Multiline
                     let file = commitDirectory.appendingPathComponent(file1)
 
                     if let appDirectory = atlasCore.appDirectory {
-                        while FileSystem.fileExists(appDirectory, isDirectory: true) {
+                        while FileSystem.fileExists(appDirectory) {
                             Helper.deleteBaseDirectory(appDirectory)
                         }
                     } else {
@@ -245,7 +246,8 @@ Multiline
 
                     let commitDirectory = project1.directory("committed").appendingPathComponent(slug1)
                     let file = commitDirectory.appendingPathComponent(file1)
-                    expect(FileSystem.fileExists(file)).to(beFalse())
+                    expect(FileSystem.fileExists(file)).to(beTrue())
+                    expect(FileSystem.fileContentsExist(file)).to(beFalse())
                 }
 
                 it("should properly sync with S3 when a new file is added") {

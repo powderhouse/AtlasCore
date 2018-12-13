@@ -31,7 +31,7 @@ class Helper {
     }
     
     class func deleteBaseDirectory(_ url: URL) {
-        if FileSystem.fileExists(url, isDirectory: true) {
+        if FileSystem.fileExists(url) {
             _ = Glue.runProcess(
                 "chmod",
                 arguments: ["-R", "u+w", url.path],

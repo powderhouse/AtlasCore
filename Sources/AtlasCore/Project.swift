@@ -37,7 +37,7 @@ public class Project {
         self.externalLog = externalLog
         
         self.projectDirectory = baseDirectory.appendingPathComponent(name)
-        if !FileSystem.fileExists(self.projectDirectory, isDirectory: true) {
+        if !FileSystem.fileExists(self.projectDirectory) {
             if let externalLog = externalLog {
                 externalLog("Initializing project: \(name)")
             }
@@ -73,14 +73,14 @@ public class Project {
         guard dir != nil else { return nil }
         
         let folderURL = dir!.appendingPathComponent(name)
-        if !FileSystem.fileExists(folderURL, isDirectory: true) {
+        if !FileSystem.fileExists(folderURL) {
             _ = FileSystem.createDirectory(folderURL)
         }
         return folderURL
     }
     
     public func createFile(_ url: URL, message: String) {
-        if !FileSystem.fileExists(url, isDirectory: false) {
+        if !FileSystem.fileExists(url) {
             do {
                 try message.write(to: url, atomically: true, encoding: .utf8)
             } catch {
@@ -262,7 +262,7 @@ public class Project {
     public class func exists(_ name: String, in directory: URL) -> Bool {
         guard !Git.gitIgnore.contains(name) else { return false }
         let projectDirectory = directory.appendingPathComponent(name)
-        return FileSystem.fileExists(projectDirectory, isDirectory: true)
+        return FileSystem.fileExists(projectDirectory)
     }
     
     public func changeState(_ fileNames: [String], to state: String) -> Result {
