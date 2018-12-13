@@ -410,6 +410,10 @@ public class Git {
         return run("ls-files", arguments: arguments).components(separatedBy: "\n").filter { $0.count > 0 }
     }
     
+    func remoteFiles() -> [String] {
+        return gitAnnex?.files() ?? []
+    }
+    
     public func filesSyncedWithAnnex() -> Bool {
         let missing = missingFilesBetweenLocalAndS3()
         if missing["local"]!.count > 0 || missing["remote"]!.count > 0 {
@@ -429,21 +433,19 @@ public class Git {
         let ignore = [
             "annex-uuid"
         ]
-        if let gitAnnex = gitAnnex {
-            if let annexFiles = gitAnnex.files() {
-                let localFiles = self.files()
-                
-                for gitFile in localFiles where !ignore.contains(gitFile) {
-                    if !annexFiles.contains(gitFile) {
-                        missing["remote"]!.append(gitFile)
-                    }
-                }
-                
-                for annexFile in annexFiles where !ignore.contains(annexFile) {
-                    if !localFiles.contains(annexFile) {
-                        missing["local"]!.append(annexFile)
-                    }
-                }
+        
+        let annexFiles = remoteFiles()
+        let localFiles = self.files()
+        
+        for gitFile in localFiles where !ignore.contains(gitFile) {
+            if !annexFiles.contains(gitFile) {
+                missing["remote"]!.append(gitFile)
+            }
+        }
+        
+        for annexFile in annexFiles where !ignore.contains(annexFile) {
+            if !localFiles.contains(annexFile) {
+                missing["local"]!.append(annexFile)
             }
         }
         return missing

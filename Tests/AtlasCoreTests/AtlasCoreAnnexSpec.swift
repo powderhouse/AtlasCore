@@ -125,6 +125,11 @@ Multiline
                 
                 let filePath3 = fileDirectory.appendingPathComponent(file3).path
                 expect(project2?.copyInto([filePath3]).success).to(beTrue())
+                
+                for identifier in [file2, file3] {
+                    let file = project2.directory(Project.staged).appendingPathComponent(identifier)
+                    expect(FileSystem.fileExists(file)).toEventually(beTrue())
+                }
 
                 expect(atlasCore.atlasCommit().success).to(beTrue())
                 
@@ -136,12 +141,6 @@ Multiline
                 expect(project2?.commitMessage(message2)).to(beTrue())
                 expect(project2?.commitStaged().success).to(beTrue())
                 expect(atlasCore.commitChanges(message2).success).to(beTrue())
-                
-                for identifier in [file2, file3] {
-                    let commitDir = project2.directory(Project.committed).appendingPathComponent(slug2)
-                    let file = commitDir.appendingPathComponent(identifier)
-                    expect(FileSystem.fileExists(file)).toEventually(beTrue())
-                }
 
                 logEntries += 1
                 expect(
@@ -166,10 +165,11 @@ Multiline
             }
             
             it("should sync with s3, reflecting files and directory structures, and then remove files locally") {
-                let objects = S3Helper.listObjects(s3Bucket)
+                let remoteFiles = atlasCore.remoteFiles()
 
                 for identifier in [slug1, slug2, file1, file2, file3] {
-                    expect(objects).toEventually(contain(identifier), timeout: 10, description: "\(identifier) not found")
+                    let matches = remoteFiles.filter { $0.contains(identifier) }.count
+                    expect(matches).toEventually(beGreaterThan(0), description: "\(identifier) not found")
                 }
                 
                 for identifier in [file2, file3] {

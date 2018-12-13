@@ -573,6 +573,15 @@ public class AtlasCore {
         return git?.missingFilesBetweenLocalAndS3() ?? [:]
     }
     
+    public func remoteFiles() -> [String] {
+        if let git = git {
+            return git.remoteFiles()
+        } else {
+            return []
+        }
+        
+    }
+    
     public func remote() -> String? {
         guard git != nil else {
             return nil
