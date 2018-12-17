@@ -3,13 +3,33 @@ import Foundation
 public struct File {
     public var name: String
     public var url: String
+    
+    var json: String {
+        return "{name: \"\(name)\", url: \"\(url)\"}"
+    }
 }
 
 public struct Commit {
     public var message: String
+    public var date: String
+    public var author: String
     public var hash: String
     public var files: [File] = []
     public var projects: [Project] = []
+    
+    var json: String {
+        var jsonString = "{hash: \"\(hash)\", author: \"\(author)\", date: \"\(date)\", message: \"\(message)\", projects: ["
+        jsonString.append(contentsOf: projects.map { "\"\($0.name ?? "N/A")\"" }.joined(separator: ", "))
+        jsonString.append(contentsOf: "], files: [")
+        jsonString.append(contentsOf: files.map { $0.json }.joined(separator: ", "))
+        jsonString.append("]}")
+        
+        if let regex = try? NSRegularExpression(pattern: "[\n\r]") {
+            let range = NSMakeRange(0, jsonString.count)
+            return regex.stringByReplacingMatches(in: jsonString, options: [], range: range, withTemplate: "\\\\n")
+        }
+        return jsonString
+    }
 }
 
 public struct Result {
@@ -75,11 +95,12 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.4.9"
+    public static let version = "2.5.0"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
     public static let originName = "AtlasOrigin"
+    public static let jsonFilename = "atlas.js"
     public static let commitsPath = "*/\(Project.committed)/*/*"
     public static let noCommitsPath = ":!:\(commitsPath)"
     
@@ -430,7 +451,16 @@ public class AtlasCore {
             }
             
             if let message = data["message"] as? String {
-                commits.append(Commit(message: message, hash: hash, files: files, projects: projects))
+                commits.append(
+                    Commit(
+                        message: message,
+                        date: data["date"] as? String ?? "N/A",
+                        author: data["author"] as? String ?? "N/A",
+                        hash: hash,
+                        files: files,
+                        projects: projects
+                    )
+                )
             }
         }
         return commits
@@ -510,6 +540,7 @@ public class AtlasCore {
                                         _ = git.reset(":!:\(commitPath)")
                                         result.mergeIn(git.commit(commitMessage, path: commitPath))
                                         result.mergeIn(git.push())
+                                        syncJson()
                                     } catch {
                                         result.add("Unable to read commit message for: \(commitPath)")
                                     }
@@ -592,6 +623,35 @@ public class AtlasCore {
     
     public func validRepository() -> Bool {
         return gitHub?.validRepository() ?? false
+    }
+    
+    public func syncJson() {
+        if let username = git?.credentials.username {
+            var json = "var atlas = {account: \(username), commits: ["
+            json.append(contentsOf: log().map { $0.json }.joined(separator: ","))
+            json.append("]}")
+            
+            do {
+                if let appDirectory = self.appDirectory {
+                    let filename = appDirectory.appendingPathComponent(AtlasCore.jsonFilename)
+                    
+                    let fileManager = FileManager.default
+                    if fileManager.fileExists(atPath: filename.path) {
+                        do {
+                            try fileManager.removeItem(at: filename)
+                        } catch {
+                            print("Failed to delete existing atlas json: \(error)")
+                        }
+                    }
+                    
+                    try json.write(to: filename, atomically: true, encoding: .utf8)
+                } else {
+                    print("Failed to save atlas json: No user directory provided")
+                }
+            } catch {
+                print("Failed to save atlas json: \(error)")
+            }
+        }
     }
     
     public func syncLog() -> String? {

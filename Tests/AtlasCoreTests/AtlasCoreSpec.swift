@@ -159,6 +159,9 @@ class AtlasCoreSpec: CoreSpec {
                     ).toEventually(equal(logEntries), timeout: 10)
 
                     expect(try? String(contentsOf: logUrl, encoding: .utf8)).toEventually(contain("Branch 'master' set up to track remote branch 'master' from 'origin'."), timeout: 10)
+                    
+                    let jsonUrl = atlasCore.appDirectory!.appendingPathComponent(AtlasCore.jsonFilename)
+                    expect(try? String(contentsOf: jsonUrl, encoding: .utf8)).to(contain("Commit Message"))
                 }
 
                 it("initializes search successfully") {
@@ -427,6 +430,26 @@ Multiline
                         it("should create syncLogEntries") {
                             expect(atlasCore.syncLogEntries().count).to(equal(5))
                             expect(atlasCore.syncLog()).toNot(contain("Bad file descriptor"))
+                        }
+                        
+                        context("syncJson") {
+                            beforeEach {
+                                atlasCore.syncJson()
+                            }
+                            
+                            it("should create a file in the user directory that contains all commit information") {
+                                let url = directory.appendingPathComponent("\(username)/\(AtlasCore.repositoryName)/\(AtlasCore.jsonFilename)")
+                                let exists = fileManager.fileExists(atPath: url.path, isDirectory: &isFile)
+                                expect(exists).to(beTrue(), description: "No atlas json found")
+                                
+                                let contents = try? String(contentsOf: url, encoding: .utf8)
+                                
+                                expect(contents).to(contain(slug1))
+                                expect(contents).to(contain(slug2))
+                                expect(contents).to(contain(file1))
+                                expect(contents).to(contain(file2))
+                                expect(contents).to(contain(message1))
+                            }
                         }
 
                     }

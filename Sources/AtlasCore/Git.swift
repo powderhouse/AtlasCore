@@ -547,8 +547,11 @@ public class Git {
     }
     
     public func log(projectName: String?=nil, full: Bool=true, commitSlugFilter: [String]?=nil) -> [[String: Any]] {
+        let startCommit = "<STARTCOMMIT>"
+        let delimiter = "<DELIMITER>"
+        
         var arguments = [
-            "--pretty=format:<START COMMIT>%H<DELIMITER>%B<DELIMITER>",
+            "--pretty=format:\(startCommit)%H\(delimiter)%ad\(delimiter)%aE\(delimiter)%B\(delimiter)",
             "--reverse",
             "--name-only",
             "--relative",
@@ -560,6 +563,7 @@ public class Git {
             arguments.append(contentsOf: [
                 ":!*/unstaged/*",
                 ":!*/staged/*",
+                ":!*\(AtlasCore.jsonFilename)",
                 ":!*\(Project.readme)",
                 ":!*\(Project.commitMessageFile)"
                 ])
@@ -576,12 +580,12 @@ public class Git {
         }
         
         var data: [[String:Any]] = []
-        let commits = log.components(separatedBy: "<START COMMIT>").filter { $0.count > 0 }
+        let commits = log.components(separatedBy: startCommit).filter { $0.count > 0 }
         for commit in commits {
-            let components = commit.components(separatedBy: "<DELIMITER>")
+            let components = commit.components(separatedBy: delimiter)
             if let hash = components.first {
                 if components.count > 1 {
-                    let message = components[1]
+                    let message = components[3]
                     
                     if message.contains("git-annex in") {
                         continue
@@ -605,6 +609,8 @@ public class Git {
                         
                         data.append([
                             "message": message,
+                            "date": components[1],
+                            "author": components[2],
                             "hash": hash,
                             "files": files
                             ])
