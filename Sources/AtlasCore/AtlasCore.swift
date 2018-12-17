@@ -95,7 +95,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.5.0"
+    public static let version = "2.5.1"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -453,7 +453,7 @@ public class AtlasCore {
             if let message = data["message"] as? String {
                 commits.append(
                     Commit(
-                        message: message,
+                        message: message.trim(),
                         date: data["date"] as? String ?? "N/A",
                         author: data["author"] as? String ?? "N/A",
                         hash: hash,
@@ -627,7 +627,7 @@ public class AtlasCore {
     
     public func syncJson() {
         if let username = git?.credentials.username {
-            var json = "var atlas = {account: \(username), commits: ["
+            var json = "var atlas = {account: \"\(username)\", commits: ["
             json.append(contentsOf: log().map { $0.json }.joined(separator: ","))
             json.append("]}")
             
