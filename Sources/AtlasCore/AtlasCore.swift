@@ -95,7 +95,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.5.1"
+    public static let version = "2.5.2"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -438,13 +438,15 @@ public class AtlasCore {
                     
                     if let projectName = fileComponents.first {
                         if Project.exists(projectName, in: git!.directory!) {
-                            let p = Project(
-                                projectName,
-                                baseDirectory: git!.directory!,
-                                git: git!,
-                                externalLog: externalLog
-                            )
-                            projects.append(p)
+                            if projects.filter({ $0.name == projectName }).isEmpty {
+                                let p = Project(
+                                    projectName,
+                                    baseDirectory: git!.directory!,
+                                    git: git!,
+                                    externalLog: externalLog
+                                )
+                                projects.append(p)
+                            }
                         }
                     }
                 }
