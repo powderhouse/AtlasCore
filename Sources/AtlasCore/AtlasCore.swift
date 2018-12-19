@@ -95,7 +95,7 @@ public struct Result {
 
 public class AtlasCore {
     
-    public static let version = "2.5.2"
+    public static let version = "2.5.3"
     public static let defaultProjectName = "General"
     public static let appName = "Atlas"
     public static let repositoryName = "Atlas"
@@ -468,7 +468,7 @@ public class AtlasCore {
         return commits
     }
     
-    public func purge(_ filePaths: [String]) -> Result {
+    public func purge(_ paths: [String]) -> Result {
         var result = Result(log: externalLog)
         
         guard git?.directory != nil else {
@@ -477,10 +477,26 @@ public class AtlasCore {
             return result
         }
         
+        let directory = git!.directory!
+        var filePaths: [String] = []
+        for path in paths {
+            if path.reversed().starts(with: "/") {
+                let files = FileSystem.filesInDirectory(directory.appendingPathComponent(path))
+                for file in files {
+                    filePaths.append(path.appending(file))
+                }
+            } else {
+                filePaths.append(path)
+            }
+        }
+        
         result.add("Removing all files.")
         var directories: [String] = []
         for filePath in filePaths {
-            result.mergeIn(git!.removeFile(filePath, existingResult: result))
+            let fileUrl = directory.appendingPathComponent(filePath)
+            while FileSystem.fileExists(fileUrl) {
+                result.mergeIn(git!.removeFile(filePath, existingResult: result))
+            }
             if result.success {
                 let directory = URL(fileURLWithPath: filePath).deletingLastPathComponent().relativePath
                 if !directories.contains(directory) {
