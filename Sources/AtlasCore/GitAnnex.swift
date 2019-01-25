@@ -22,9 +22,19 @@ public class GitAnnex {
             return "\(GitAnnex.groupName)-\(credentials.username)"
         }
     }
+    
     public var s3Path: String {
         get {
             return "https://s3.amazonaws.com/\(s3Bucket)/"
+        }
+    }
+    
+    var endpoint: String? {
+        get {
+            if credentials.s3AccessKey == "test" {
+                return "http://localhost:4572"
+            }
+            return nil
         }
     }
     
@@ -289,7 +299,7 @@ public class GitAnnex {
     
     func wanted() -> Result {
         var result = Result()
-        let wantedOutput = run("wanted", arguments: [".", "standard"])
+        let wantedOutput = run("wanted", arguments: [".", "standard or include=*.md"])
         let groupOutput = run("group", arguments: [".", "source"])
         result.add(wantedOutput)
         result.add(groupOutput)
@@ -346,11 +356,6 @@ public class GitAnnex {
     
     public func files() -> [String]? {
         var s3Files: [String] = []
-        
-        var endpoint: String? = nil
-        if credentials.s3AccessKey == "test" {
-            endpoint = "http://localhost:4572"
-        }
         
         let s3 = S3(accessKeyId: credentials.s3AccessKey, secretAccessKey: credentials.s3SecretAccessKey, endpoint: endpoint)
         
