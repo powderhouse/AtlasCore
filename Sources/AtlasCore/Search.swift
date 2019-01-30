@@ -62,7 +62,7 @@ public class Search {
         var mimeType: NSString? = nil
         if file.lastPathComponent.contains(".md") {
             mimeType = NSString(string: "text/plain")
-        } else if file.lastPathComponent.contains(".xlsx") {
+        } else if file.lastPathComponent.contains(".xlsx") || file.lastPathComponent.contains(".zip") {
             return false
         }
         
